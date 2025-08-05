@@ -162,51 +162,52 @@ const BalanceCard = ({ cardData }: { cardData: CardData & { data: BalanceItem[] 
         )}
       </div>
 
-      {/* Currency breakdown list */}
-      {series.length > 0 && (
-        <div className="mt-4 space-y-2">
-          <div className="max-h-32 overflow-y-auto scrollbar-thumb-gray-500 scrollbar-track-gray-700 scrollbar-thin">
-            {cardData.data
-              .filter(item => {
-                const balance = activeBalanceTab === 'available' 
-                  ? parseFloat(item.availableBalance) 
-                  : parseFloat(item.lockedBalance);
-                return balance > 0;
-              })
-              .map((item, index) => (
-                <div key={item.id} className="flex items-center justify-between py-1 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded">
-                  <div className="flex items-center space-x-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
-                      style={{ backgroundColor: colors[index] }}
-                    ></div>
-                    <img
-                      src={`https://crypto-server.ahadcommit.com/uploads/currency/${item.currency.icon}`}
-                      alt={item.currency.shortName}
-                      className="w-4 h-4 rounded-full"
-                    />
-                    <span className="text-sm font-medium">{item.currency.shortName}</span>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm">
-                      {activeBalanceTab === 'available' 
-                        ? parseFloat(item.availableBalance).toFixed(6)
-                        : parseFloat(item.lockedBalance).toFixed(6)
-                      }
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      ${activeBalanceTab === 'available' 
-                        ? item.availableBalanceUSD.toFixed(2)
-                        : item.lockedBalanceUSD.toFixed(2)
-                      }
-                    </div>
-                  </div>
-                </div>
-              ))
-            }
+    {/* Currency breakdown list */}
+{series.length > 0 && (
+  <div className="mt-4 space-y-2">
+    <div className="max-h-32 overflow-y-auto scrollbar-thumb-gray-500 scrollbar-track-gray-700 scrollbar-thin">
+      {cardData.data.map((item, index) => {
+        const balance = activeBalanceTab === 'available' 
+          ? parseFloat(item.availableBalance) 
+          : parseFloat(item.lockedBalance);
+        const balanceUSD = activeBalanceTab === 'available' 
+          ? item.availableBalanceUSD 
+          : item.lockedBalanceUSD;
+
+        return (
+          <div
+            key={item.id}
+            className="flex items-center justify-between py-1 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+          >
+            <div className="flex items-center space-x-2">
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: colors[index] || '#888' }}
+              ></div>
+              <img
+                src={`https://crypto-server.ahadcommit.com/uploads/currency/${item.currency.icon}`}
+                alt={item.currency.shortName}
+                className="w-4 h-4 rounded-full"
+              />
+              <span className="text-sm font-medium">{item.currency.shortName}</span>
+            </div>
+            <div className="text-right">
+              <div className={classNames('text-sm', {
+                'text-red-500': balance < 0,
+              })}>
+                {balance.toFixed(6)}
+              </div>
+              <div className="text-xs text-gray-500">
+                ${balanceUSD.toFixed(2)}
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })}
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

@@ -97,7 +97,7 @@ interface FeeBundle {
 }
 
 interface UserDetails {
-  withdrawFee?: string | null;
+  withdrawFees?: string | null;
 }
 
 interface ConversionData {
@@ -154,7 +154,7 @@ const Page = () => {
   const [bundleDetails, setBundleDetails] = useState<FeeBundle[]>([]);
   const [conversionLoading, setConversionLoading] = useState<boolean>(false);
 
-  const shouldShowBundleForWithdraw = userDetails?.withdrawFee === null || userDetails?.withdrawFee === undefined;
+const shouldShowBundleForWithdraw = userDetails?.withdrawFees === null || userDetails?.withdrawFees === undefined;
 
   // Filter crypto bundles and sort by rangeMin
   const cryptoBundles = useMemo(() => {
@@ -413,20 +413,21 @@ const Page = () => {
     return parseFloat(balance.toString());
   };
 
-  const calculateWithdrawFees = (amount: string): number => {
-    if (!amount) return 0;
-    const numAmount = parseFloat(amount) || 0;
+const calculateWithdrawFees = (amount: string): number => {
+  if (!amount) return 0;
+  const numAmount = parseFloat(amount) || 0;
 
-    if (shouldShowBundleForWithdraw && selectedFeeBundle) {
-      const feePercentage = parseFloat(selectedFeeBundle.value) || 0;
-      return (numAmount * feePercentage) / 100;
-    } else if (userDetails?.withdrawFee) {
-      const feePercentage = parseFloat(userDetails.withdrawFee) || 0;
-      return (numAmount * feePercentage) / 100;
-    }
+  if (shouldShowBundleForWithdraw && selectedFeeBundle) {
+    const feePercentage = parseFloat(selectedFeeBundle.value) || 0;
+    return (numAmount * feePercentage) / 100;
+  } else if (userDetails?.withdrawFees) {  // Changed from withdrawFee to withdrawFees
+    const feePercentage = parseFloat(userDetails.withdrawFees) || 0;
+    return (numAmount * feePercentage) / 100;
+  }
 
-    return 0;
-  };
+  return 0;
+};
+
 
   const calculateTotalWithdrawAmount = (amount: string): number => {
     const numAmount = parseFloat(amount) || 0;
@@ -551,14 +552,15 @@ const Page = () => {
         formData.append('total', calculateTotalWithdrawAmount(withdrawAmount).toString());
       }
 
-      if (shouldShowBundleForWithdraw && selectedFeeBundle) {
-        formData.append('FeesType', 'Package');
-        formData.append('feesBundleId', selectedFeeBundle.id || '');
-        formData.append('fees', selectedFeeBundle.value);
-      } else {
-        formData.append('FeesType', 'Default');
-        formData.append('fees', userDetails?.withdrawFee || '0');
-      }
+ // 4. Update the form data submission part in handleWithdrawClick
+if (shouldShowBundleForWithdraw && selectedFeeBundle) {
+  formData.append('FeesType', 'Package');
+  formData.append('feesBundleId', selectedFeeBundle.id || '');
+  formData.append('fees', selectedFeeBundle.value);
+} else {
+  formData.append('FeesType', 'Default');
+  formData.append('fees', userDetails?.withdrawFees || '0');  // Changed from withdrawFee to withdrawFees
+}
 
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/withdraw/crytpo/create`,
@@ -989,13 +991,13 @@ const Page = () => {
                       </div>
                     )}
 
-                    {!shouldShowBundleForWithdraw && userDetails?.withdrawFee && (
-                      <div className='mb-4 p-3 bg-blue-100 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-lg'>
-                        <div className='text-sm text-blue-700 dark:text-blue-300'>
-                          Your withdrawal fee: {userDetails.withdrawFee}% (Default rate)
-                        </div>
-                      </div>
-                    )}
+                    {!shouldShowBundleForWithdraw && userDetails?.withdrawFees && (  // Changed from withdrawFee to withdrawFees
+  <div className='mb-4 p-3 bg-blue-100 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-lg'>
+    <div className='text-sm text-blue-700 dark:text-blue-300'>
+      Your withdrawal fee: {userDetails.withdrawFees}% (Default rate)  {/* Changed from withdrawFee to withdrawFees */}
+    </div>
+  </div>
+)}
 
                     {errorMessage && (
                       <div className='mb-4 p-2 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg'>
@@ -1013,17 +1015,21 @@ const Page = () => {
                         <div>{withdrawAmount ? parseFloat(withdrawAmount).toFixed(6) : '0.000000'} {selectedWithdrawCurrency?.shortName}</div>
                       </div>
                       <div className='flex flex-row items-center justify-between gap-4'>
-                        <div>
-                          Withdrawal Fees ({shouldShowBundleForWithdraw ?
-                            (selectedFeeBundle ? selectedFeeBundle.value : '0') :
-                            (userDetails?.withdrawFee || '0')}%)
-                        </div>
-                        <div>{calculateWithdrawFees(withdrawAmount).toFixed(6)} {selectedWithdrawCurrency?.shortName}</div>
-                      </div>
+                    <div>
+                      Withdrawal Fees ({shouldShowBundleForWithdraw ?
+                        (selectedFeeBundle ? selectedFeeBundle.value : '0') :
+                        (userDetails?.withdrawFees || '0')}%)  {/* Changed from withdrawFee to withdrawFees */}
+                    </div>
+                    <div>{calculateWithdrawFees(withdrawAmount).toFixed(6)} {selectedWithdrawCurrency?.shortName}</div>
+                  </div>
                       <div className='flex flex-row items-center justify-between gap-4 font-semibold'>
                         <div>Total Deduction:</div>
                         <div>{calculateTotalWithdrawAmount(withdrawAmount).toFixed(6)} {selectedWithdrawCurrency?.shortName}</div>
                       </div>
+                      <div className='flex justify-between text-primary'>
+                                <span>USD Amount:</span>
+                                <span>${parseFloat(conversionData.usdAmount).toFixed(2)}</span>
+                              </div>
                       <div className='flex flex-row items-center justify-between gap-4'>
                         <div>Balance Type:</div>
                         <div className='capitalize'>{tab}</div>

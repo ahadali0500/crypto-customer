@@ -137,7 +137,7 @@ const _Currency = ({ className }: { className?: string }) => {
                 activeTab === 'available'
                   ? item['availableBalanceUSD'] || ''
                   : item['lockedBalanceUSD'] || ''
-              if (parseFloat(balance) <= 0) return null
+              // if (parseFloat(balance) <= 0) return null
 
               return (
                 <div

@@ -651,7 +651,7 @@ const Page = () => {
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Available Balance</p>
                 <p className="text-xl font-bold text-gray-800 dark:text-white">
-                  ${cardData?.availableBalanceUSD || '0.00'}
+                  {cardData?.availableBalanceUSD || '0.00'}$
                 </p>
               </div>
               <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
@@ -668,7 +668,7 @@ const Page = () => {
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Locked Balance</p>
                 <p className="text-xl font-bold text-gray-800 dark:text-white">
-                  ${cardData?.lockedBalanceUSD || '0.00'}
+                  {cardData?.lockedBalanceUSD || '0.00'}$
                 </p>
               </div>
               <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full">
@@ -685,7 +685,7 @@ const Page = () => {
               <div>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Balance</p>
                 <p className="text-xl font-bold text-gray-800 dark:text-white">
-                  ${cardData?.totalBalanceUSD || '0.00'}
+                  {cardData?.totalBalanceUSD || '0.00'}$
                 </p>
               </div>
               <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full">
