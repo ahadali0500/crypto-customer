@@ -98,7 +98,7 @@ type Withdrawal = {
 }
 
 interface UserDetails {
-  withdrawFee?: string | null;
+  withdrawFees?: string | null;
 }
 
 const BankTransferForm = () => {
@@ -134,7 +134,7 @@ const BankTransferForm = () => {
   const [bundleDetails, setBundleDetails] = useState<FeeBundle[]>([]);
   const [selectedFeeBundle, setSelectedFeeBundle] = useState<FeeBundle | null>(null);
 
-  const shouldShowBundleForWithdraw = userDetails?.withdrawFee === null || userDetails?.withdrawFee === undefined;
+  const shouldShowBundleForWithdraw = userDetails?.withdrawFees === null || userDetails?.withdrawFees === undefined;
 
   // Filter bank bundles only
   const bankBundles = useMemo(() => {
@@ -290,20 +290,21 @@ const BankTransferForm = () => {
     return () => clearTimeout(debounceTimer);
   }, [formData.amount, selectedWithdrawCurrency, fetchConversionRate]);
 
-  const calculateFee = () => {
-    if (!conversionData) return 0;
-    const usdAmount = Number.parseFloat(conversionData.usdAmount) || 0
+const calculateFee = () => {
+  if (!conversionData) return 0;
+  const usdAmount = Number.parseFloat(conversionData.usdAmount) || 0
 
-    if (shouldShowBundleForWithdraw && selectedFeeBundle) {
-      const feePercentage = parseFloat(selectedFeeBundle.value) || 0;
-      return (usdAmount * feePercentage) / 100;
-    } else if (userDetails?.withdrawFee) {
-      const feePercentage = parseFloat(userDetails.withdrawFee) || 0;
-      return (usdAmount * feePercentage) / 100;
-    }
-
-    return formData.feeType === "Default" ? usdAmount * 0.01 : usdAmount * 0.02
+  if (shouldShowBundleForWithdraw && selectedFeeBundle) {
+    const feePercentage = parseFloat(selectedFeeBundle.value) || 0;
+    return (usdAmount * feePercentage) / 100;
+  } else if (userDetails?.withdrawFees) {  // Change withdrawFee to withdrawFees
+    const feePercentage = parseFloat(userDetails.withdrawFees) || 0;
+    return (usdAmount * feePercentage) / 100;
   }
+
+  // Fallback to default rates if nothing is set
+  return formData.feeType === "Default" ? usdAmount * 0.01 : usdAmount * 0.02
+}
 
   const calculateTotal = () => {
     if (!conversionData) return 0;
@@ -353,13 +354,13 @@ const BankTransferForm = () => {
       submitData.append('amount', formData.amount)
 
       if (shouldShowBundleForWithdraw && selectedFeeBundle) {
-        submitData.append('FeesType', 'Package')
-        submitData.append('feesBundleId', selectedFeeBundle.id || '')
-        submitData.append('fees', selectedFeeBundle.value)
-      } else {
-        submitData.append('FeesType', 'Default')
-        submitData.append('fees', userDetails?.withdrawFee || '0')
-      }
+      submitData.append('FeesType', 'Package')
+      submitData.append('feesBundleId', selectedFeeBundle.id || '')
+      submitData.append('fees', selectedFeeBundle.value)
+    } else {
+      submitData.append('FeesType', 'Default')
+      submitData.append('fees', userDetails?.withdrawFees || '0')  // Change withdrawFee to withdrawFees
+    }
 
       submitData.append('country', formData.country)
       submitData.append('canton', formData.canton)
@@ -827,13 +828,13 @@ const BankTransferForm = () => {
                       </div>
                     )}
 
-                    {!shouldShowBundleForWithdraw && userDetails?.withdrawFee && (
-                      <div className="p-3 bg-blue-100 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-lg">
-                        <div className="text-sm text-blue-700 dark:text-blue-300">
-                          Your withdrawal fee: {userDetails.withdrawFee}% (Default rate)
-                        </div>
-                      </div>
-                    )}
+{!shouldShowBundleForWithdraw && userDetails?.withdrawFees && (  // Change withdrawFee to withdrawFees
+  <div className="p-3 bg-blue-100 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-lg">
+    <div className="text-sm text-blue-700 dark:text-blue-300">
+      Your withdrawal fee: {userDetails.withdrawFees}% (Default rate)  // Change withdrawFee to withdrawFees
+    </div>
+  </div>
+)}
 
                     <div className="space-y-2 pt-4 border-t border-gray-300">
                       <div className="flex justify-between">
@@ -848,10 +849,14 @@ const BankTransferForm = () => {
                         <span>Paying from {balanceType} Balance:</span>
                         <span>{formData.amount || "0"} {selectedWithdrawCurrency?.shortName || ''}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Fees (USD):</span>
-                        <span>${isNaN(calculateFee()) ? "0" : calculateFee().toFixed(2)}</span>
-                      </div>
+<div className="flex justify-between">
+  <span>
+    Fees (USD) ({shouldShowBundleForWithdraw ?
+      (selectedFeeBundle ? selectedFeeBundle.value : '0') :
+      (userDetails?.withdrawFees || '0')}%) 
+  </span>
+  <span>${isNaN(calculateFee()) ? "0" : calculateFee().toFixed(2)}</span>
+</div>
                       <div className="flex justify-between font-semibold">
                         <span>Total Amount (USD):</span>
                         <span>${isNaN(calculateTotal()) ? "0" : calculateTotal().toFixed(2)}</span>

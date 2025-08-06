@@ -1026,10 +1026,25 @@ if (shouldShowBundleForWithdraw && selectedFeeBundle) {
                         <div>Total Deduction:</div>
                         <div>{calculateTotalWithdrawAmount(withdrawAmount).toFixed(6)} {selectedWithdrawCurrency?.shortName}</div>
                       </div>
-                      <div className='flex justify-between text-primary'>
+                      {/* Conversion display for BTC */}
+                    {selectedWithdrawCurrency?.shortName === 'BTC' && withdrawAmount && (
+                      <div className='mb-4'>
+                        <div className='text-sm'>
+                          {conversionLoading ? (
+                            <div></div>
+                          ) : conversionData.rate ? (
+                            <>
+                              <div className='flex justify-between text-primary'>
                                 <span>USD Amount:</span>
                                 <span>${parseFloat(conversionData.usdAmount).toFixed(2)}</span>
                               </div>
+                            </>
+                          ) : (
+                            <div>Could not fetch conversion rate</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                       <div className='flex flex-row items-center justify-between gap-4'>
                         <div>Balance Type:</div>
                         <div className='capitalize'>{tab}</div>
