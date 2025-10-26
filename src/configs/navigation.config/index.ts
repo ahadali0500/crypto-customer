@@ -135,7 +135,7 @@ const navigationConfig: NavigationTree[] = [
     {
         key: 'Viewticket',
         path: '/view-ticket',
-        title: 'Tickets',
+        title: 'Support Tickets',
         translateKey: 'nav.Viewticket',
         icon: 'Viewticket',
         type: NAV_ITEM_TYPE_ITEM,

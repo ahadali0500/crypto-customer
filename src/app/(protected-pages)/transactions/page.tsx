@@ -21,6 +21,9 @@ const statusColorMap: Record<string, string> = {
   Processing: 'bg-yellow-300 text-yellow-900',
   Execute: 'bg-green-300 text-green-900',
   Decline: 'bg-red-300 text-red-900',
+  Completed: 'bg-green-500 text-white',
+  Success: 'bg-green-500 text-white',
+  Failed: 'bg-red-500 text-white',
 }
 
 interface CardData {
@@ -30,13 +33,19 @@ interface CardData {
   data: BalanceItem[];
 }
 
-interface TicketData {
+interface ExchangeData {
   id: number;
-  subject: string;
   customerId: number;
-  type: string;
+  sellAssetId: number;
+  buyAssetId: number;
+  sellAmount: string;
+  buyAmount: string;
+  fees: string;
   createdAt: string;
   updatedAt: string;
+  sellAsset?: any;
+  buyAsset?: any;
+  customer?: any;
 }
 
 interface DepositData {
@@ -71,18 +80,6 @@ interface BalanceItem {
   };
 }
 
-interface Coin {
-  id: string;
-  name: string;
-  symbol: string;
-  current_price: number;
-  price_change_percentage_24h: number;
-  image: string;
-  sparkline_in_7d: { price: number[] };
-}
-
-const coinIds = ['bitcoin', 'ethereum', 'dogecoin', 'cardano', 'tether'];
-
 interface WithdrawData {
   id: number;
   withdrawType: string;
@@ -104,7 +101,6 @@ interface WithdrawData {
 interface DashboardData {
   balanceInUSD: BalanceData;
   depositInUSD: BalanceData;
-  ticket: TicketData[];
   deposit: DepositData[];
   withdraw: WithdrawData[];
 }
@@ -115,7 +111,7 @@ interface OnSortParam {
 }
 
 interface PaginationState {
-  tickets: { pageIndex: number; pageSize: number; sortBy?: string; sortOrder?: 'asc' | 'desc' };
+  exchanges: { pageIndex: number; pageSize: number; sortBy?: string; sortOrder?: 'asc' | 'desc' };
   deposits: { pageIndex: number; pageSize: number; sortBy?: string; sortOrder?: 'asc' | 'desc' };
   withdrawals: { pageIndex: number; pageSize: number; sortBy?: string; sortOrder?: 'asc' | 'desc' };
 }
@@ -145,7 +141,7 @@ const DetailsModal = ({ isOpen, onClose, data, type }) => {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            {type === 'ticket' && 'Support Ticket Details'}
+            {type === 'exchange' && 'Exchange Details'}
             {type === 'deposit' && 'Deposit Details'}
             {type === 'withdrawal' && 'Withdrawal Details'}
           </h2>
@@ -163,57 +159,65 @@ const DetailsModal = ({ isOpen, onClose, data, type }) => {
         <div className="p-6 space-y-6">
           {/* Basic Info */}
           <div className="grid grid-cols-2 gap-6">
-            {type === 'ticket' && (
+            {type === 'exchange' && (
               <>
                 <div className="space-y-1">
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">ID</label>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Transaction ID</label>
                   <p className="text-sm font-semibold text-gray-900 dark:text-white">#{data.id}</p>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Subject</label>
-                  <p className="text-sm text-gray-900 dark:text-white">{data.subject}</p>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Type</label>
+                  <p className="text-sm text-gray-900 dark:text-white">Exchange</p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Sell Asset</label>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-900 dark:text-white font-medium">
+                      {data.sellAsset?.shortName || 'N/A'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Sell Amount</label>
+                  <p className="text-xl font-bold text-red-600">{formatAmount(data.sellAmount)}</p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Buy Asset</label>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-900 dark:text-white font-medium">
+                      {data.buyAsset?.shortName || 'N/A'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Buy Amount</label>
+                  <p className="text-xl font-bold text-green-600">{formatAmount(data.buyAmount)}</p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Fees</label>
+                  <p className="text-sm text-gray-900 dark:text-white">{formatAmount(data.fees)}</p>
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</label>
-                  <p className={`text-base font-medium ${data.type === 'Pending' ? 'text-red-500' : 'text-green-500'}`}>
-                    {data.type}
-                  </p>
+                  <p className="text-base font-medium text-green-600">Completed</p>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Customer ID</label>
-                  <p className="text-sm text-gray-900 dark:text-white">{data.customerId}</p>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Created At</label>
+                  <p className="text-sm text-gray-900 dark:text-white">{formatDate(data.createdAt)}</p>
                 </div>
 
-                {data.priority && (
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Priority</label>
-                    <p className="text-sm text-gray-900 dark:text-white">{data.priority}</p>
-                  </div>
-                )}
-
-                {data.department && (
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Department</label>
-                    <p className="text-sm text-gray-900 dark:text-white">{data.department}</p>
-                  </div>
-                )}
-
-                {data.createdAt && (
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Created At</label>
-                    <p className="text-sm text-gray-900 dark:text-white">{data.createdAt}</p>
-                  </div>
-                )}
-
-                {data.updatedAt && (
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Updated At</label>
-                    <p className="text-sm text-gray-900 dark:text-white">{data.updatedAt}</p>
-                  </div>
-                )}
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Updated At</label>
+                  <p className="text-sm text-gray-900 dark:text-white">{formatDate(data.updatedAt)}</p>
+                </div>
               </>
             )}
 
@@ -268,48 +272,15 @@ const DetailsModal = ({ isOpen, onClose, data, type }) => {
                   </div>
                 )}
 
-                {data.method && (
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Method</label>
-                    <p className="text-sm text-gray-900 dark:text-white">{data.method}</p>
-                  </div>
-                )}
-
-                {data.reference && (
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Reference</label>
-                    <p className="text-sm text-gray-900 dark:text-white">{data.reference}</p>
-                  </div>
-                )}
-
                 {data.createdAt && (
                   <div className="space-y-1">
                     <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Created At</label>
-                    <p className="text-sm text-gray-900 dark:text-white">{data.createdAt}</p>
-                  </div>
-                )}
-
-                {data.processedAt && (
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Processed At</label>
-                    <p className="text-sm text-gray-900 dark:text-white">{data.processedAt}</p>
+                    <p className="text-sm text-gray-900 dark:text-white">{formatDate(data.createdAt)}</p>
                   </div>
                 )}
               </>
             )}
           </div>
-
-          {/* Description/Message */}
-          {data.message && (
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                {type === 'ticket' ? 'Message' : 'Description'}
-              </h3>
-              <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                <p className="text-gray-900 dark:text-white whitespace-pre-wrap">{data.message}</p>
-              </div>
-            </div>
-          )}
 
           {/* Customer Details */}
           {data.customer && (
@@ -324,26 +295,52 @@ const DetailsModal = ({ isOpen, onClose, data, type }) => {
                   <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Email</label>
                   <p className="text-gray-900 dark:text-white">{data.customer.email}</p>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Phone</label>
-                  <p className="text-gray-900 dark:text-white">{data.customer.phone}</p>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Country</label>
-                  <p className="text-gray-900 dark:text-white">{data.customer.country}</p>
-                </div>
-                {data.customer.address && (
-                  <div className="space-y-2 col-span-2">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Address</label>
-                    <p className="text-gray-900 dark:text-white">{data.customer.address}</p>
-                  </div>
-                )}
               </div>
             </div>
           )}
 
-          {/* Currency Details */}
-          {data.currency && (
+          {/* Currency Details for Sell Asset */}
+          {type === 'exchange' && data.sellAsset && (
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Sell Asset Information</h3>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Currency</label>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-900 dark:text-white font-medium">{data.sellAsset.shortName}</span>
+                    <span className="text-gray-500 dark:text-gray-400">({data.sellAsset.fullName})</span>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Type</label>
+                  <p className="text-gray-900 dark:text-white">{data.sellAsset.type}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Currency Details for Buy Asset */}
+          {type === 'exchange' && data.buyAsset && (
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Buy Asset Information</h3>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Currency</label>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-900 dark:text-white font-medium">{data.buyAsset.shortName}</span>
+                    <span className="text-gray-500 dark:text-gray-400">({data.buyAsset.fullName})</span>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Type</label>
+                  <p className="text-gray-900 dark:text-white">{data.buyAsset.type}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Currency Details for Deposit/Withdrawal */}
+          {(type === 'deposit' || type === 'withdrawal') && data.currency && (
             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Currency Information</h3>
               <div className="grid grid-cols-2 gap-6">
@@ -358,18 +355,6 @@ const DetailsModal = ({ isOpen, onClose, data, type }) => {
                   <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Type</label>
                   <p className="text-gray-900 dark:text-white">{data.currency.type}</p>
                 </div>
-                {data.currency.rate && (
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Exchange Rate</label>
-                    <p className="text-gray-900 dark:text-white">{data.currency.rate}</p>
-                  </div>
-                )}
-                {data.currency.symbol && (
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Symbol</label>
-                    <p className="text-gray-900 dark:text-white">{data.currency.symbol}</p>
-                  </div>
-                )}
               </div>
             </div>
           )}
@@ -392,13 +377,14 @@ const DetailsModal = ({ isOpen, onClose, data, type }) => {
 const Page = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<DashboardData | null>(null);
-  const [activeTab, setActiveTab] = useState('tickets');
+  const [exchangeData, setExchangeData] = useState<ExchangeData[]>([]);
+  const [activeTab, setActiveTab] = useState('exchanges');
   const [selectedItem, setSelectedItem] = useState(null);
   const [modalType, setModalType] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [pagination, setPagination] = useState<PaginationState>({
-    tickets: { pageIndex: 1, pageSize: 10 },
+    exchanges: { pageIndex: 1, pageSize: 10 },
     deposits: { pageIndex: 1, pageSize: 10 },
     withdrawals: { pageIndex: 1, pageSize: 10 }
   });
@@ -442,6 +428,33 @@ const Page = () => {
     }
   };
 
+  const fetchExchangeHistory = async () => {
+    setLoading(true);
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+
+      if (!token) {
+        if (typeof window !== 'undefined') {
+          window.location.href = '/sign-in';
+        }
+        return;
+      }
+
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/exchange/fetch`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      setExchangeData(response.data.data);
+    } catch (error) {
+      console.error('Error fetching exchange data:', error);
+      setExchangeData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const [cardData, setCardData] = useState<CardData>();
 
   const fetchDasboard = async () => {
@@ -474,10 +487,8 @@ const Page = () => {
   useEffect(() => {
     fetchHistory();
     fetchDasboard();
+    fetchExchangeHistory();
   }, []);
-
-  console.log('setCardData', cardData);
-  console.log('setData', data);
 
   // Helper function to sort data
   const sortData = (data: any[], sortBy: string, sortOrder: 'asc' | 'desc') => {
@@ -503,18 +514,18 @@ const Page = () => {
 
   // Get processed data for current tab
   const getProcessedData = (tabKey: keyof PaginationState) => {
-    if (!data) return { paginatedData: [], total: 0 };
+    if (!data && !exchangeData) return { paginatedData: [], total: 0 };
 
     let rawData: any[] = [];
     switch (tabKey) {
-      case 'tickets':
-        rawData = data.ticket || [];
+      case 'exchanges':
+        rawData = exchangeData || [];
         break;
       case 'deposits':
-        rawData = data.deposit || [];
+        rawData = data?.deposit || [];
         break;
       case 'withdrawals':
-        rawData = data.withdraw || [];
+        rawData = data?.withdraw || [];
         break;
     }
 
@@ -568,14 +579,14 @@ const Page = () => {
     }));
   };
 
-  // Column definitions for Tickets
-  const ticketColumns = [
+  // Column definitions for Exchanges
+  const exchangeColumns = [
     {
       accessorKey: 'id',
-      header: 'Ticket ID',
+      header: 'Exchange ID',
       cell: ({ row }) => (
         <button
-          onClick={() => handleItemClick(row.original, 'ticket')}
+          onClick={() => handleItemClick(row.original, 'exchange')}
           className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
         >
           #{row.getValue('id')}
@@ -583,27 +594,44 @@ const Page = () => {
       ),
     },
     {
-      accessorKey: 'subject',
-      header: 'Subject',
+      accessorKey: 'sellAsset',
+      header: 'From Asset',
       cell: ({ row }) => (
-        <span className="max-w-[200px] truncate block">{row.getValue('subject')}</span>
+        <div className="flex flex-col">
+          <span className="font-medium">{row.original.sellAsset?.shortName || 'N/A'}</span>
+          <span className="text-sm text-gray-500">{parseFloat(row.original.sellAmount).toFixed(6)}</span>
+        </div>
       ),
     },
     {
-      accessorKey: 'type',
-      header: 'Status',
+      accessorKey: 'buyAsset',
+      header: 'To Asset',
       cell: ({ row }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.getValue('type') === 'Pending'
-          ? 'bg-yellow-100 text-yellow-800'
-          : 'bg-green-100 text-green-800'
-          }`}>
-          {row.getValue('type')}
+        <div className="flex flex-col">
+          <span className="font-medium">{row.original.buyAsset?.shortName || 'N/A'}</span>
+          <span className="text-sm text-gray-500">{parseFloat(row.original.buyAmount).toFixed(6)}</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'fees',
+      header: 'Fee',
+      cell: ({ row }) => (
+        <span className="">{parseFloat(row.getValue('fees')).toFixed(6)}</span>
+      ),
+    },
+    {
+      header: 'Status',
+      accessorKey: 'status',
+      cell: () => (
+        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-500 text-white">
+          Completed
         </span>
       ),
     },
     {
       accessorKey: 'createdAt',
-      header: 'Created At',
+      header: 'Date',
       cell: ({ row }) => (
         <span className="">
           {new Date(row.getValue('createdAt')).toLocaleDateString()}
@@ -737,24 +765,24 @@ const Page = () => {
 
   const tabItems = [
     {
-      key: 'tickets',
-      label: 'Support Tickets',
-      count: data?.ticket?.length || 0,
+      key: 'exchanges',
+      label: 'Exchange History',
+      count: exchangeData?.length || 0,
       content: (
         <div className="overflow-x-auto">
           <DataTable
-            columns={ticketColumns}
-            data={getProcessedData('tickets').paginatedData}
+            columns={exchangeColumns}
+            data={getProcessedData('exchanges').paginatedData}
             loading={loading}
-            noData={!data?.ticket?.length}
+            noData={!exchangeData?.length}
             pagingData={{
-              total: getProcessedData('tickets').total,
-              pageIndex: pagination.tickets.pageIndex,
-              pageSize: pagination.tickets.pageSize,
+              total: getProcessedData('exchanges').total,
+              pageIndex: pagination.exchanges.pageIndex,
+              pageSize: pagination.exchanges.pageSize,
             }}
-            onPaginationChange={(page) => handlePaginationChange('tickets', page)}
-            onSelectChange={(pageSize) => handlePageSizeChange('tickets', pageSize)}
-            onSort={(sortParams: OnSortParam) => handleSort('tickets', sortParams)}
+            onPaginationChange={(page) => handlePaginationChange('exchanges', page)}
+            onSelectChange={(pageSize) => handlePageSizeChange('exchanges', pageSize)}
+            onSort={(sortParams: OnSortParam) => handleSort('exchanges', sortParams)}
           />
         </div>
       )
