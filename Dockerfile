@@ -37,6 +37,6 @@ COPY --from=deps    /app/node_modules ./node_modules
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-EXPOSE 3000
+EXPOSE 7001
 # For standalone build, Next provides a server.js entrypoint at project root in the standalone folder
 CMD ["node", "server.js"]
