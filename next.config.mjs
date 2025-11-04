@@ -4,6 +4,8 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
+  swcMinify: true,
   images: {
     remotePatterns: [
       {
@@ -14,11 +16,11 @@ const nextConfig = {
     ],
   },
   reactStrictMode: false,
-    typescript: {
+  typescript: {
     // ❗ WARNING: This allows builds to succeed even with TypeScript errors
     ignoreBuildErrors: true,
   },
-   eslint: {
+  eslint: {
     ignoreDuringBuilds: true,
   },
 };

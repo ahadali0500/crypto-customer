@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  bexchange:
+    image: ahadcommit/bexchange-user:latest   
+    container_name: bexchange-user           
+    restart: unless-stopped
+    ports:
+      - "7001:7001"
+    environment:
+      AUTH_SECRET: "lmsdZgyoJ+vIJLrxo3lVVoq5uP0tKKclr"
+      AUTH_TRUST_HOST: "true"
+      NEXTAUTH_URL: "https://bexchange.io"            
+      NEXT_PUBLIC_BACKEND_URL: "https://server.bexchange.io" 
+    networks:
+      - docker_docker_net
+
+networks:
+  docker_docker_net:
+    external: true
