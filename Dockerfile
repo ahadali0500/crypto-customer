@@ -21,6 +21,8 @@ ENV NEXT_DISABLE_SOURCEMAPS=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+ARG NEXT_PUBLIC_BACKEND_URL
+ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
 # If you use standalone output, make sure next.config.js has:  module.exports = { output: 'standalone' }
 RUN npm run build
 
