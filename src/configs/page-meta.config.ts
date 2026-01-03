@@ -1,11 +1,11 @@
 import { Metadata } from 'next'
 
 const pageMeta: Metadata = {
-    title: 'Welcome to Cryptovia',
+    title: 'Bexchange',
     description:
-        'Cryptovia is a secure and modern platform to explore, trade, and manage your cryptocurrency assets.',
+        'Bexchange is a secure and modern platform to explore, trade, and manage your cryptocurrency assets.',
     icons: {
-        icon: '/favicon.png',
+        icon: '/public/img/logo/logo.png.png',
     },
 }
 
