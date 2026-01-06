@@ -78,17 +78,23 @@ const SideNav = ({
             >
                 {/* <div className='text-center text-2xl font-semibold italic text-primary tracking-widest'>Cryptovia</div> */}
                 <div className="relative flex items-center w-full h-18 m-1 ml-2 mx-auto gap-2">
-                    <div className="relative w-8 h-8">
+                <div
+                        className={classNames(
+                            'relative w-8 h-8',
+                            !sideNavCollapse && 'ml-3',
+                        )}
+                    >
                         <Image
                             src="/img/logo/logo.png"
                             alt="logo"
                             fill
-                            className="object-contain"
                             priority
                         />
                     </div>
 
-                    <p className=" text-lg font-semibold">Bexchange</p>
+                    {!sideNavCollapse && (
+                        <p className="text-lg font-semibold">bexchange.io</p>
+                    )}
                 </div>
             </Link>
             <div className={classNames('side-nav-content', contentClass)}>
