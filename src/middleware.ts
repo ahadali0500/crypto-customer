@@ -72,20 +72,13 @@ export default auth((req) => {
         return Response.redirect(new URL(appConfig.authenticatedEntryPath, nextUrl))
     }
 
-    // If accessing protected route without being logged in
+    // If accessing protected route without NextAuth session
+    // Note: We allow the request through and let AuthGuard handle client-side token checks
+    // This supports both NextAuth sessions and custom token-based auth (localStorage)
     if (isProtectedRoute && !isLoggedIn) {
-        console.log('🚫 BLOCKING: Protected route access without login')
-        
-        // Build callback URL for redirect after login
-        let callbackUrl = pathname
-        if (nextUrl.search) {
-            callbackUrl += nextUrl.search
-        }
-
-        const signInUrl = new URL(appConfig.unAuthenticatedEntryPath, nextUrl)
-        signInUrl.searchParams.set(REDIRECT_URL_KEY, callbackUrl)
-        
-        return Response.redirect(signInUrl)
+        console.log('⚠️ Protected route without NextAuth session - allowing through for client-side check')
+        // AuthGuard will check for localStorage token and redirect if needed
+        return
     }
 
     // Allow access to public routes
