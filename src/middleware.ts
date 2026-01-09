@@ -21,6 +21,8 @@ const publicRoutes = [
     '/',
     '/about',
     '/contact',
+    '/privacy-policy',
+    '/terms-and-conditions',
     '/pricing',
     // Add your public routes here
 ]
