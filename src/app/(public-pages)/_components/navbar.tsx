@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X, LogIn, LayoutDashboard, Shield, HelpCircle, Home, Zap, Info, Mail, FileText, Scale } from 'lucide-react'
+import CurrencySlider from './currency-slider'
 import logo from "../../../../public/img/logo/logo.png"
 const Navbar = () => {
     const [open, setOpen] = useState(false)
@@ -52,6 +53,7 @@ const Navbar = () => {
     }
 
     return (
+        <>
         <nav className={`w-full sticky top-0 z-50 transition-all duration-500 ${
             scrolled 
                 ? 'bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl shadow-xl border-b border-neutral-200/50 dark:border-neutral-800/50' 
@@ -181,7 +183,9 @@ const Navbar = () => {
                     </div>
                 </div>
             )}
+        <CurrencySlider />
         </nav>
+        </>
     )
 }
 

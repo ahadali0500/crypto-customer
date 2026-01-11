@@ -2,18 +2,20 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Home, Info, Mail, FileText, Scale } from 'lucide-react'
+import { Home, Info, Mail, FileText, Scale, CircleHelp } from 'lucide-react'
 import logo from "../../../../public/img/logo/logo.png"
+
 const Footer = () => {
   const currentYear = new Date().getFullYear()
-
   const footerLinks = [
     { href: '/', label: 'Home', icon: Home },
     { href: '/about', label: 'About', icon: Info },
     { href: '/contact', label: 'Contact', icon: Mail },
     { href: '/privacy-policy', label: 'Privacy Policy', icon: FileText },
     { href: '/terms-and-conditions', label: 'Terms & Conditions', icon: Scale },
+    { href: '/faqs', label: 'FAQs', icon: CircleHelp },
   ]
+
 
   return (
     <footer className="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800">
@@ -23,7 +25,7 @@ const Footer = () => {
           <div>
             <Link href="/" className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-               <img src={logo.src} alt="InnovateCo Logo" className="w-8 h-8" />
+                <img src={logo.src} alt="InnovateCo Logo" className="w-8 h-8" />
               </div>
             </Link>
             <p className="text-neutral-600 dark:text-neutral-400 text-sm">

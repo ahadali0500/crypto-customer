@@ -25,26 +25,10 @@ const PasswordInput = (props: PasswordInputProps) => {
             {...rest}
             ref={ref}
             type={pwInputType}
-            style={{
-                background: 'transparent',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                color: 'white',
-                padding: '0.5rem 0.75rem',
-                borderRadius: '0.375rem',
-                fontSize: '0.875rem',
-                outline: 'none',
-            }}
-            onFocus={(e) => {
-                e.target.style.borderColor = '#facc15' // yellow-400
-                e.target.style.boxShadow = '0 0 0 3px rgba(250, 204, 21, 0.2)' // ring
-            }}
-            onBlur={(e) => {
-                e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)'
-                e.target.style.boxShadow = 'none'
-            }}
+            className={`bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-primary-500 focus:ring-primary-500/20 ${rest.className || ''}`}
             suffix={
                 <span
-                    className="cursor-pointer select-none text-xl"
+                    className="cursor-pointer select-none text-xl text-gray-500 dark:text-gray-400"
                     role="button"
                     onClick={onPasswordVisibleClick}
                 >

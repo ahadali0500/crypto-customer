@@ -121,11 +121,11 @@ const SignInForm = (props: SignInFormProps) => {
     return (
         <>
         <div className={className}>
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-xl">
                 <CardHeader className="space-y-4 pb-6">
 
-                    <CardTitle className="text-2xl font-bold text-center text-white">Welcome Back</CardTitle>
-                    <CardDescription className="text-center text-slate-300">
+                    <CardTitle className="text-2xl font-bold text-center text-gray-900 dark:text-white">Welcome Back</CardTitle>
+                    <CardDescription className="text-center text-gray-600 dark:text-gray-300">
                         Sign in to access your trading dashboard
                     </CardDescription>
                 </CardHeader>
@@ -145,7 +145,7 @@ const SignInForm = (props: SignInFormProps) => {
                                         type="email"
                                         placeholder="Email"
                                         autoComplete="off"
-                                        className=" bg-white/5 border-white/20 text-white placeholder:text-slate-400 focus:border-yellow-400 focus:ring-yellow-400/20"
+                                        className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-primary-500 focus:ring-primary-500/20"
                                         {...field}
                                     />
                                 )}
