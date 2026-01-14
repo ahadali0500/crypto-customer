@@ -60,7 +60,7 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '2.5 No investment advice',
-              content: 'Coinxpot does not offer investment advice. All trading decisions are your responsibility and Coinxpot is not liable for any losses incurred.'
+              content: 'Bexchange does not offer investment advice. All trading decisions are your responsibility and Bexchange is not liable for any losses incurred.'
             },
             {
               title: '2.6 Seek advice if unsure',
@@ -92,11 +92,11 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '3.7 Keep credentials confidential',
-              content: 'Do not share your login details; Coinxpot may disable accounts if these terms are violated.'
+              content: 'Do not share your login details; Bexchange may disable accounts if these terms are violated.'
             },
             {
               title: '4.1 Compliance with KYC and EDD',
-              content: 'Coinxpot adheres to high standards for customer verification to prevent fraud.'
+              content: 'Bexchange adheres to high standards for customer verification to prevent fraud.'
             },
             {
               title: '4.2 Synchronization deposit requirement',
@@ -104,7 +104,7 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '4.3 Rights to restrict or terminate accounts',
-              content: 'Coinxpot can limit or close accounts based on additional verification needs or false information.'
+              content: 'Bexchange can limit or close accounts based on additional verification needs or false information.'
             },
             {
               title: '4.4 Account limitations',
@@ -112,27 +112,27 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '5.1 Exchange use at own risk',
-              content: 'The Coinxpot Exchange is for experienced users and is not available in all jurisdictions.'
+              content: 'The Bexchange Exchange is for experienced users and is not available in all jurisdictions.'
             },
             {
-              title: '5.2 Coinxpot\'s rights',
-              content: 'Coinxpot may limit or refuse trades and impose conditions without notice.'
+              title: '5.2 Bexchange\'s rights',
+              content: 'Bexchange may limit or refuse trades and impose conditions without notice.'
             },
             {
               title: '5.3 Acknowledgement of risks',
-              content: 'Using the Coinxpot Exchange involves risks including technical issues that can affect trades.'
+              content: 'Using the Bexchange Exchange involves risks including technical issues that can affect trades.'
             },
             {
               title: '6.1 Transaction refusal',
-              content: 'Coinxpot may refuse transactions for various reasons including legal restrictions or payment issues.'
+              content: 'Bexchange may refuse transactions for various reasons including legal restrictions or payment issues.'
             },
             {
               title: '6.2 Adjustments for refused transactions',
-              content: 'Funds from refused transactions may be purchased by Coinxpot and returned minus costs.'
+              content: 'Funds from refused transactions may be purchased by Bexchange and returned minus costs.'
             },
             {
               title: '6.3 Account freezing',
-              content: 'Under certain conditions, Coinxpot may freeze accounts and retain funds.'
+              content: 'Under certain conditions, Bexchange may freeze accounts and retain funds.'
             },
             {
               title: '6.4 Debt responsibility',
@@ -140,7 +140,7 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '6.5 No profit payments',
-              content: 'Coinxpot will not pay profits from terminated transactions.'
+              content: 'Bexchange will not pay profits from terminated transactions.'
             },
             {
               title: '6.6 Interest on unpaid sums',
@@ -164,7 +164,7 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '8.1 Importance of security',
-              content: 'You are primarily responsible for the security of your Coinxpot Account.'
+              content: 'You are primarily responsible for the security of your Bexchange Account.'
             },
             {
               title: '8.2 Risks of inadequate security',
@@ -176,7 +176,7 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '8.4 Authentication recommendations',
-              content: 'Always verify the authenticity of communications from Coinxpot.'
+              content: 'Always verify the authenticity of communications from Bexchange.'
             },
             {
               title: '8.5 Country-specific and exchange-specific restrictions',
@@ -184,19 +184,19 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '8.6 Ownership of private keys',
-              content: 'Coinxpot retains control over the private keys associated with your account.'
+              content: 'Bexchange retains control over the private keys associated with your account.'
             },
             {
               title: '8.7 Limitations on private key use',
-              content: 'Coinxpot will not perform actions requiring private key signatures and does not provide access to funds linked to private keys, except as specified.'
+              content: 'Bexchange will not perform actions requiring private key signatures and does not provide access to funds linked to private keys, except as specified.'
             },
             {
               title: '9.1 No guarantee of uninterrupted service',
-              content: 'Coinxpot does not warrant continuous access to its services or accounts.'
+              content: 'Bexchange does not warrant continuous access to its services or accounts.'
             },
             {
               title: '10.1 Network responsibility',
-              content: 'Transactions using your Coinxpot Account depend on external cryptocurrency networks for confirmation and recording.'
+              content: 'Transactions using your Bexchange Account depend on external cryptocurrency networks for confirmation and recording.'
             },
             {
               title: '10.2 Transaction conditions',
@@ -204,15 +204,15 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '10.3 Disclaimer regarding network operations',
-              content: 'Coinxpot is not liable for the operation or maintenance of underlying cryptocurrency network software.'
+              content: 'Bexchange is not liable for the operation or maintenance of underlying cryptocurrency network software.'
             },
             {
               title: '11.1 Compliance with international regulations',
-              content: 'Your use of the Coinxpot Site must comply with all applicable sanctions and export controls.'
+              content: 'Your use of the Bexchange Site must comply with all applicable sanctions and export controls.'
             },
             {
               title: '11.2 Restricted use',
-              content: 'If you fall under certain sanctioned categories, you may not use your Coinxpot Account.'
+              content: 'If you fall under certain sanctioned categories, you may not use your Bexchange Account.'
             },
             {
               title: '12.1 Upgrading to premium',
@@ -236,7 +236,7 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '13.2 Consequences of account closure',
-              content: 'Access to your account will be terminated, and any remaining funds may be retained by Coinxpot.'
+              content: 'Access to your account will be terminated, and any remaining funds may be retained by Bexchange.'
             },
             {
               title: '13.3 Liquidation account closure',
@@ -244,7 +244,7 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '14.1 Grounds for account restriction',
-              content: 'Coinxpot may restrict or terminate accounts for reasons including suspected errors, fraud, or regulatory concerns.'
+              content: 'Bexchange may restrict or terminate accounts for reasons including suspected errors, fraud, or regulatory concerns.'
             },
             {
               title: '14.2 Notification and disclosure of account restrictions',
@@ -256,23 +256,23 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '14.4 Rights to withdraw funds manually',
-              content: 'Coinxpot may manually process withdrawals for certain accounts under specific conditions.'
+              content: 'Bexchange may manually process withdrawals for certain accounts under specific conditions.'
             },
             {
               title: '15.1 Restrictions on account use',
-              content: 'Your Coinxpot Account must not be used for illegal activities, fraud, or other prohibited actions.'
+              content: 'Your Bexchange Account must not be used for illegal activities, fraud, or other prohibited actions.'
             },
             {
               title: '15.2 Prohibited business activities',
-              content: 'Without Coinxpot\'s written approval, your account cannot be used for certain high-risk business activities.'
+              content: 'Without Bexchange\'s written approval, your account cannot be used for certain high-risk business activities.'
             },
             {
               title: '15.3 Actions on violation',
-              content: 'Coinxpot reserves the right to restrict or close accounts involved in prohibited activities.'
+              content: 'Bexchange reserves the right to restrict or close accounts involved in prohibited activities.'
             },
             {
               title: '16.1 "As-is" basis',
-              content: 'The Coinxpot Site and services are provided without warranties of any kind, express or implied.'
+              content: 'The Bexchange Site and services are provided without warranties of any kind, express or implied.'
             },
             {
               title: '16.2 Jurisdictional consumer rights',
@@ -280,15 +280,15 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '17.1 Limitation of liability',
-              content: 'Coinxpot, its affiliates, and their representatives are not liable for any damages (direct, indirect, special, etc.) arising from your use of the Coinxpot Site or Account. This includes any loss due to reliance on Coinxpot\'s information or errors.'
+              content: 'Coinxpot, its affiliates, and their representatives are not liable for any damages (direct, indirect, special, etc.) arising from your use of the Bexchange Site or Account. This includes any loss due to reliance on Coinxpot\'s information or errors.'
             },
             {
               title: '17.2 Liability cap',
-              content: 'The total liability of Coinxpot and its affiliates for claims related to your use of the Coinxpot Site or Account is limited to the fees you paid to Coinxpot in the six months preceding the claim. Some jurisdictions do not allow exclusions or limitations, so some limitations may not apply to you.'
+              content: 'The total liability of Bexchange and its affiliates for claims related to your use of the Bexchange Site or Account is limited to the fees you paid to Bexchange in the six months preceding the claim. Some jurisdictions do not allow exclusions or limitations, so some limitations may not apply to you.'
             },
             {
               title: '18.1 Dispute resolution',
-              content: 'You and Coinxpot agree to notify each other of any dispute within 30 days and attempt to resolve it informally before taking legal action.'
+              content: 'You and Bexchange agree to notify each other of any dispute within 30 days and attempt to resolve it informally before taking legal action.'
             },
             {
               title: '18.2 Governing law and jurisdiction',
@@ -304,7 +304,7 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: '19.1 Indemnity',
-              content: 'You agree to indemnify and hold Coinxpot and its representatives harmless from any claim, loss, or expense arising from your use of the services, your feedback, your violation of these Terms, or your violation of any rights of others. Coinxpot has the right to control any related action or proceeding.'
+              content: 'You agree to indemnify and hold Bexchange and its representatives harmless from any claim, loss, or expense arising from your use of the services, your feedback, your violation of these Terms, or your violation of any rights of others. Bexchange has the right to control any related action or proceeding.'
             },
             {
               title: 'Entire Agreement; Order of Precedence',
@@ -312,7 +312,7 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: 'Amendment',
-              content: 'Terms may be modified at Coinxpot\'s discretion with notice. Continued use of services after notice indicates acceptance.'
+              content: 'Terms may be modified at Bexchange\'s discretion with notice. Continued use of services after notice indicates acceptance.'
             },
             {
               title: 'Waiver',
@@ -324,11 +324,11 @@ const TermsAndConditionsPage = () => {
             },
             {
               title: 'Force Majeure',
-              content: 'Coinxpot is not liable for delays or failures due to events beyond its control.'
+              content: 'Bexchange is not liable for delays or failures due to events beyond its control.'
             },
             {
               title: 'Assignment',
-              content: 'Rights cannot be assigned without consent; Coinxpot may assign rights without consent.'
+              content: 'Rights cannot be assigned without consent; Bexchange may assign rights without consent.'
             },
             {
               title: 'Headings',
@@ -346,39 +346,35 @@ const TermsAndConditionsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-800">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3b82f6]"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-900">
+    <div className="min-h-screen bg-slate-800">
       {/* Hero Section */}
       <section className="relative py-16 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-50/20 via-white/90 to-secondary-50/20 dark:from-primary-950/10 dark:via-neutral-900 dark:to-secondary-950/10" />
-        
-        <div className="absolute top-20 right-10 w-64 h-64 bg-gradient-to-r from-primary-300/10 to-secondary-300/10 rounded-full blur-3xl animate-pulse" />
-        
         <div className="max-w-4xl mx-auto relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20 border border-primary-200 dark:border-primary-800/30 mb-4">
-            <Sparkles className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-            <span className="text-sm font-semibold text-primary-700 dark:text-primary-300">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 shadow-sm mb-4">
+            <Sparkles className="w-4 h-4 text-[#38bdf8]" />
+            <span className="text-sm font-semibold text-slate-200">
               Legal Agreement
             </span>
           </div>
           
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3">
-            <span className="text-neutral-900 dark:text-white">Terms & </span>
-            <span className="text-transparent bg-gradient-to-r from-[#0284c7] via-[#0ea5e9] to-[#c026d3] bg-clip-text">
+            <span className="text-slate-50">Terms & </span>
+            <span className="text-transparent bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] bg-clip-text">
               Conditions
             </span>
           </h1>
           
           {content?.lastUpdated && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-sm">
-              <span className="text-neutral-600 dark:text-neutral-400">Last Updated:</span>
-              <span className="font-medium text-neutral-900 dark:text-white">{content.lastUpdated}</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm">
+              <span className="text-slate-300">Last Updated:</span>
+              <span className="font-medium text-slate-50">{content.lastUpdated}</span>
             </div>
           )}
         </div>
@@ -387,16 +383,16 @@ const TermsAndConditionsPage = () => {
       {/* Content Section */}
       <section className="py-12 px-4">
         <div className="max-w-5xl mx-auto">
-          <div className="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm rounded-xl p-6 border border-neutral-200/50 dark:border-neutral-800/50 shadow-lg">
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 shadow-lg">
             {/* Important Notice */}
-            <div className="mb-8 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <div className="mb-8 p-4 bg-yellow-500/10 border border-yellow-400/20 rounded-lg">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-bold text-yellow-900 dark:text-yellow-300 text-sm mb-1">
+                  <h3 className="font-bold text-yellow-300 text-sm mb-1">
                     Important Notice
                   </h3>
-                  <p className="text-yellow-800 dark:text-yellow-400 text-xs">
+                  <p className="text-yellow-200 text-xs">
                     By accessing and using our platform, you acknowledge that you have read, understood, and agree to be bound by these Terms of Use. If you do not agree, you must not access or use this Website or its Services.
                   </p>
                 </div>
@@ -405,7 +401,7 @@ const TermsAndConditionsPage = () => {
 
             {/* Quick Navigation */}
             <div className="mb-8">
-              <h3 className="font-bold text-neutral-900 dark:text-white mb-3 text-sm">Quick Navigation</h3>
+              <h3 className="font-bold text-slate-50 mb-3 text-sm">Quick Navigation</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 {[
                   { label: 'Acceptance of Terms', section: 0 },
@@ -430,12 +426,12 @@ const TermsAndConditionsPage = () => {
                     }}
                     className={`flex items-center gap-2 p-2.5 rounded-lg text-left transition-all ${
                       activeSection === item.section
-                        ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800'
-                        : 'bg-neutral-50 dark:bg-neutral-800/50 hover:bg-neutral-100 dark:hover:bg-neutral-800 border border-transparent'
+                        ? 'bg-white/10 border border-white/20'
+                        : 'bg-white/5 hover:bg-white/10 border border-transparent'
                     }`}
                   >
-                    <ChevronRight className="w-3 h-3 text-neutral-400 flex-shrink-0" />
-                    <span className="font-medium text-neutral-900 dark:text-white text-xs">
+                    <ChevronRight className="w-3 h-3 text-slate-400 flex-shrink-0" />
+                    <span className="font-medium text-slate-50 text-xs">
                       {item.label}
                     </span>
                   </button>
@@ -449,20 +445,20 @@ const TermsAndConditionsPage = () => {
                 <div 
                   key={index} 
                   id={`section-${index}`}
-                  className="border-b border-neutral-200 dark:border-neutral-700 last:border-b-0 pb-8 last:pb-0 scroll-mt-20"
+                  className="border-b border-white/10 last:border-b-0 pb-8 last:pb-0 scroll-mt-20"
                 >
                   <div className="flex items-start gap-3 mb-4">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center flex-shrink-0">
                       <span className="text-xs font-bold text-white">
                         {Math.floor(index/3) + 1}.{(index%3) + 1}
                       </span>
                     </div>
-                    <h2 className="text-lg font-bold text-neutral-900 dark:text-white">
+                    <h2 className="text-lg font-bold text-slate-50">
                       {section.title}
                     </h2>
                   </div>
-                  <div className="ml-11 pl-2 border-l-2 border-primary-200 dark:border-primary-800">
-                    <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed text-sm">
+                  <div className="ml-11 pl-2 border-l-2 border-white/10">
+                    <p className="text-slate-300 leading-relaxed text-sm">
                       {section.content}
                     </p>
                   </div>
@@ -471,18 +467,18 @@ const TermsAndConditionsPage = () => {
             </div>
 
             {/* Acceptance Section */}
-            <div className="mt-12 pt-8 border-t border-neutral-200 dark:border-neutral-700">
-              <div className="bg-gradient-to-r from-primary-50/50 to-secondary-50/50 dark:from-primary-900/10 dark:to-secondary-900/10 rounded-lg p-6">
+            <div className="mt-12 pt-8 border-t border-white/10">
+              <div className="bg-white/5 rounded-lg p-6 border border-white/10">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center flex-shrink-0">
                       <Scale className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-neutral-900 dark:text-white text-sm mb-1">
+                      <h3 className="font-bold text-slate-50 text-sm mb-1">
                         Agreement Acceptance
                       </h3>
-                      <p className="text-neutral-600 dark:text-neutral-400 text-xs">
+                      <p className="text-slate-300 text-xs">
                         By using our services, you acknowledge that you have read, understood, and agree to all terms outlined above.
                       </p>
                     </div>
@@ -490,13 +486,13 @@ const TermsAndConditionsPage = () => {
                   <div className="flex gap-3">
                     <button 
                       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                      className="px-4 py-2 bg-neutral-200 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-md hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-colors text-sm"
+                      className="px-4 py-2 bg-white/5 border border-white/10 text-slate-200 rounded-md hover:bg-white/10 transition-colors text-sm"
                     >
                       Back to Top
                     </button>
                     <a
                       href="/contact"
-                      className="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-md hover:shadow-md transition-all duration-300 text-sm"
+                      className="px-4 py-2 bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] text-white rounded-md hover:shadow-md hover:brightness-110 transition-all duration-300 text-sm"
                     >
                       Contact Legal Team
                     </a>
