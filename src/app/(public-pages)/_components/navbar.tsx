@@ -1,191 +1,201 @@
-// app/components/Navigation/Navbar.jsx
 'use client'
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, LogIn, LayoutDashboard, Shield, HelpCircle, Home, Zap, Info, Mail, FileText, Scale } from 'lucide-react'
-import CurrencySlider from './currency-slider'
-import logo from "../../../../public/img/logo/logo.png"
+import {
+  Menu,
+  X,
+  LayoutDashboard,
+  Info,
+  Mail,
+  ArrowRight,
+} from 'lucide-react'
+import CurrencySlider from './home/currency-slider'
+import logo from '../../../../public/img/logo/logo.png'
+
+const navLinks = [
+  { name: 'About', href: '/about' },
+  { name: 'Contact', href: '/contact'},
+]
+
 const Navbar = () => {
-    const [open, setOpen] = useState(false)
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [scrolled, setScrolled] = useState(false)
-    const pathname = usePathname()
+  const [open, setOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const pathname = usePathname()
 
-    useEffect(() => {
-        const checkAuth = () => {
-            if (typeof window !== 'undefined') {
-                const token = localStorage.getItem('authToken')
-                setIsAuthenticated(!!token)
-            }
-        }
-
-        checkAuth()
-        window.addEventListener('storage', checkAuth)
-        const interval = setInterval(checkAuth, 1000)
-
-        return () => {
-            window.removeEventListener('storage', checkAuth)
-            clearInterval(interval)
-        }
-    }, [])
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 10)
-        }
-        window.addEventListener('scroll', handleScroll)
-        return () => window.removeEventListener('scroll', handleScroll)
-    }, [])
-
-    const navLinks = [
-        { href: '/', label: 'Home', icon: <Home size={18} /> },
-        { href: '/about', label: 'About', icon: <Info size={18} /> },
-        { href: '/contact', label: 'Contact', icon: <Mail size={18} /> },
-        { href: '/privacy-policy', label: 'Privacy Policy', icon: <FileText size={18} /> },
-        { href: '/terms-and-conditions', label: 'Terms', icon: <Scale size={18} /> },
-    ]
-
-    const isActive = (href: string) => {
-        if (href === '/') return pathname === '/'
-        return pathname?.startsWith(href)
+  /* -------- AUTH CHECK -------- */
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('authToken')
+      setIsAuthenticated(!!token)
     }
 
-    return (
-        <>
-            <nav className={`w-full sticky top-0 z-50 transition-all duration-500 ${scrolled
-                    ? 'bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl shadow-xl border-b border-neutral-200/50 dark:border-neutral-800/50'
-                    : 'bg-transparent'
-                }`}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16 lg:h-20">
-                        {/* Logo */}
-                        <Link
-                            href="/"
-                            className="flex items-center gap-3 group"
-                        >
-                            <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-                                <img src={logo.src} alt="Bexchange Logo" className="w-8 h-8" />
-                            </div>
-                            <div className="flex flex-col">
-                                <h1 className="text-transparent text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-[#0284c7] via-[#0ea5e9] to-[#c026d3] bg-clip-text">
-                                    Bexchange.io
-                                </h1>
-                            </div>
-                        </Link>
+    checkAuth()
+    window.addEventListener('storage', checkAuth)
+    return () => window.removeEventListener('storage', checkAuth)
+  }, [])
 
-                        {/* Desktop Menu */}
-                        <div className="hidden lg:flex items-center gap-1">
-                            {navLinks.map((link) => {
-                                const active = isActive(link.href)
-                                return (
-                                    <Link
-                                        key={link.href}
-                                        href={link.href}
-                                        className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${active
-                                                ? 'bg-gradient-primary text-white shadow-lg shadow-primary/30'
-                                                : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-primary-600 dark:hover:text-primary-400'
-                                            }`}
-                                    >
-                                        <span className={`transition-transform ${active ? 'scale-110' : ''}`}>
-                                            {link.icon}
-                                        </span>
-                                        {link.label}
-                                    </Link>
-                                )
-                            })}
+  /* -------- SCROLL EFFECT -------- */
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
-                            {/* Auth Button */}
-                            <div className="ml-4 pl-4 border-l border-neutral-300 dark:border-neutral-700">
-                                {isAuthenticated ? (
-                                    <Link
-                                        href="/dashboard"
-                                        className="px-6 py-2.5 bg-gradient-premium text-white rounded-xl hover:shadow-xl hover:shadow-secondary/30 transition-all duration-300 flex items-center gap-2 text-sm font-semibold group animate-pulse-glow"
-                                    >
-                                        <LayoutDashboard size={18} className="transition-transform group-hover:rotate-12" />
-                                        Dashboard
-                                    </Link>
-                                ) : (
-                                    <Link
-                                        href="/sign-in"
-                                        className="px-6 py-2.5 bg-gradient-primary text-white rounded-xl hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 flex items-center gap-2 text-sm font-semibold group"
-                                    >
-                                        <LogIn size={18} className="transition-transform group-hover:translate-x-1" />
-                                        Sign In
-                                    </Link>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Mobile Toggle */}
-                        <button
-                            className="lg:hidden p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-                            onClick={() => setOpen(!open)}
-                            aria-label="Toggle menu"
-                        >
-                            {open ? (
-                                <X size={24} className="text-neutral-700 dark:text-neutral-300" />
-                            ) : (
-                                <Menu size={24} className="text-neutral-700 dark:text-neutral-300" />
-                            )}
-                        </button>
-                    </div>
+  return (
+    <>
+      <nav
+        className={`sticky top-0 z-50 w-full transition-all duration-500
+        ${
+          scrolled
+            ? 'bg-slate-800/90 backdrop-blur-xl shadow-xl border-b border-neutral-700'
+            : 'bg-slate-800'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 lg:h-20">
+            {/* -------- LEFT SIDE (LOGO + LINKS) -------- */}
+            <div className="flex items-center gap-8">
+              {/* Logo */}
+              <Link href="/" className="flex items-center gap-3 group">
+                <div className="w-10 h-10 flex items-center justify-center">
+                  <img src={logo.src} alt="Bexchange Logo" className="w-8 h-8" />
                 </div>
+                <span className="text-xl font-semibold text-white">
+                  Bexchange.io
+                </span>
+              </Link>
 
-                {/* Mobile Menu */}
-                {open && (
-                    <div className="lg:hidden bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border-t border-neutral-200 dark:border-neutral-800 animate-in slide-in-from-top duration-300">
-                        <div className="flex flex-col px-4 py-6 gap-2">
-                            {navLinks.map((link) => {
-                                const active = isActive(link.href)
-                                return (
-                                    <Link
-                                        key={link.href}
-                                        href={link.href}
-                                        onClick={() => setOpen(false)}
-                                        className={`px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-300 flex items-center gap-3 ${active
-                                                ? 'bg-gradient-primary text-white shadow-lg shadow-primary/30'
-                                                : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'
-                                            }`}
-                                    >
-                                        <span className={`transition-transform ${active ? 'scale-110' : ''}`}>
-                                            {link.icon}
-                                        </span>
-                                        {link.label}
-                                    </Link>
-                                )
-                            })}
+              {/* Desktop Links */}
+              <div className="hidden lg:flex items-center gap-6">
+                {navLinks.map(link => {
+                  
+                  const active = pathname === link.href
 
-                            {/* Mobile Auth Button */}
-                            <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-800">
-                                {isAuthenticated ? (
-                                    <Link
-                                        href="/dashboard"
-                                        onClick={() => setOpen(false)}
-                                        className="px-5 py-3.5 bg-gradient-premium text-white rounded-xl hover:shadow-xl hover:shadow-secondary/30 transition-all duration-300 flex items-center justify-center gap-3 font-semibold"
-                                    >
-                                        <LayoutDashboard size={20} />
-                                        Dashboard
-                                    </Link>
-                                ) : (
-                                    <Link
-                                        href="/sign-in"
-                                        onClick={() => setOpen(false)}
-                                        className="px-5 py-3.5 bg-gradient-primary text-white rounded-xl hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 flex items-center justify-center gap-3 font-semibold"
-                                    >
-                                        <LogIn size={20} />
-                                        Sign In
-                                    </Link>
-                                )}
-                            </div>
-                        </div>
-                    </div>
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`flex items-center gap-2 text-sm font-medium transition-colors
+                      ${
+                        active
+                          ? 'text-blue-400'
+                          : 'text-white hover:text-blue-400'
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* -------- RIGHT SIDE (CTA) -------- */}
+            <div className="hidden lg:flex">
+              {isAuthenticated ? (
+                <Link
+                  href="/dashboard"
+                  className="px-6 py-2.5 rounded-full text-sm font-semibold text-white
+                             bg-neutral-900 hover:bg-neutral-800
+                             transition-all duration-300 flex items-center gap-2"
+                >
+                  <LayoutDashboard size={18} />
+                  Dashboard
+                </Link>
+              ) : (
+                <Link
+                  href="/sign-up"
+                  className="group inline-flex items-center gap-3
+                             px-6 py-2.5 rounded-lg
+                             text-sm font-semibold text-white
+                             bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6]
+                             shadow-md hover:shadow-lg hover:brightness-110
+                             transition-all duration-300"
+                >
+                  Get Started
+                  <ArrowRight
+                    size={16}
+                    className="transition-transform duration-300 group-hover:translate-x-1"
+                  />
+                </Link>
+              )}
+            </div>
+
+            {/* -------- MOBILE TOGGLE -------- */}
+            <button
+              className="lg:hidden p-2 rounded-xl hover:bg-neutral-700 transition-colors"
+              onClick={() => setOpen(!open)}
+              aria-label="Toggle menu"
+            >
+              {open ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+        </div>
+
+        {/* -------- MOBILE MENU -------- */}
+        {open && (
+          <div className="lg:hidden bg-slate-900/95 backdrop-blur-xl border-t border-neutral-700 animate-in slide-in-from-top duration-300">
+            <div className="flex flex-col px-4 py-6 gap-4">
+              {navLinks.map(link => {
+                
+                const active = pathname === link.href
+
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-lg
+                    ${
+                      active
+                        ? 'text-blue-400 bg-neutral-800'
+                        : 'text-neutral-200 hover:bg-neutral-800'
+                    }`}
+                  >
+                    
+                    {link.name}
+                  </Link>
+                )
+              })}
+
+              <div className="pt-4 border-t border-neutral-700">
+                {isAuthenticated ? (
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center justify-center gap-3
+                               px-6 py-3 rounded-full font-semibold text-white
+                               bg-neutral-800 hover:bg-neutral-700 transition"
+                  >
+                    <LayoutDashboard size={20} />
+                    Dashboard
+                  </Link>
+                ) : (
+                  <Link
+                    href="/sign-up"
+                    onClick={() => setOpen(false)}
+                    className="group flex items-center justify-center gap-3
+                               px-6 py-3 rounded-lg font-semibold text-white
+                               bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6]
+                               shadow-md hover:shadow-lg hover:brightness-110
+                               transition-all duration-300"
+                  >
+                    Get Started
+                    <ArrowRight size={18} />
+                  </Link>
                 )}
-                <CurrencySlider />
-            </nav>
-        </>
-    )
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* -------- CURRENCY SLIDER -------- */}
+        <CurrencySlider />
+      </nav>
+    </>
+  )
 }
 
 export default Navbar

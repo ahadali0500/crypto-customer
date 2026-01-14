@@ -2,91 +2,89 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Home, Info, Mail, FileText, Scale, CircleHelp } from 'lucide-react'
+import { BsTwitter, BsGithub, BsLinkedin } from 'react-icons/bs'
 import logo from "../../../../public/img/logo/logo.png"
 
 const Footer = () => {
   const currentYear = new Date().getFullYear()
-  const footerLinks = [
-    { href: '/', label: 'Home', icon: Home },
-    { href: '/about', label: 'About', icon: Info },
-    { href: '/contact', label: 'Contact', icon: Mail },
-    { href: '/privacy-policy', label: 'Privacy Policy', icon: FileText },
-    { href: '/terms-and-conditions', label: 'Terms & Conditions', icon: Scale },
-    { href: '/faqs', label: 'FAQs', icon: CircleHelp },
-  ]
-
 
   return (
-    <footer className="bg-white dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Brand Section */}
+    <footer className="bg-gradient-to-b from-slate-900 to-slate-800 text-gray-400">
+      <div className="max-w-7xl mx-auto px-6 py-16">
+
+        {/* Top Section */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+
+          {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-                <img src={logo.src} alt="InnovateCo Logo" className="w-8 h-8" />
-              </div>
+              <img src={logo.src} alt="GlobaCoin" className="w-9 h-9" />
+              <span className="text-white font-semibold text-lg">Bexchange.io</span>
             </Link>
-            <p className="text-neutral-600 dark:text-neutral-400 text-sm">
-              Secure and reliable cryptocurrency exchange platform with enterprise-grade security.
+            <p className="text-sm leading-relaxed">
+              The world's most trusted cryptocurrency platform.
             </p>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-semibold text-neutral-900 dark:text-white mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              {footerLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                  >
-                    <link.icon className="w-4 h-4" />
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+          {/* Products */}
+          {/* <div>
+            <h4 className="text-white font-semibold mb-4">Products</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="#" className="hover:text-white">Buy/Sell Crypto</Link></li>
+              <li><Link href="#" className="hover:text-white">Trading</Link></li>
+              <li><Link href="#" className="hover:text-white">Wallet</Link></li>
+              <li><Link href="#" className="hover:text-white">Staking</Link></li>
             </ul>
-          </div>
+          </div> */}
 
-          {/* Contact Info */}
+          {/* Company */}
+          {/* <div>
+            <h4 className="text-white font-semibold mb-4">Company</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="/about" className="hover:text-white">About Us</Link></li>
+              <li><Link href="#" className="hover:text-white">Careers</Link></li>
+              <li><Link href="#" className="hover:text-white">Press</Link></li>
+              <li><Link href="#" className="hover:text-white">Blog</Link></li>
+            </ul>
+          </div> */}
+
+          {/* Support */}
           <div>
-            <h3 className="font-semibold text-neutral-900 dark:text-white mb-4">Contact</h3>
-            <ul className="space-y-2 text-sm text-neutral-600 dark:text-neutral-400">
-              <li>Email: support@innovateco.com</li>
-              <li>Phone: +1 (555) 123-4567</li>
-              <li>24/7 Support Available</li>
+            <h4 className="text-white font-semibold mb-4">Support</h4>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="/terms-and-conditions" className="hover:text-white">Term & Conditions</Link></li>
+              <li><Link href="/" className="hover:text-white">Security</Link></li>
+              <li><Link href="/privacy-policy" className="hover:text-white">Privacy Policy</Link></li>
+              <li><Link href="/faqs" className="hover:text-white">FAQ</Link></li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-8 pt-8 border-t border-neutral-200 dark:border-neutral-800 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        {/* Divider */}
+        <div className="border-t border-white/10 mt-12 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+
+          {/* Copyright */}
+          <p className="text-sm">
             © {currentYear} Bexchange. All rights reserved.
           </p>
-          <div className="flex items-center gap-4 text-sm">
-            <Link
-              href="/privacy-policy"
-              className="text-neutral-600 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-            >
-              Privacy Policy
+
+          {/* Social Icons */}
+          <div className="flex items-center gap-4">
+            <Link href="#" className="hover:text-white transition">
+              <BsTwitter size={18} />
             </Link>
-            <span className="text-neutral-400">|</span>
-            <Link
-              href="/terms-and-conditions"
-              className="text-neutral-600 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-            >
-              Terms & Conditions
+            <Link href="#" className="hover:text-white transition">
+              <BsGithub size={18} />
+            </Link>
+            <Link href="#" className="hover:text-white transition">
+              <BsLinkedin size={18} />
             </Link>
           </div>
         </div>
+
       </div>
     </footer>
   )
 }
 
 export default Footer
-

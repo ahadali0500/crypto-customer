@@ -69,39 +69,35 @@ const PrivacyPolicyPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-800">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3b82f6]"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-900">
+    <div className="min-h-screen bg-slate-800">
       {/* Hero Section */}
       <section className="relative py-16 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-50/20 via-white/90 to-secondary-50/20 dark:from-primary-950/10 dark:via-neutral-900 dark:to-secondary-950/10" />
-        
-        <div className="absolute top-20 left-10 w-64 h-64 bg-gradient-to-r from-primary-300/10 to-secondary-300/10 rounded-full blur-3xl animate-pulse" />
-        
         <div className="max-w-4xl mx-auto relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary-50 to-secondary-50 dark:from-primary-900/20 dark:to-secondary-900/20 border border-primary-200 dark:border-primary-800/30 mb-4">
-            <Sparkles className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-            <span className="text-sm font-semibold text-primary-700 dark:text-primary-300">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 shadow-sm mb-4">
+            <Sparkles className="w-4 h-4 text-[#38bdf8]" />
+            <span className="text-sm font-semibold text-slate-200">
               Data Protection
             </span>
           </div>
           
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3">
-            <span className="text-transparent bg-gradient-to-r from-[#0284c7] via-[#0ea5e9] to-[#c026d3] bg-clip-text">
+            <span className="text-transparent bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] bg-clip-text">
               Privacy
             </span>
-            <span className="text-neutral-900 dark:text-white"> Policy</span>
+            <span className="text-slate-50"> Policy</span>
           </h1>
           
           {content?.lastUpdated && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 text-sm">
-              <span className="text-neutral-600 dark:text-neutral-400">Last Updated:</span>
-              <span className="font-medium text-neutral-900 dark:text-white">{content.lastUpdated}</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm">
+              <span className="text-slate-300">Last Updated:</span>
+              <span className="font-medium text-slate-50">{content.lastUpdated}</span>
             </div>
           )}
         </div>
@@ -110,16 +106,16 @@ const PrivacyPolicyPage = () => {
       {/* Content Section */}
       <section className="py-12 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm rounded-xl p-6 border border-neutral-200/50 dark:border-neutral-800/50 shadow-lg">
+          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10 shadow-lg">
             {/* Privacy Commitment */}
-            <div className="mb-6 p-4 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg">
+            <div className="mb-6 p-4 bg-white/5 border border-white/10 rounded-lg">
               <div className="flex items-start gap-3">
-                <Shield className="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5" />
+                <Shield className="w-5 h-5 text-[#38bdf8] flex-shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-bold text-primary-900 dark:text-primary-300 text-sm mb-1">
+                  <h3 className="font-bold text-slate-50 text-sm mb-1">
                     Our Privacy Commitment
                   </h3>
-                  <p className="text-primary-800 dark:text-primary-400 text-xs">
+                  <p className="text-slate-300 text-xs">
                     We are committed to protecting your personal information and being transparent about how we collect, use, and safeguard your data.
                   </p>
                 </div>
@@ -128,7 +124,7 @@ const PrivacyPolicyPage = () => {
 
             {/* Table of Contents */}
             <div className="mb-8">
-              <h3 className="font-bold text-neutral-900 dark:text-white mb-3 text-sm">Policy Sections</h3>
+              <h3 className="font-bold text-slate-50 mb-3 text-sm">Policy Sections</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {(content?.sections || []).map((section, index) => (
                   <button
@@ -140,19 +136,19 @@ const PrivacyPolicyPage = () => {
                     }}
                     className={`flex items-center justify-between p-2.5 rounded-lg text-left transition-all ${
                       activeSection === index
-                        ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800'
-                        : 'bg-neutral-50 dark:bg-neutral-800/50 hover:bg-neutral-100 dark:hover:bg-neutral-800 border border-transparent'
+                        ? 'bg-white/10 border border-white/20'
+                        : 'bg-white/5 hover:bg-white/10 border border-transparent'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-md bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-md bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center">
                         <span className="text-xs font-bold text-white">{index + 1}</span>
                       </div>
-                      <span className="font-medium text-neutral-900 dark:text-white text-sm">
+                      <span className="font-medium text-slate-50 text-sm">
                         {section.title}
                       </span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-neutral-400" />
+                    <ChevronRight className="w-4 h-4 text-slate-400" />
                   </button>
                 ))}
               </div>
@@ -164,17 +160,17 @@ const PrivacyPolicyPage = () => {
                 <div 
                   key={index} 
                   id={`section-${index}`}
-                  className="border-b border-neutral-200 dark:border-neutral-700 last:border-b-0 pb-6 last:pb-0 scroll-mt-20"
+                  className="border-b border-white/10 last:border-b-0 pb-6 last:pb-0 scroll-mt-20"
                 >
                   <div className="flex items-start gap-3 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center flex-shrink-0">
                       <FileText className="w-4 h-4 text-white" />
                     </div>
-                    <h2 className="text-lg font-bold text-neutral-900 dark:text-white">
+                    <h2 className="text-lg font-bold text-slate-50">
                       {section.title}
                     </h2>
                   </div>
-                  <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed text-sm ml-11">
+                  <p className="text-slate-300 leading-relaxed text-sm ml-11">
                     {section.content}
                   </p>
                 </div>
@@ -182,22 +178,22 @@ const PrivacyPolicyPage = () => {
             </div>
 
             {/* Contact Section */}
-            <div className="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-700">
-              <div className="bg-gradient-to-r from-primary-50/50 to-secondary-50/50 dark:from-primary-900/10 dark:to-secondary-900/10 rounded-lg p-5">
+            <div className="mt-8 pt-6 border-t border-white/10">
+              <div className="bg-white/5 rounded-lg p-5 border border-white/10">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center flex-shrink-0">
                     <Lock className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-neutral-900 dark:text-white text-sm mb-1">
+                    <h3 className="font-bold text-slate-50 text-sm mb-1">
                       Privacy Questions?
                     </h3>
-                    <p className="text-neutral-600 dark:text-neutral-400 text-xs mb-3">
+                    <p className="text-slate-300 text-xs mb-3">
                       If you have questions about our Privacy Policy or data practices, please contact our support team.
                     </p>
                     <a
                       href="/contact"
-                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-primary-600 to-primary-500 text-white rounded-md hover:shadow-md transition-all duration-300 text-sm"
+                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] text-white rounded-md hover:shadow-md hover:brightness-110 transition-all duration-300 text-sm"
                     >
                       Contact Support
                     </a>

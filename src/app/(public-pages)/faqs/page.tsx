@@ -113,7 +113,7 @@ export default function FAQPage() {
     : faqItems.filter(item => item.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-slate-800">
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         {/* Category Filter */}
@@ -128,13 +128,13 @@ export default function FAQPage() {
                 }}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                   selectedCategory === category
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                    ? 'bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] text-white'
+                    : 'bg-white/5 border border-white/10 text-slate-200 hover:bg-white/10'
                 }`}
               >
                 {category}
                 {category !== 'All' && (
-                  <span className="ml-1 text-xs bg-gray-700 px-2 py-0.5 rounded-full">
+                  <span className="ml-1 text-xs bg-white/10 px-2 py-0.5 rounded-full">
                     {faqItems.filter(item => item.category === category).length}
                   </span>
                 )}
@@ -148,23 +148,23 @@ export default function FAQPage() {
           {filteredFAQs.map((item, index) => (
             <div
               key={index}
-              className="bg-gray-800 rounded-lg overflow-hidden"
+              className="bg-white/5 border border-white/10 rounded-lg overflow-hidden"
             >
               <button
                 onClick={() => toggleFAQ(index)}
-                className="w-full px-5 py-4 text-left flex justify-between items-center hover:bg-gray-750 transition-colors"
+                className="w-full px-5 py-4 text-left flex justify-between items-center hover:bg-white/10 transition-colors"
               >
                 <div>
-                  <h3 className="font-semibold text-white text-left">
+                  <h3 className="font-semibold text-slate-50 text-left">
                     {item.question}
                   </h3>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs px-2 py-1 bg-gray-700 text-gray-300 rounded">
+                    <span className="text-xs px-2 py-1 bg-white/10 text-slate-300 rounded">
                       {item.category}
                     </span>
                   </div>
                 </div>
-                <div className="text-gray-400 flex-shrink-0 ml-4">
+                <div className="text-slate-400 flex-shrink-0 ml-4">
                   {openIndex === index ? (
                     <FaChevronUp />
                   ) : (
@@ -174,8 +174,8 @@ export default function FAQPage() {
               </button>
               
               {openIndex === index && (
-                <div className="px-5 pb-4 pt-2 border-t border-gray-700">
-                  <p className="text-gray-300 whitespace-pre-line">
+                <div className="px-5 pb-4 pt-2 border-t border-white/10">
+                  <p className="text-slate-300 whitespace-pre-line">
                     {item.answer}
                   </p>
                 </div>
