@@ -17,7 +17,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useSessionContext } from '../AuthProvider/SessionContext'
 import { Spinner } from '@/components/ui'
-
+import logo from '../../../../public/img/logo/logo.png'
 export type OnSignInPayload = {
     values: SignInFormSchema
     setSubmitting: (isSubmitting: boolean) => void
@@ -111,16 +111,16 @@ const SignInForm = (props: SignInFormProps) => {
     return (
         <>
             <div className={className}>
-                <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+                <Card className="rounded-2xl border border-white/10 bg-slate-900/70 shadow-2xl backdrop-blur">
                     <CardHeader className="pb-6">
                         <div className="flex flex-col items-center">
-                            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-4">
-                                <span className="text-xl font-bold text-white">B</span>
+                            <div className="w-12 h-12  flex items-center justify-center mb-4">
+                              <img src={logo.src} alt="Bexchange Logo" className="w-10 h-10" />
                             </div>
-                            <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+                            <CardTitle className="text-2xl font-bold text-slate-50">
                                 Sign In to Bexchange
                             </CardTitle>
-                            <CardDescription className="text-gray-600 dark:text-gray-400 mt-1">
+                            <CardDescription className="mt-1 text-slate-300">
                                 Enter your credentials to continue
                             </CardDescription>
                         </div>
@@ -142,6 +142,7 @@ const SignInForm = (props: SignInFormProps) => {
                                             type="email"
                                             placeholder="Enter your email address"
                                             autoComplete="off"
+                                            
                                             // className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                                             {...field}
                                         />
@@ -184,14 +185,14 @@ const SignInForm = (props: SignInFormProps) => {
                             </Button>
                         </Form>
 
-                        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        {/* <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
                             <p className="text-center text-sm text-gray-600 dark:text-gray-400">
                                 Need assistance?{' '}
                                 <a href="/support" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
                                     Contact Support
                                 </a>
                             </p>
-                        </div>
+                        </div> */}
                     </CardContent>
                 </Card>
             </div>
