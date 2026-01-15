@@ -40,6 +40,9 @@ const BalanceCard = ({
 }: {
     cardData: CardData & { data: BalanceItem[] }
 }) => {
+
+    console.log("cardData",cardData);
+    
     const [activeBalanceTab, setActiveBalanceTab] = useState<
         'available' | 'locked'
     >('locked')
