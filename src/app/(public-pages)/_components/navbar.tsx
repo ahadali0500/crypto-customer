@@ -106,7 +106,7 @@ const Navbar = () => {
                 </Link>
               ) : (
                 <Link
-                  href="/sign-up"
+                  href="/sign-in"
                   className="group inline-flex items-center gap-3
                              px-6 py-2.5 rounded-lg
                              text-sm font-semibold text-white
@@ -114,7 +114,7 @@ const Navbar = () => {
                              shadow-md hover:shadow-lg hover:brightness-110
                              transition-all duration-300"
                 >
-                  Get Started
+                  Login
                   <ArrowRight
                     size={16}
                     className="transition-transform duration-300 group-hover:translate-x-1"
@@ -174,7 +174,7 @@ const Navbar = () => {
                   </Link>
                 ) : (
                   <Link
-                    href="/sign-up"
+                    href="/sign-in"
                     onClick={() => setOpen(false)}
                     className="group flex items-center justify-center gap-3
                                px-6 py-3 rounded-lg font-semibold text-white
@@ -182,7 +182,7 @@ const Navbar = () => {
                                shadow-md hover:shadow-lg hover:brightness-110
                                transition-all duration-300"
                   >
-                    Get Started
+                    Login
                     <ArrowRight size={18} />
                   </Link>
                 )}

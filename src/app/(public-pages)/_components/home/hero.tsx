@@ -121,7 +121,7 @@ const Hero = () => {
                             {/* CTA Buttons */}
                             <div className="flex flex-col sm:flex-row gap-4 pt-4">
                                 <Link
-                                    href="/sign-up"
+                                    href="/sign-in"
                                     className="group flex items-center justify-center gap-3
                                px-6 py-3.5
                                rounded-lg
@@ -206,7 +206,7 @@ const Hero = () => {
                                 </div>
 
                                 <Link
-                                    href="/sign-up"
+                                    href="/sign-in"
                                     className="group inline-flex items-center gap-3
                                px-6 py-2.5
                                rounded-lg

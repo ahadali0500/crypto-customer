@@ -73,7 +73,7 @@ const HowItWorks = () => {
         {/* CTA */}
         <div className="mt-20 text-center">
           <Link
-            href="/sign-up"
+            href="/sign-in"
             className="group inline-flex items-center justify-center gap-3
                        px-6 py-3.5
                        rounded-lg

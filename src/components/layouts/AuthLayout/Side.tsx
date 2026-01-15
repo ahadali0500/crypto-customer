@@ -1,19 +1,19 @@
 import { cloneElement } from 'react'
 import type { CommonProps } from '@/@types/common'
 import { Shield, Zap, BarChart3, Globe, Clock, Users } from 'lucide-react'
-
+import logo from '../../../../public/img/logo/logo.png'
 type SideProps = CommonProps
 
 const Side = ({ children, ...rest }: SideProps) => {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
             <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
                 {/* Left side - Branding */}
                 <div className="hidden lg:block">
                     <div className="mb-10">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
-                                <span className="text-2xl font-bold text-white">B</span>
+                            <div className="w-12 h-12 flex items-center justify-center">
+                                <img src={logo.src} alt="Bexchange Logo" className="w-10 h-10" />
                             </div>
                             <div>
                                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Bexchange.io</h1>
@@ -35,7 +35,7 @@ const Side = ({ children, ...rest }: SideProps) => {
 
                     {/* Features */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="flex items-start gap-3 p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-start gap-3 p-4 bg-slate-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
                             <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
                                 <Shield className="w-5 h-5 text-green-600 dark:text-green-400" />
                             </div>
@@ -45,7 +45,7 @@ const Side = ({ children, ...rest }: SideProps) => {
                             </div>
                         </div>
 
-                        <div className="flex items-start gap-3 p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-start gap-3 p-4 bg-slate-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
                             <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
                                 <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                             </div>
@@ -55,7 +55,7 @@ const Side = ({ children, ...rest }: SideProps) => {
                             </div>
                         </div>
 
-                        <div className="flex items-start gap-3 p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-start gap-3 p-4 bg-slate-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
                             <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
                                 <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                             </div>
@@ -65,7 +65,7 @@ const Side = ({ children, ...rest }: SideProps) => {
                             </div>
                         </div>
 
-                        <div className="flex items-start gap-3 p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg border border-gray-200 dark:border-gray-700">
+                        <div className="flex items-start gap-3 p-4 bg-slate-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
                             <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
                                 <Globe className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                             </div>
