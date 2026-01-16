@@ -8,29 +8,29 @@ const HowItWorks = () => {
   const steps = [
     {
       number: '1',
-      title: 'Sign up to our Exchange within just 5 minutes',
+      title: 'Receive your login credentials',
       description:
-        "Get started by signing up to our exchange. Our seamless registration process ensures you're ready to trade in no time.",
+        "After approval, our team securely provides login credentials and access instructions.",
       gradient: 'from-blue-500 to-cyan-500',
     },
     {
       number: '2',
-      title: 'Connect and synchronize your crypto wallets',
+      title: 'Synchronize your personal wallets and complete KYC',
       description:
-        'Connect your crypto accounts to deposit and withdraw funds in and out of your Coinxpot account almost instantly. We make fund transfers simple and secure, so you can start trading quickly.',
+        'Connect personal wallets and complete identity verification for compliant access.',
       gradient: 'from-green-500 to-emerald-500',
     },
     {
       number: '3',
-      title: 'Buy and Sell Cryptocurrencies with Low Commission Fees plan',
+      title: 'ccess and use our services',
       description:
-        'Enjoy trading with low commissions. Buy and sell cryptocurrencies effortlessly using our user-friendly platform, designed to make your trading experience smooth and cost-effective.',
+        'Once setup is complete, securely access platform features with full support.',
       gradient: 'from-purple-500 to-pink-500',
     },
   ]
 
   return (
-    <section className="relative py-20 md:py-28 px-4 overflow-hidden bg-[#1f2937]">
+    <section className="relative py-20 md:py-28 px-4 overflow-hidden bg-[oklch(0.24_0.03_260.32)]">
       {/* Background Grid */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.05)_0px,transparent_1px)] bg-[size:60px_60px]" />
 

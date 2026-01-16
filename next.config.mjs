@@ -10,7 +10,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'crypto-server.ahadcommit.com',
+        hostname: 'server.bexchange.io',
         pathname: '/uploads/**',
       },
     ],

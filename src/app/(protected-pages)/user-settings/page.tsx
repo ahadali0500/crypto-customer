@@ -97,7 +97,7 @@ const User = () => {
                             {user.profileImageUrl && !imageError ? (
                                 <Image 
                                     // src={user.profileImageUrl} 
-                                    src={`https://crypto-server.ahadcommit.com/uploads/user/${user.profileImageUrl}`}
+                                    src={`https://server.bexchange.io/uploads/user/${user.profileImageUrl}`}
                                     width={80} 
                                     height={80} 
                                     className='rounded-full object-cover' 

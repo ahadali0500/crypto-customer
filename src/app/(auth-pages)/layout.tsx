@@ -5,7 +5,7 @@ import Side from '@/components/layouts/AuthLayout/Side'
 
 const Layout = ({ children }: { children: ReactNode }) => {
     return (
-        <div className="flex flex-auto flex-col h-[100vh]">
+        <div className="flex flex-auto bg-red-600 flex-col h-[100vh]">
             <Side>{children}</Side>
         </div>
     )

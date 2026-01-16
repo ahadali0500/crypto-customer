@@ -45,7 +45,7 @@ const PlatformIntro = () => {
     ]
 
     return (
-        <section className="relative py-20 md:py-28 px-4 overflow-hidden bg-slate-900">
+        <section className="relative py-20 md:py-28 px-4 overflow-hidden bg-[#111827f2]">
 
 
             <div className="max-w-7xl mx-auto relative z-10">
@@ -66,7 +66,7 @@ const PlatformIntro = () => {
                     {features.map((feature, index) => (
                         <div
                             key={index}
-                            className="group relative bg-[#1f2937] rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 hover:shadow-xl"
+                            className="group relative bg-[oklch(0.24_0.03_260.32)] rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 hover:shadow-xl"
                         >
                             {/* Feature Icon */}
                             <div className={`w-14 h-14 rounded-xl bg-gradient-to-r ${feature.gradient} flex items-center justify-center mb-4 shadow-md group-hover:scale-110 transition-transform duration-300`}>

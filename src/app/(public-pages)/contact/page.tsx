@@ -38,7 +38,7 @@ const ContactPage = () => {
         setContent({
           title: 'Contact Us',
           description: 'Get in touch with our support team. We\'re here to help you 24/7 with any inquiries.',
-          email: 'support@innovateco.com',
+          email: 'support@bexchange.io',
           phone: '+1 (555) 123-4567',
           address: '123 Innovation Street, Tech City, TC 12345',
           officeHours: '24/7 Support Available'
@@ -87,13 +87,13 @@ const ContactPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-800">
+    <div className="min-h-screen bg-[#111827f2]">
       {/* Hero Section */}
       <section className="relative py-16 px-4 overflow-hidden">
         <div className="max-w-4xl mx-auto relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 shadow-sm mb-4">
-            <Sparkles className="w-4 h-4 text-[#38bdf8]" />
-            <span className="text-sm font-semibold text-slate-200">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 backdrop-blur-sm border border-white/10 shadow-sm mb-4">
+            <Sparkles className="w-4 h-4 text-blue-500" />
+            <span className="text-sm font-semibold text-blue-500">
               Contact Support
             </span>
           </div>
@@ -113,7 +113,7 @@ const ContactPage = () => {
 
       {/* Contact Information */}
       <section className="py-12 px-4">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-4 mb-8">
+        <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-4 mb-8">
           <div className="bg-white/5 backdrop-blur-sm rounded-xl p-5 border border-white/10 hover:border-white/20 transition-all duration-300">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center mb-3">
               <Mail className="w-5 h-5 text-white" />
@@ -124,7 +124,7 @@ const ContactPage = () => {
             </p>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-sm rounded-xl p-5 border border-white/10 hover:border-white/20 transition-all duration-300">
+          {/* <div className="bg-white/5 backdrop-blur-sm rounded-xl p-5 border border-white/10 hover:border-white/20 transition-all duration-300">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center mb-3">
               <Phone className="w-5 h-5 text-white" />
             </div>
@@ -132,7 +132,7 @@ const ContactPage = () => {
             <p className="text-slate-300 text-sm">
               {content?.phone}
             </p>
-          </div>
+          </div> */}
 
           <div className="bg-white/5 backdrop-blur-sm rounded-xl p-5 border border-white/10 hover:border-white/20 transition-all duration-300">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] flex items-center justify-center mb-3">

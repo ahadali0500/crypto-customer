@@ -50,12 +50,12 @@ const Navbar = () => {
         className={`sticky top-0 z-50 w-full transition-all duration-500
         ${
           scrolled
-            ? 'bg-slate-800/90 backdrop-blur-xl shadow-xl border-b border-neutral-700'
-            : 'bg-slate-800'
+            ? 'bg-slate-900 backdrop-blur-xl shadow-xl border-b border-neutral-700'
+            : 'bg-[#111827f2]'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-20">
+          <div className="flex items-center justify-between h-16 lg:h-16">
             {/* -------- LEFT SIDE (LOGO + LINKS) -------- */}
             <div className="flex items-center gap-8">
               {/* Logo */}
@@ -68,28 +68,8 @@ const Navbar = () => {
                 </span>
               </Link>
 
-              {/* Desktop Links */}
-              <div className="hidden lg:flex items-center gap-6">
-                {navLinks.map(link => {
-                  
-                  const active = pathname === link.href
-
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={`flex items-center gap-2 text-sm font-medium transition-colors
-                      ${
-                        active
-                          ? 'text-blue-400'
-                          : 'text-white hover:text-blue-400'
-                      }`}
-                    >
-                      {link.name}
-                    </Link>
-                  )
-                })}
-              </div>
+            
+            
             </div>
 
             {/* -------- RIGHT SIDE (CTA) -------- */}
@@ -97,9 +77,12 @@ const Navbar = () => {
               {isAuthenticated ? (
                 <Link
                   href="/dashboard"
-                  className="px-6 py-2.5 rounded-full text-sm font-semibold text-white
-                             bg-neutral-900 hover:bg-neutral-800
-                             transition-all duration-300 flex items-center gap-2"
+                  className="group inline-flex items-center gap-3
+                             px-6 py-2.5 rounded-lg
+                             text-sm font-semibold text-white
+                             bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6]
+                             shadow-md hover:shadow-lg hover:brightness-110
+                             transition-all duration-300"
                 >
                   <LayoutDashboard size={18} />
                   Dashboard
@@ -108,13 +91,13 @@ const Navbar = () => {
                 <Link
                   href="/sign-in"
                   className="group inline-flex items-center gap-3
-                             px-6 py-2.5 rounded-lg
+                             px-8 py-2 rounded-lg
                              text-sm font-semibold text-white
                              bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6]
                              shadow-md hover:shadow-lg hover:brightness-110
                              transition-all duration-300"
                 >
-                  Login
+                  Sign In
                   <ArrowRight
                     size={16}
                     className="transition-transform duration-300 group-hover:translate-x-1"
@@ -136,38 +119,21 @@ const Navbar = () => {
 
         {/* -------- MOBILE MENU -------- */}
         {open && (
-          <div className="lg:hidden bg-slate-900/95 backdrop-blur-xl border-t border-neutral-700 animate-in slide-in-from-top duration-300">
+          <div className="lg:hidden bg-slate-800 backdrop-blur-xl animate-in slide-in-from-top duration-300">
             <div className="flex flex-col px-4 py-6 gap-4">
-              {navLinks.map(link => {
-                
-                const active = pathname === link.href
-
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg
-                    ${
-                      active
-                        ? 'text-blue-400 bg-neutral-800'
-                        : 'text-neutral-200 hover:bg-neutral-800'
-                    }`}
-                  >
-                    
-                    {link.name}
-                  </Link>
-                )
-              })}
+            
 
               <div className="pt-4 border-t border-neutral-700">
                 {isAuthenticated ? (
                   <Link
                     href="/dashboard"
                     onClick={() => setOpen(false)}
-                    className="flex items-center justify-center gap-3
-                               px-6 py-3 rounded-full font-semibold text-white
-                               bg-neutral-800 hover:bg-neutral-700 transition"
+                    className="group inline-flex items-center gap-3
+                             px-6 py-2.5 rounded-lg
+                             text-sm font-semibold text-white
+                             bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6]
+                             shadow-md hover:shadow-lg hover:brightness-110
+                             transition-all duration-300"
                   >
                     <LayoutDashboard size={20} />
                     Dashboard
@@ -177,12 +143,12 @@ const Navbar = () => {
                     href="/sign-in"
                     onClick={() => setOpen(false)}
                     className="group flex items-center justify-center gap-3
-                               px-6 py-3 rounded-lg font-semibold text-white
+                               px-9 py-1 rounded-lg font-semibold text-white
                                bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6]
                                shadow-md hover:shadow-lg hover:brightness-110
                                transition-all duration-300"
                   >
-                    Login
+                    Sign In
                     <ArrowRight size={18} />
                   </Link>
                 )}

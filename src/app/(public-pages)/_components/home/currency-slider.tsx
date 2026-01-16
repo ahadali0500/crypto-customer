@@ -78,7 +78,7 @@ const CurrencySlider = () => {
   }, [paused])
 
   return (
-    <div className="w-full bg-slate-800 border-y border-slate-top border-slate-700">
+    <div className="w-full bg-[oklch(0.24_0.03_260.32)]  border-y border-slate-top border-slate-700">
       <div
         className="relative overflow-hidden h-10 flex items-center"
         onMouseEnter={() => setPaused(true)}

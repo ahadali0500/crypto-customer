@@ -3,7 +3,7 @@ import { Button, Input, Select, Switcher, Dialog, Spinner } from '@/components/u
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import User from './page';
-
+import { BiSolidUser } from 'react-icons/bi';
 interface UserData {
   id: number;
   name: string;
@@ -397,13 +397,13 @@ export const Overview = () => {
                         {profileImagePreview || userData.profileImageUrl ? (
                           <img
                             // src={profileImagePreview || userData.profileImageUrl!}
-                            src={`https://crypto-server.ahadcommit.com/uploads/user/${profileImagePreview}`}
+                            src={`https://server.bexchange.io/uploads/user/${profileImagePreview}`}
                             alt="Profile"
                             className="w-24 h-24 rounded-full object-cover border"
                           />
                         ) : (
                           <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-                            No Image
+                            <BiSolidUser/>
                           </div>
                         )}
                       </div>

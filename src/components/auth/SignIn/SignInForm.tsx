@@ -111,11 +111,11 @@ const SignInForm = (props: SignInFormProps) => {
     return (
         <>
             <div className={className}>
-                <Card className="rounded-2xl border border-white/10 bg-slate-900/70 shadow-2xl backdrop-blur">
+                <Card className="rounded-2xl border border-white/10 bg-[oklch(0.24_0.03_260.32)] shadow-2xl backdrop-blur">
                     <CardHeader className="pb-6">
                         <div className="flex flex-col items-center">
                             <div className="w-12 h-12  flex items-center justify-center mb-4">
-                              <img src={logo.src} alt="Bexchange Logo" className="w-10 h-10" />
+                                <img src={logo.src} alt="Bexchange Logo" className="w-10 h-10" />
                             </div>
                             <CardTitle className="text-2xl font-bold text-slate-50">
                                 Sign In to Bexchange
@@ -132,7 +132,7 @@ const SignInForm = (props: SignInFormProps) => {
                                 label="Email Address"
                                 invalid={Boolean(errors.email)}
                                 errorMessage={errors.email?.message}
-                              
+
                             >
                                 <Controller
                                     name="email"
@@ -142,7 +142,7 @@ const SignInForm = (props: SignInFormProps) => {
                                             type="email"
                                             placeholder="Enter your email address"
                                             autoComplete="off"
-                                            
+                                            className='bg-[oklch(0.24_0.03_260.32)]'
                                             // className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                                             {...field}
                                         />
@@ -154,7 +154,7 @@ const SignInForm = (props: SignInFormProps) => {
                                 label="Password"
                                 invalid={Boolean(errors.password)}
                                 errorMessage={errors.password?.message}
-                               
+
                             >
                                 <Controller
                                     name="password"
@@ -164,12 +164,13 @@ const SignInForm = (props: SignInFormProps) => {
                                             <PasswordInput
                                                 placeholder="Enter your password"
                                                 autoComplete="off"
-                                                className='rounded-lg'
+                                                className="rounded-lg"
                                                 {...field}
                                             />
                                         </div>
                                     )}
                                 />
+
                             </FormItem>
 
                             {passwordHint}

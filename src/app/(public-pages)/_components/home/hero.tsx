@@ -4,7 +4,7 @@
 import React from 'react'
 import { ArrowRight, Shield, Users, Globe, Zap, CheckCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { BsGraphDown, BsGraphUp } from 'react-icons/bs'
+import { BsGraphUp } from 'react-icons/bs'
 import Link from 'next/link'
 const Hero = () => {
     const router = useRouter()
@@ -66,74 +66,53 @@ const Hero = () => {
 
 
             {/* Content Container */}
-            <div className='bg-slate-800 py-15'>
+            <div className='bg-gradient-to-b from-[#0f1a2b] via-[#0f1a2b] to-slate-800 pt-35 pb-46'>
                 <div className="max-w-7xl mx-auto w-full relative z-10">
                     <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
                         {/* Left Content */}
                         <div className="space-y-8">
                             {/* Trust Badge */}
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 shadow-sm">
-                                <Users className="w-4 h-4 text-[#38bdf8]" />
-                                <span className="text-sm font-medium text-slate-200">
-                                    Trusted by <span className="font-bold text-[#38bdf8]">500K+</span> users worldwide
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/20 backdrop-blur-sm border border-blue-500/30 shadow-sm">
+                                <Users className="w-4 h-4 text-blue-400" />
+                                <span className="text-sm font-medium text-blue-400">
+                                    Trusted by 500K+ users worldwide
                                 </span>
                             </div>
 
                             {/* Main Headline */}
                             <div className="space-y-6">
-                                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
-                                    <span className="block text-slate-50">
+                                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-none tracking-tight">
+                                    <span className=" text-slate-50">
                                         Buy &amp; Sell
                                     </span>
-                                    <span className="block">
-                                        <span className="text-transparent bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] bg-clip-text">
-                                            Crypto
-                                        </span>
-                                        <span className="text-slate-50"> in Minutes</span>
+
+                                    <span className="text-transparent ml-2 bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] bg-clip-text">
+                                        Crypto
                                     </span>
+                                    <span className="text-slate-50"> in Minutes</span>
+
                                 </h1>
                                 <p className="text-lg md:text-xl text-slate-300 leading-relaxed max-w-2xl">
-                                    Join the world&apos;s most trusted cryptocurrency platform. Trade Bitcoin, Ethereum, and 100+ cryptocurrencies with confidence.
+                                   A secure cryptocurrency platform focused on usability and security
                                 </p>
                             </div>
-
-                            {/* Security Features */}
-                            <div className="flex flex-wrap items-center gap-6 py-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                                        <Shield className="w-4 h-4 text-emerald-400" />
-                                    </div>
-                                    <span className="text-sm font-medium text-slate-200">
-                                        Secure & Regulated
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-sky-500/10 flex items-center justify-center">
-                                        <Users className="w-4 h-4 text-sky-400" />
-                                    </div>
-                                    <span className="text-sm font-medium text-slate-200">
-                                        24/7 Support
-                                    </span>
-                                </div>
-                            </div>
-
                             {/* CTA Buttons */}
-                            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                            <div className="flex flex-col sm:flex-row gap-4">
                                 <Link
                                     href="/sign-in"
                                     className="group flex items-center justify-center gap-3
-                               px-6 py-3.5
-                               rounded-lg
-                               font-semibold text-white
-                               bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6]
-                               shadow-md
-                               hover:shadow-lg
-                               hover:brightness-110
-                               transition-all duration-300"
+               px-8 py-2
+               rounded-lg
+               font-semibold text-white
+               bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6]
+               shadow-md
+               hover:shadow-lg
+               hover:brightness-110
+               transition-all duration-300"
                                 >
                                     <span className="flex items-center gap-3">
-                                        Get Started
+                                        Create a Free Account
                                         <ArrowRight
                                             size={18}
                                             className="transition-transform duration-300 group-hover:translate-x-1"
@@ -143,17 +122,40 @@ const Hero = () => {
 
                                 <button
                                     onClick={handleViewPrices}
-                                    className="px-8 py-4 rounded-lg font-semibold border border-slate-600/80  text-slate-100  hover:border-slate-400 transition-all duration-300 hover:bg-slate-700 shadow-sm text-sm md:text-base"
+                                    className="px-8 py-2 rounded-lg font-semibold
+               border border-slate-600/80 text-slate-100
+               hover:border-slate-400 hover:bg-slate-700
+               transition-all duration-300 shadow-sm
+               text-sm md:text-base"
                                 >
                                     View Prices
                                 </button>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-6">
+                                <div className="flex items-center">
+                                    <div className="w-8 h-8 rounded-full flex items-center justify-center">
+                                        <CheckCircle className="w-5 h-5 text-green-500" />
+                                    </div>
+                                    <span className="text-sm font-medium text-slate-200">
+                                        Secure & Regulated
+                                    </span>
+                                </div>
+                                <div className="flex items-center">
+                                    <div className="w-8 h-8 rounded-full flex items-center justify-center">
+                                        <CheckCircle className="w-5 h-5 text-green-500" />
+                                    </div>
+                                    <span className="text-sm font-medium text-slate-200">
+                                        24/7 Support
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
                         {/* Right Visual - Live Market Preview */}
                         <div className="relative">
                             {/* Main Market Preview Card */}
-                            <div className="relative bg-slate-750 z-10 rounded-3xl p-6 shadow-2xl border border-white/5">
+                            <div className="relative bg-[oklch(0.24_0.03_260.32)] z-10 rounded-2xl p-6 shadow-2xl border border-white/5">
                                 {/* Card Header */}
                                 <div className="flex items-center justify-between mb-6">
                                     <div>
@@ -173,7 +175,7 @@ const Hero = () => {
                                     {cryptoData.map((crypto, index) => (
                                         <div
                                             key={index}
-                                            className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                                            className="flex items-center justify-between p-3 rounded-xl bg-white/2 hover:bg-white/5 transition-colors"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div>
@@ -207,24 +209,20 @@ const Hero = () => {
 
                                 <Link
                                     href="/sign-in"
-                                    className="group inline-flex items-center gap-3
-                               px-6 py-2.5
-                               rounded-lg
-                               text-sm font-semibold text-white
-                               bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6]
-                               shadow-md
-                               hover:shadow-lg
-                               hover:brightness-110
-                               transition-all duration-300"
+                                    className="group inline-flex items-center justify-center gap-3
+             px-6 py-2
+             w-full
+             rounded-lg
+             text-sm font-semibold text-white
+             bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6]
+             shadow-md
+             hover:shadow-lg
+             hover:brightness-110
+             transition-all duration-300"
                                 >
-                                    <span className="flex items-center gap-3">
-                                        Get Started
-                                        <ArrowRight
-                                            size={16}
-                                            className="transition-transform duration-300 group-hover:translate-x-1"
-                                        />
-                                    </span>
+                                    Start Trading
                                 </Link>
+
                             </div>
                         </div>
                     </div>
@@ -233,7 +231,7 @@ const Hero = () => {
                 </div>
             </div>
 
-            <div className="bg-[#1f2937] py-15">
+            {/* <div className="bg-[#1f2937] py-18">
                 <div className="max-w-7xl mx-auto w-full relative z-10">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 
@@ -264,7 +262,7 @@ const Hero = () => {
                     </div>
                 </div>
 
-            </div>
+            </div> */}
 
 
         </section>
