@@ -17,37 +17,14 @@ const Footer = () => {
 
           {/* Brand */}
           <div>
-            <Link href="/" className="flex items-center gap-3 mb-4">
+            <Link href="/" className="flex items-center gap-3 mb-3">
               <img src={logo.src} alt="GlobaCoin" className="w-9 h-9" />
               <span className="text-white font-semibold text-lg">Bexchange.io</span>
             </Link>
             <p className="text-sm leading-relaxed">
-              The world's most trusted cryptocurrency platform.
+             A secure cryptocurrency platform focused on usability and security
             </p>
           </div>
-
-          {/* Products */}
-          {/* <div>
-            <h4 className="text-white font-semibold mb-4">Products</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="#" className="hover:text-white">Buy/Sell Crypto</Link></li>
-              <li><Link href="#" className="hover:text-white">Trading</Link></li>
-              <li><Link href="#" className="hover:text-white">Wallet</Link></li>
-              <li><Link href="#" className="hover:text-white">Staking</Link></li>
-            </ul>
-          </div> */}
-
-          {/* Company */}
-          {/* <div>
-            <h4 className="text-white font-semibold mb-4">Company</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link href="/about" className="hover:text-white">About Us</Link></li>
-              <li><Link href="#" className="hover:text-white">Careers</Link></li>
-              <li><Link href="#" className="hover:text-white">Press</Link></li>
-              <li><Link href="#" className="hover:text-white">Blog</Link></li>
-            </ul>
-          </div> */}
-
           {/* Support */}
           <div>
             <h4 className="text-white font-semibold mb-4">Support</h4>
@@ -61,25 +38,12 @@ const Footer = () => {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-white/10 mt-12 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t text-center border-white/10 mt-12 pt-6 ">
 
           {/* Copyright */}
           <p className="text-sm">
             © {currentYear} Bexchange. All rights reserved.
           </p>
-
-          {/* Social Icons */}
-          <div className="flex items-center gap-4">
-            <Link href="#" className="hover:text-white transition">
-              <BsTwitter size={18} />
-            </Link>
-            <Link href="#" className="hover:text-white transition">
-              <BsGithub size={18} />
-            </Link>
-            <Link href="#" className="hover:text-white transition">
-              <BsLinkedin size={18} />
-            </Link>
-          </div>
         </div>
 
       </div>

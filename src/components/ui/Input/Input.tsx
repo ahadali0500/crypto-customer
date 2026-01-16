@@ -80,7 +80,7 @@ const Input = (props: InputProps) => {
 
     const inputDefaultClass = 'input'
     const inputSizeClass = `input-${inputSize} ${CONTROL_SIZES[inputSize].h}`
-    const inputFocusClass = `focus:ring-gray-400 rounded-lg`
+    const inputFocusClass = `focus:ring-slate-800 bg-[oklch(0.24_0.03_260.32)] rounded-lg`
     const inputWrapperClass = classNames(
         'input-wrapper',
         prefix || suffix ? className : '',

@@ -24,12 +24,12 @@ const WalletSystem = () => {
       description: "95% of funds stored offline in secure cold wallets.",
       iconColor: "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30"
     },
-    {
-      icon: CheckCircle,
-      title: "Regular Audits",
-      description: "Independent security audits and compliance checks.",
-      iconColor: "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30"
-    }
+    // {
+    //   icon: CheckCircle,
+    //   title: "Regular Audits",
+    //   description: "Independent security audits and compliance checks.",
+    //   iconColor: "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30"
+    // }
   ]
 
   return (
@@ -83,7 +83,7 @@ const WalletSystem = () => {
           </div>
 
           {/* Right Visual */}
-          <div className="px-6 py-10 bg-[#1f2937] rounded-xl shadow-lg flex justify-center">
+          <div className="px-6 py-10 bg-[oklch(0.24_0.03_260.32)] rounded-xl shadow-lg flex justify-center">
             <div className="flex flex-col items-center gap-4">
               <div className="w-28 h-28 bg-gradient-to-tr from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-xl">
                 <Shield size={48} className="text-white" />

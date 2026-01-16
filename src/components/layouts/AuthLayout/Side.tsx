@@ -6,7 +6,7 @@ type SideProps = CommonProps
 
 const Side = ({ children, ...rest }: SideProps) => {
     return (
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-[oklch(0.24_0.03_260.32)] flex items-center justify-center p-4">
             <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
                 {/* Left side - Branding */}
                 <div className="hidden lg:block">

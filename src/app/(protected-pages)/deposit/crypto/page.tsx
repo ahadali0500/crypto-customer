@@ -733,7 +733,7 @@ const Page = () => {
                                 </div>
 
                                 <img
-                                    src={`https://crypto-server.ahadcommit.com${walletData?.qrImage}`}
+                                    src={`https://server.bexchange.io${walletData?.qrImage}`}
                                     width={300}
                                     height={300}
                                     alt="crypto address qr code"
