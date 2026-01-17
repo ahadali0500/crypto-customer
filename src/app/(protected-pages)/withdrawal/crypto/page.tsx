@@ -173,75 +173,96 @@ const Page = () => {
             .sort((a, b) => (a.rangeMin || 0) - (b.rangeMin || 0))
     }, [bundleDetails])
 
+    // ===== FEE + USD COMPUTATIONS (ClickUp Task) =====
+
+    const feePercent = useMemo(() => {
+        if (shouldShowBundleForWithdraw && selectedFeeBundle)
+            return parseFloat(selectedFeeBundle.value || '0')
+        if (!shouldShowBundleForWithdraw && userDetails?.withdrawFees)
+            return parseFloat(userDetails.withdrawFees || '0')
+        return 0
+    }, [shouldShowBundleForWithdraw, selectedFeeBundle, userDetails])
+
+    const computed = useMemo(() => {
+        const amountBtc = parseFloat(withdrawAmount || '0') || 0
+        const rate = conversionData.rate || 0
+
+        const feeBtc = amountBtc * (feePercent / 100)
+        const netBtc = Math.max(amountBtc - feeBtc, 0)
+
+        const feeUsd = rate ? feeBtc * rate : 0
+        const netUsd = rate ? netBtc * rate : 0
+        const amountUsd = rate ? amountBtc * rate : 0
+
+        return { amountBtc, amountUsd, feeBtc, feeUsd, netBtc, netUsd, rate }
+    }, [withdrawAmount, feePercent, conversionData.rate])
+
+    const balances = useMemo(() => {
+        const available =
+            parseFloat(selectedWithdrawCurrency?.availableBalance || '0') || 0
+        const locked =
+            parseFloat(selectedWithdrawCurrency?.lockedBalance || '0') || 0
+        return { available, locked }
+    }, [selectedWithdrawCurrency])
+
+    const maxAllowed = useMemo(() => {
+        if (!selectedWithdrawCurrency) return 0
+        const maxByLocked = balances.locked
+        if (feePercent <= 0) return maxByLocked
+        const maxByFee = balances.available / (feePercent / 100)
+        return Math.max(0, Math.min(maxByLocked, maxByFee))
+    }, [balances, feePercent, selectedWithdrawCurrency])
+
     // Fee tier system logic
     const getFeeEligibility = useCallback(
-        (amount: string, bundleName: string): boolean => {
-            if (!amount) return true // If no amount entered, show all as available
+        (amount: string, bundle: FeeBundle): boolean => {
+            if (!amount) return true
+            if (selectedWithdrawCurrency?.shortName !== 'BTC') return true // rules BTC only
 
             const numAmount = parseFloat(amount)
             if (isNaN(numAmount) || numAmount <= 0) return false
 
-            const bundleNameLower = bundleName.toLowerCase()
+            const percent = parseFloat(bundle.value || '0')
 
-            // Fee tier system based on amount ranges
-            if (numAmount < 1) {
-                // Less than 1 BTC - can use any fee option
-                return true
-            } else if (numAmount >= 1 && numAmount < 3) {
-                // 1-3 BTC - cannot use "low", can use economy, normal, high
-                return !bundleNameLower.includes('low')
-            } else if (numAmount >= 3 && numAmount < 7) {
-                // 3-7 BTC - cannot use "low" or "economy", can use normal, high
-                return (
-                    !bundleNameLower.includes('low') &&
-                    !bundleNameLower.includes('economy')
-                )
-            } else {
-                // 7+ BTC - can only use "high"
-                return bundleNameLower.includes('high')
-            }
+            if (percent === 2) return numAmount <= 1
+            if (percent === 3.5) return numAmount <= 3
+            if (percent === 5) return numAmount <= 7
+            if (percent === 7) return true
+
+            // If some unexpected fee exists, allow it (or block it) — I'd allow but show warning
+            return true
         },
-        [],
+        [selectedWithdrawCurrency],
     )
 
     // Check if a fee bundle is enabled for the current amount
     const isBundleEnabled = useCallback(
-        (bundle: FeeBundle, amount: string): boolean => {
-            return getFeeEligibility(amount, bundle.name)
-        },
+        (bundle: FeeBundle, amount: string) =>
+            getFeeEligibility(amount, bundle),
         [getFeeEligibility],
     )
 
     // Get reason why bundle is disabled
     const getDisabledReason = useCallback(
-        (bundleName: string, amount: string): string => {
+        (bundle: FeeBundle, amount: string): string => {
             if (!amount) return ''
+            if (selectedWithdrawCurrency?.shortName !== 'BTC') return ''
 
             const numAmount = parseFloat(amount)
             if (isNaN(numAmount) || numAmount <= 0) return ''
 
-            const bundleNameLower = bundleName.toLowerCase()
+            const percent = parseFloat(bundle.value || '0')
 
-            if (numAmount >= 1 && numAmount < 3) {
-                if (bundleNameLower.includes('low')) {
-                    return 'Low fee option not available for amounts 1-3 BTC'
-                }
-            } else if (numAmount >= 3 && numAmount < 7) {
-                if (bundleNameLower.includes('low')) {
-                    return 'Low fee option not available for amounts 3-7 BTC'
-                }
-                if (bundleNameLower.includes('economy')) {
-                    return 'Economy fee option not available for amounts 3-7 BTC'
-                }
-            } else if (numAmount >= 7) {
-                if (!bundleNameLower.includes('high')) {
-                    return 'Only High fee option available for amounts 7+ BTC'
-                }
-            }
+            if (percent === 2 && numAmount > 1)
+                return 'Not available above 1 BTC'
+            if (percent === 3.5 && numAmount > 3)
+                return 'Not available above 3 BTC'
+            if (percent === 5 && numAmount > 7)
+                return 'Not available above 7 BTC'
 
             return ''
         },
-        [],
+        [selectedWithdrawCurrency],
     )
 
     // Add this function to fetch conversion rate
@@ -426,7 +447,7 @@ const Page = () => {
         const isEligible = isBundleEnabled(bundle, withdrawAmount)
 
         if (!isEligible) {
-            const reason = getDisabledReason(bundle.name, withdrawAmount)
+            const reason = getDisabledReason(bundle, withdrawAmount)
             setFeeBundleError(reason)
             setSelectedFeeBundle(bundle)
             return
@@ -530,7 +551,7 @@ const Page = () => {
 
         // Re-validate selected fee bundle when amount changes
         if (selectedFeeBundle && !isBundleEnabled(selectedFeeBundle, value)) {
-            const reason = getDisabledReason(selectedFeeBundle.name, value)
+            const reason = getDisabledReason(selectedFeeBundle, value)
             setFeeBundleError(reason)
         }
     }
@@ -684,9 +705,7 @@ const Page = () => {
     }
 
     const handleMaxWithdrawAmountClick = () => {
-        const maxAmount = getWithdrawAvailableBalance().toString()
-        setWithdrawAmount(maxAmount)
-        setLoading(false)
+        setWithdrawAmount(maxAllowed.toFixed(6))
     }
 
     const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([])
@@ -894,6 +913,11 @@ const Page = () => {
         },
     ]
 
+    const exceedsMaxAllowed =
+        selectedWithdrawCurrency?.shortName === 'BTC' &&
+        withdrawAmount &&
+        parseFloat(withdrawAmount) > maxAllowed
+
     return (
         <>
             <div className="p-5 ">
@@ -1073,7 +1097,7 @@ const Page = () => {
                                                             const disabledReason =
                                                                 !isEligible
                                                                     ? getDisabledReason(
-                                                                          bundle.name,
+                                                                          bundle,
                                                                           withdrawAmount,
                                                                       )
                                                                     : ''
@@ -1223,38 +1247,42 @@ const Page = () => {
                                                     }
                                                 </div>
                                             </div>
-                                            <div className="flex flex-row items-center justify-between gap-4">
+                                            {/* ===== FEE TRANSPARENCY (ClickUp Requirement) ===== */}
+
+                                            <div className="flex justify-between">
+                                                <div>Fee ({feePercent}%):</div>
                                                 <div>
-                                                    Withdrawal Fees (
-                                                    {shouldShowBundleForWithdraw
-                                                        ? selectedFeeBundle
-                                                            ? selectedFeeBundle.value
-                                                            : '0'
-                                                        : userDetails?.withdrawFees ||
-                                                          '0'}
-                                                    %){' '}
-                                                    {/* Changed from withdrawFee to withdrawFees */}
-                                                </div>
-                                                <div>
-                                                    {calculateWithdrawFees(
-                                                        withdrawAmount,
-                                                    ).toFixed(6)}{' '}
-                                                    {
-                                                        selectedWithdrawCurrency?.shortName
-                                                    }
+                                                    {computed.feeBtc.toFixed(6)}{' '}
+                                                    BTC
+                                                    {computed.rate ? (
+                                                        <span className="ml-2 text-sm text-gray-500">
+                                                            ($
+                                                            {computed.feeUsd.toFixed(
+                                                                2,
+                                                            )}
+                                                            )
+                                                        </span>
+                                                    ) : null}
                                                 </div>
                                             </div>
-                                            <div className="flex flex-row items-center justify-between gap-4 font-semibold">
-                                                <div>Total Deduction:</div>
+
+                                            <div className="flex justify-between font-semibold">
+                                                <div>Net received:</div>
                                                 <div>
-                                                    {calculateTotalWithdrawAmount(
-                                                        withdrawAmount,
-                                                    ).toFixed(6)}{' '}
-                                                    {
-                                                        selectedWithdrawCurrency?.shortName
-                                                    }
+                                                    {computed.netBtc.toFixed(6)}{' '}
+                                                    BTC
+                                                    {computed.rate ? (
+                                                        <span className="ml-2 text-sm text-gray-500">
+                                                            ($
+                                                            {computed.netUsd.toFixed(
+                                                                2,
+                                                            )}
+                                                            )
+                                                        </span>
+                                                    ) : null}
                                                 </div>
                                             </div>
+
                                             {/* Conversion display for BTC */}
                                             {selectedWithdrawCurrency?.shortName ===
                                                 'BTC' &&
@@ -1303,14 +1331,19 @@ const Page = () => {
                                                     handleMaxWithdrawAmountClick
                                                 }
                                             >
-                                                Max amount:{' '}
-                                                {getWithdrawAvailableBalance().toFixed(
-                                                    6,
-                                                )}{' '}
+                                                Max allowed:{' '}
+                                                {maxAllowed.toFixed(6)}
                                                 {
                                                     selectedWithdrawCurrency?.shortName
                                                 }
                                             </div>
+                                            {exceedsMaxAllowed && (
+  <div className="mt-1 text-sm text-red-500">
+    Amount exceeds max allowed ({maxAllowed.toFixed(6)}{' '}
+    {selectedWithdrawCurrency?.shortName})
+  </div>
+)}
+
                                         </div>
 
                                         <div className="w-full">
@@ -1319,24 +1352,17 @@ const Page = () => {
                                                 className="rounded-lg w-full"
                                                 size="sm"
                                                 onClick={handleWithdrawClick}
-                                                disabled={
-                                                    loading ||
-                                                    !selectedWithdrawCurrency ||
-                                                    !withdrawAmount ||
-                                                    !walletAddress ||
-                                                    (shouldShowBundleForWithdraw &&
-                                                        !selectedFeeBundle) ||
-                                                    !validateWithdrawAmount(
-                                                        withdrawAmount,
-                                                    ) ||
-                                                    !!errorMessage ||
-                                                    !!feeBundleError ||
-                                                    (selectedFeeBundle &&
-                                                        !isBundleEnabled(
-                                                            selectedFeeBundle,
-                                                            withdrawAmount,
-                                                        ))
-                                                }
+                                              disabled={
+  loading ||
+  !selectedWithdrawCurrency ||
+  !withdrawAmount ||
+  !walletAddress ||
+  (shouldShowBundleForWithdraw && !selectedFeeBundle) ||
+  !!errorMessage ||
+  !!feeBundleError ||
+  exceedsMaxAllowed ||
+  (selectedFeeBundle && !isBundleEnabled(selectedFeeBundle, withdrawAmount))
+}
                                             >
                                                 {loading
                                                     ? 'Processing...'
