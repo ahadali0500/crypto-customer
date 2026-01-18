@@ -22,7 +22,7 @@ const HowItWorks = () => {
     },
     {
       number: '3',
-      title: 'ccess and use our services',
+      title: 'Access and use our services',
       description:
         'Once setup is complete, securely access platform features with full support.',
       gradient: 'from-purple-500 to-pink-500',
