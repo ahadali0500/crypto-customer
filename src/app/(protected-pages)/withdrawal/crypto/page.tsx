@@ -188,11 +188,13 @@ const Page = () => {
         const rate = conversionData.rate || 0
 
         const feeBtc = amountBtc * (feePercent / 100)
-        const netBtc = Math.max(amountBtc - feeBtc, 0)
 
-        const feeUsd = rate ? feeBtc * rate : 0
-        const netUsd = rate ? netBtc * rate : 0
         const amountUsd = rate ? amountBtc * rate : 0
+        const feeUsd = rate ? feeBtc * rate : 0
+
+        // IMPORTANT: fee is NOT taken from amount
+        const netBtc = amountBtc
+        const netUsd = amountUsd
 
         return { amountBtc, amountUsd, feeBtc, feeUsd, netBtc, netUsd, rate }
     }, [withdrawAmount, feePercent, conversionData.rate])
@@ -207,11 +209,28 @@ const Page = () => {
 
     const maxAllowed = useMemo(() => {
         if (!selectedWithdrawCurrency) return 0
-        const maxByLocked = balances.locked
-        if (feePercent <= 0) return maxByLocked
-        const maxByFee = balances.available / (feePercent / 100)
-        return Math.max(0, Math.min(maxByLocked, maxByFee))
-    }, [balances, feePercent, selectedWithdrawCurrency])
+
+        const available = balances.available
+        const locked = balances.locked
+
+        // if fee not selected yet, just cap by selected balance
+        if (feePercent <= 0) {
+            return activeTab === 'Locked' ? locked : available
+        }
+
+        const feeRate = feePercent / 100
+
+        if (activeTab === 'Locked') {
+            // principal from locked, fee from available
+            const maxByLocked = locked
+            const maxByFee = available / feeRate
+            return Math.max(0, Math.min(maxByLocked, maxByFee))
+        }
+
+        // activeTab === 'Available'
+        // principal + fee both from available
+        return Math.max(0, available / (1 + feeRate))
+    }, [balances, feePercent, selectedWithdrawCurrency, activeTab])
 
     // Fee tier system logic
     const getFeeEligibility = useCallback(
@@ -915,7 +934,7 @@ const Page = () => {
 
     const exceedsMaxAllowed =
         selectedWithdrawCurrency?.shortName === 'BTC' &&
-        withdrawAmount &&
+        !!withdrawAmount &&
         parseFloat(withdrawAmount) > maxAllowed
 
     return (
@@ -1250,7 +1269,14 @@ const Page = () => {
                                             {/* ===== FEE TRANSPARENCY (ClickUp Requirement) ===== */}
 
                                             <div className="flex justify-between">
-                                                <div>Fee ({feePercent}%):</div>
+                                                <div>
+                                                    Fee ({feePercent}%):{' '}
+                                                    <span className="text-xs text-gray-500">
+                                                        (deducted from
+                                                        Available)
+                                                    </span>
+                                                </div>
+
                                                 <div>
                                                     {computed.feeBtc.toFixed(6)}{' '}
                                                     BTC
@@ -1281,6 +1307,19 @@ const Page = () => {
                                                         </span>
                                                     ) : null}
                                                 </div>
+                                            </div>
+                                            <div className="flex justify-between text-sm text-gray-500">
+                                                <div>
+                                                    Principal deducted from:
+                                                </div>
+                                                <div className="capitalize">
+                                                    {activeTab}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-between text-sm text-gray-500">
+                                                <div>Fee deducted from:</div>
+                                                <div>Available</div>
                                             </div>
 
                                             {/* Conversion display for BTC */}
@@ -1322,7 +1361,7 @@ const Page = () => {
                                             <div className="flex flex-row items-center justify-between gap-4">
                                                 <div>Balance Type:</div>
                                                 <div className="capitalize">
-                                                    {tab}
+                                                    {activeTab}
                                                 </div>
                                             </div>
                                             <div
@@ -1338,12 +1377,15 @@ const Page = () => {
                                                 }
                                             </div>
                                             {exceedsMaxAllowed && (
-  <div className="mt-1 text-sm text-red-500">
-    Amount exceeds max allowed ({maxAllowed.toFixed(6)}{' '}
-    {selectedWithdrawCurrency?.shortName})
-  </div>
-)}
-
+                                                <div className="mt-1 text-sm text-red-500">
+                                                    Amount exceeds max allowed (
+                                                    {maxAllowed.toFixed(6)}{' '}
+                                                    {
+                                                        selectedWithdrawCurrency?.shortName
+                                                    }
+                                                    )
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="w-full">
@@ -1352,17 +1394,22 @@ const Page = () => {
                                                 className="rounded-lg w-full"
                                                 size="sm"
                                                 onClick={handleWithdrawClick}
-                                              disabled={
-  loading ||
-  !selectedWithdrawCurrency ||
-  !withdrawAmount ||
-  !walletAddress ||
-  (shouldShowBundleForWithdraw && !selectedFeeBundle) ||
-  !!errorMessage ||
-  !!feeBundleError ||
-  exceedsMaxAllowed ||
-  (selectedFeeBundle && !isBundleEnabled(selectedFeeBundle, withdrawAmount))
-}
+                                                disabled={
+                                                    loading ||
+                                                    !selectedWithdrawCurrency ||
+                                                    !withdrawAmount ||
+                                                    !walletAddress ||
+                                                    (shouldShowBundleForWithdraw &&
+                                                        !selectedFeeBundle) ||
+                                                    !!errorMessage ||
+                                                    !!feeBundleError ||
+                                                    exceedsMaxAllowed ||
+                                                    (selectedFeeBundle &&
+                                                        !isBundleEnabled(
+                                                            selectedFeeBundle,
+                                                            withdrawAmount,
+                                                        ))
+                                                }
                                             >
                                                 {loading
                                                     ? 'Processing...'
