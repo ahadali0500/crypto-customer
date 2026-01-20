@@ -722,9 +722,13 @@ const Page = () => {
             rate: null,
         })
     }
+    const floorTo = (num: number, decimals: number) => {
+        const factor = Math.pow(10, decimals)
+        return Math.floor(num * factor) / factor
+    }
 
     const handleMaxWithdrawAmountClick = () => {
-        setWithdrawAmount(maxAllowed.toFixed(6))
+        setWithdrawAmount(floorTo(maxAllowed, 6).toFixed(6))
     }
 
     const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([])
@@ -932,10 +936,14 @@ const Page = () => {
         },
     ]
 
+    // const exceedsMaxAllowed =
+    //     selectedWithdrawCurrency?.shortName === 'BTC' &&
+    //     !!withdrawAmount &&
+    //     parseFloat(withdrawAmount) > maxAllowed
     const exceedsMaxAllowed =
         selectedWithdrawCurrency?.shortName === 'BTC' &&
-        !!withdrawAmount &&
-        parseFloat(withdrawAmount) > maxAllowed
+        withdrawAmount &&
+        parseFloat(withdrawAmount) - maxAllowed > 1e-9
 
     return (
         <>
