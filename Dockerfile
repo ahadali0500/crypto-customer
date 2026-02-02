@@ -3,7 +3,7 @@ FROM node:20-alpine AS deps
 WORKDIR /app
 # For sharp/next-image on alpine
 RUN apk add --no-cache libc6-compat
-COPY package.json yarn.lock* package-lock.json* ./
+COPY package.json
 RUN if [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
     elif [ -f package-lock.json ]; then npm ci; \
     else npm install; fi
