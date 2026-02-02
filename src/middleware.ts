@@ -40,12 +40,6 @@ export default auth((req) => {
     const { nextUrl } = req
     const isLoggedIn = !!req.auth
 
-    console.log('🔒 Middleware executing:', {
-        path: nextUrl.pathname,
-        isLoggedIn,
-        userEmail: req.auth?.user?.email || 'No user'
-    })
-
     const pathname = nextUrl.pathname
 
     // Check route types
@@ -54,22 +48,16 @@ export default auth((req) => {
     const isAuthRoute = authRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
     const isProtectedRoute = protectedRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
 
-    console.log('📍 Route analysis:', {
-        isApiAuthRoute,
-        isPublicRoute,
-        isAuthRoute, 
-        isProtectedRoute
-    })
 
     // Don't run middleware on API auth routes
     if (isApiAuthRoute) {
-        console.log('✅ Skipping API auth route')
+      
         return
     }
 
     // If user is logged in and tries to access auth routes (sign-in, sign-up)
     if (isAuthRoute && isLoggedIn) {
-        console.log('🔄 Redirecting logged user away from auth routes')
+      
         return Response.redirect(new URL(appConfig.authenticatedEntryPath, nextUrl))
     }
 
@@ -77,30 +65,30 @@ export default auth((req) => {
     // Note: We allow the request through and let AuthGuard handle client-side token checks
     // This supports both NextAuth sessions and custom token-based auth (localStorage)
     if (isProtectedRoute && !isLoggedIn) {
-        console.log('⚠️ Protected route without NextAuth session - allowing through for client-side check')
+       
         // AuthGuard will check for localStorage token and redirect if needed
         return
     }
 
     // Allow access to public routes
     if (isPublicRoute) {
-        console.log('✅ Public route access allowed')
+        
         return
     }
 
     // Allow access to auth routes when not logged in
     if (isAuthRoute && !isLoggedIn) {
-        console.log('✅ Auth route access allowed for non-logged user')
+       
         return
     }
 
     // Allow access to protected routes when logged in
     if (isProtectedRoute && isLoggedIn) {
-        console.log('✅ Protected route access allowed for logged user')
+        
         return
     }
 
-    console.log('✅ Default: allowing access')
+    
 })
 
 export const config = {
