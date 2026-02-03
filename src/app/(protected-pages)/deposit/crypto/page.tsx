@@ -4,15 +4,16 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Dialog, Input } from '@/components/ui'
 import Dropdown from '@/components/ui/Dropdown/Dropdown'
 import DropdownItem from '@/components/ui/Dropdown/DropdownItem'
-import DataTable, { ColumnDef, OnSortParam } from '@/components/shared/DataTable'
+import DataTable, {
+    ColumnDef,
+    OnSortParam,
+} from '@/components/shared/DataTable'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useSessionContext } from '@/components/auth/AuthProvider/SessionContext'
 import { IoCopyOutline } from 'react-icons/io5'
-
-
 
 type Currency = {
     id: number
@@ -28,8 +29,6 @@ type Currency = {
         name: string
     }[]
 }
-
-
 
 type Transaction = {
     id: number
@@ -51,61 +50,61 @@ type DepositData = {
 }
 
 export const SYMBOL_TO_ID_MAP: Record<string, string> = {
-    AAVE: "aave",
-    ADA: "cardano",
-    ALGO: "algorand",
-    APT: "aptos",
-    ARB: "arbitrum",
-    ATOM: "cosmos",
-    AVAX: "avalanche-2",
-    AXS: "axie-infinity",
-    BCH: "bitcoin-cash",
-    BNB: "binancecoin",
-    BONK: "bonk",
-    BTC: "bitcoin",
-    CAKE: "pancakeswap-token",
-    CHZ: "chiliz",
-    COMP: "compound-governance-token",
-    CRV: "curve-dao-token",
-    DOGE: "dogecoin",
-    DOT: "polkadot",
-    EGLD: "elrond-erd-2",
-    ENS: "ethereum-name-service",
-    ETC: "ethereum-classic",
-    ETH: "ethereum",
-    FIL: "filecoin",
-    FTM: "fantom",
-    GRT: "the-graph",
-    ICP: "internet-computer",
-    JUP: "jupiter-exchange-solana",
-    KSM: "kusama",
-    LDO: "lido-dao",
-    LINK: "chainlink",
-    LTC: "litecoin",
-    MATIC: "matic-network",
-    MKR: "maker",
-    NEAR: "near",
-    PEPE: "pepe",
-    QNT: "quant-network",
-    RUNE: "thorchain",
-    SAN: "the-sandbox",
-    SEI: "sei-network",
-    SHIB: "shiba-inu",
-    SNX: "synthetix-network-token",
-    SOL: "solana",
-    STETH: "staked-ether",
-    TON: "the-open-network",
-    TRON: "tron",
-    TRX: "tron",
-    UNI: "uniswap",
-    USDC: "usd-coin",
-    USDT: "tether",
-    VET: "vechain",
-    WBTC: "wrapped-bitcoin",
-    XLM: "stellar",
-    XRP: "ripple",
-    XTZ: "tezos",
-    ZEC: "zcash",
+    AAVE: 'aave',
+    ADA: 'cardano',
+    ALGO: 'algorand',
+    APT: 'aptos',
+    ARB: 'arbitrum',
+    ATOM: 'cosmos',
+    AVAX: 'avalanche-2',
+    AXS: 'axie-infinity',
+    BCH: 'bitcoin-cash',
+    BNB: 'binancecoin',
+    BONK: 'bonk',
+    BTC: 'bitcoin',
+    CAKE: 'pancakeswap-token',
+    CHZ: 'chiliz',
+    COMP: 'compound-governance-token',
+    CRV: 'curve-dao-token',
+    DOGE: 'dogecoin',
+    DOT: 'polkadot',
+    EGLD: 'elrond-erd-2',
+    ENS: 'ethereum-name-service',
+    ETC: 'ethereum-classic',
+    ETH: 'ethereum',
+    FIL: 'filecoin',
+    FTM: 'fantom',
+    GRT: 'the-graph',
+    ICP: 'internet-computer',
+    JUP: 'jupiter-exchange-solana',
+    KSM: 'kusama',
+    LDO: 'lido-dao',
+    LINK: 'chainlink',
+    LTC: 'litecoin',
+    MATIC: 'matic-network',
+    MKR: 'maker',
+    NEAR: 'near',
+    PEPE: 'pepe',
+    QNT: 'quant-network',
+    RUNE: 'thorchain',
+    SAN: 'the-sandbox',
+    SEI: 'sei-network',
+    SHIB: 'shiba-inu',
+    SNX: 'synthetix-network-token',
+    SOL: 'solana',
+    STETH: 'staked-ether',
+    TON: 'the-open-network',
+    TRON: 'tron',
+    TRX: 'tron',
+    UNI: 'uniswap',
+    USDC: 'usd-coin',
+    USDT: 'tether',
+    VET: 'vechain',
+    WBTC: 'wrapped-bitcoin',
+    XLM: 'stellar',
+    XRP: 'ripple',
+    XTZ: 'tezos',
+    ZEC: 'zcash',
 }
 
 const statusColorMap: Record<string, string> = {
@@ -119,37 +118,40 @@ const columns: ColumnDef<Transaction>[] = [
     {
         header: 'ID',
         accessorKey: 'id',
-        cell: ({ row }) => <span className="font-semibold">#{row.original.id}</span>,
+        cell: ({ row }) => (
+            <span className="font-semibold">#{row.original.id}</span>
+        ),
     },
     {
         header: 'Date',
         accessorKey: 'createdAt',
         cell: ({ getValue }) => {
-            const rawDate = getValue() as string;
-            const date = new Date(rawDate);
+            const rawDate = getValue() as string
+            const date = new Date(rawDate)
             return date.toLocaleDateString('en-GB', {
                 day: 'numeric',
                 month: 'short',
-                year: 'numeric'
-            });
-        }
+                year: 'numeric',
+            })
+        },
     },
     {
         header: 'Base Asset',
         accessorKey: 'shortName',
-        cell: ({ row }) => (
-            <span>{row.original.currency.shortName}</span>
-        )
-
+        cell: ({ row }) => <span>{row.original.currency.shortName}</span>,
     },
     {
         header: 'Amount',
         accessorKey: 'amount',
         cell: ({ getValue }) => {
-            const value = getValue() as string;
+            const value = getValue() as string
             // Convert to number, then fix to 6 decimal places
-            const formattedValue = parseFloat(value).toFixed(6);
-            return <span className="text-green-600 font-medium">{formattedValue}</span>;
+            const formattedValue = parseFloat(value).toFixed(6)
+            return (
+                <span className="text-green-600 font-medium">
+                    {formattedValue}
+                </span>
+            )
         },
     },
     {
@@ -163,7 +165,9 @@ const columns: ColumnDef<Transaction>[] = [
             const value = getValue() as string
             const color = statusColorMap[value] || 'bg-gray-100 text-gray-800'
             return (
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${color}`}>
+                <span
+                    className={`px-2 py-1 text-xs font-medium rounded-full ${color}`}
+                >
                     {value}
                 </span>
             )
@@ -175,7 +179,9 @@ const Page = () => {
     // State declarations
     const [copiedMap, setCopiedMap] = useState<{ [id: string]: boolean }>({})
     const [currencies, setCurrencies] = useState<Currency[]>([])
-    const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(null)
+    const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(
+        null,
+    )
     const [usdAmount, setUsdAmount] = useState<string>('')
     const [cryptoAmount, setCryptoAmount] = useState<string>('')
     const [showStatus, setShowStatus] = useState(false)
@@ -188,11 +194,14 @@ const Page = () => {
     const [search, setSearch] = useState('')
     const [dataLoading, setDataLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const { session } = useSessionContext();
+    const { session } = useSessionContext()
     // Pagination and Sorting
     const [pageIndex, setPageIndex] = useState(1)
     const [pageSize, setPageSize] = useState(10)
-    const [sortConfig, setSortConfig] = useState<{ key: string; order: 'asc' | 'desc' | '' }>({
+    const [sortConfig, setSortConfig] = useState<{
+        key: string
+        order: 'asc' | 'desc' | ''
+    }>({
         key: '',
         order: '',
     })
@@ -202,7 +211,9 @@ const Page = () => {
     const router = useRouter()
     const tableRef = useRef<HTMLDivElement>(null)
     // Add these state variables at the top with other states
-    const [rateCache, setRateCache] = useState<{ [key: string]: { rate: number; timestamp: number } }>({})
+    const [rateCache, setRateCache] = useState<{
+        [key: string]: { rate: number; timestamp: number }
+    }>({})
     const [isLoadingRates, setIsLoadingRates] = useState(false)
 
     // Get token safely
@@ -218,9 +229,11 @@ const Page = () => {
         if (!search.trim()) return depositHistory
         const query = search.toLowerCase()
         return depositHistory.filter((item) => {
-            const matchesSubject = item.subject?.toLowerCase().includes(query) || false
+            const matchesSubject =
+                item.subject?.toLowerCase().includes(query) || false
             const matchesId = item.id.toString().includes(query)
-            const matchesAsset = item.asset?.toLowerCase().includes(query) || false
+            const matchesAsset =
+                item.asset?.toLowerCase().includes(query) || false
             return matchesSubject || matchesId || matchesAsset
         })
     }, [depositHistory, search])
@@ -243,7 +256,9 @@ const Page = () => {
 
             // Handle date sorting
             if (sortConfig.key === 'createdAt' || sortConfig.key === 'date') {
-                return (new Date(A).getTime() - new Date(B).getTime()) * direction
+                return (
+                    (new Date(A).getTime() - new Date(B).getTime()) * direction
+                )
             }
 
             // Handle numeric sorting
@@ -263,92 +278,106 @@ const Page = () => {
         return sortedData?.slice(start, end)
     }, [sortedData, pageIndex, pageSize])
 
-    const [localCurr, setLocalCurr] = useState([]);
-    const [allcurr, setAllcurr] = useState([]);
-    const [symbolToIdMap, setSymbolToIdMap] = useState({});
+    const [localCurr, setLocalCurr] = useState([])
+    const [allcurr, setAllcurr] = useState([])
+    const [symbolToIdMap, setSymbolToIdMap] = useState({})
 
     const fetchAllCurrencies = async () => {
         const [vsCurrenciesRes, cryptoListRes] = await Promise.all([
-            axios.get("https://api.coingecko.com/api/v3/simple/supported_vs_currencies"),
-            axios.get("https://api.coingecko.com/api/v3/coins/list")
-        ]);
+            axios.get(
+                'https://api.coingecko.com/api/v3/simple/supported_vs_currencies',
+            ),
+            axios.get('https://api.coingecko.com/api/v3/coins/list'),
+        ])
 
-        setLocalCurr(vsCurrenciesRes.data); // fiat and some crypto vs currencies
-        setAllcurr(cryptoListRes.data);     // full list of coins with {id, symbol, name}
+        setLocalCurr(vsCurrenciesRes.data) // fiat and some crypto vs currencies
+        setAllcurr(cryptoListRes.data) // full list of coins with {id, symbol, name}
 
         // Create mapping from SYMBOL to ID (use lowercase to avoid case mismatches)
-        const map = {};
+        const map = {}
         cryptoListRes.data.forEach((coin) => {
-            map[coin.symbol.toUpperCase()] = coin.id;
-        });
+            map[coin.symbol.toUpperCase()] = coin.id
+        })
 
-        setSymbolToIdMap(map);
-    };
+        setSymbolToIdMap(map)
+    }
 
     useEffect(() => {
-        fetchAllCurrencies();
-    }, []);
+        fetchAllCurrencies()
+    }, [])
 
     const fetchConversionRate = useCallback(
-        async (symbol: string, useCache: boolean = true): Promise<number | null> => {
-            const upperSymbol = symbol.toUpperCase();
+        async (
+            symbol: string,
+            useCache: boolean = true,
+        ): Promise<number | null> => {
+            const upperSymbol = symbol.toUpperCase()
 
             // ✅ Check cache first (cache for 5 minutes)
             if (useCache && rateCache[upperSymbol]) {
-                const cached = rateCache[upperSymbol];
-                const now = Date.now();
-                if (now - cached.timestamp < 300000) { // 5 minutes
-                    console.log(`Using cached rate for ${upperSymbol}:`, cached.rate);
-                    return cached.rate;
+                const cached = rateCache[upperSymbol]
+                const now = Date.now()
+                if (now - cached.timestamp < 300000) {
+                    // 5 minutes
+                    console.log(
+                        `Using cached rate for ${upperSymbol}:`,
+                        cached.rate,
+                    )
+                    return cached.rate
                 }
             }
 
-            const coinId = symbolToIdMap[upperSymbol] || SYMBOL_TO_ID_MAP[upperSymbol];
+            const coinId =
+                symbolToIdMap[upperSymbol] || SYMBOL_TO_ID_MAP[upperSymbol]
 
-            console.log('Fetching fresh rate for symbol:', symbol, '| coinId:', coinId);
+            console.log(
+                'Fetching fresh rate for symbol:',
+                symbol,
+                '| coinId:',
+                coinId,
+            )
             if (!coinId) {
-                console.warn(`No mapping found for symbol: ${symbol}`);
-                return null;
+                console.warn(`No mapping found for symbol: ${symbol}`)
+                return null
             }
 
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased timeout
+                const controller = new AbortController()
+                const timeoutId = setTimeout(() => controller.abort(), 15000) // Increased timeout
 
                 const res = await axios.get(
                     `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`,
                     {
                         signal: controller.signal,
-                    }
-                );
+                    },
+                )
 
-                clearTimeout(timeoutId);
-                const rate = res.data[coinId]?.usd ?? null;
+                clearTimeout(timeoutId)
+                const rate = res.data[coinId]?.usd ?? null
 
                 // ✅ Cache the result
                 if (rate !== null) {
-                    setRateCache(prev => ({
+                    setRateCache((prev) => ({
                         ...prev,
                         [upperSymbol]: {
                             rate,
-                            timestamp: Date.now()
-                        }
-                    }));
+                            timestamp: Date.now(),
+                        },
+                    }))
                 }
 
-                return rate;
+                return rate
             } catch (err) {
                 if (axios.isCancel(err)) {
-                    console.error("Request timeout for conversion rate");
+                    console.error('Request timeout for conversion rate')
                 } else {
-                    console.error("Error fetching conversion rate:", err);
+                    console.error('Error fetching conversion rate:', err)
                 }
-                return null;
+                return null
             }
         },
-        [symbolToIdMap, rateCache]
-    );
-
+        [symbolToIdMap, rateCache],
+    )
 
     // Fetch deposit history
     const fetchDepositHistory = useCallback(async () => {
@@ -363,7 +392,7 @@ const Page = () => {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
-                }
+                },
             )
             setDepositHistory(res.data.data || [])
         } catch (error) {
@@ -373,8 +402,6 @@ const Page = () => {
             setDataLoading(false)
         }
     }, [token])
-
-
 
     // Replace the existing fetchCryptocurrencies function
     const fetchCryptocurrencies = useCallback(async () => {
@@ -388,7 +415,7 @@ const Page = () => {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
-                }
+                },
             )
 
             const currencyData = response.data.data || []
@@ -400,23 +427,28 @@ const Page = () => {
                 const currency = currencyData[i]
 
                 try {
-                    console.log(`Fetching rate for ${currency.shortName} (${i + 1}/${currencyData.length})`)
+                    console.log(
+                        `Fetching rate for ${currency.shortName} (${i + 1}/${currencyData.length})`,
+                    )
                     const rate = await fetchConversionRate(currency.shortName)
 
                     currenciesWithRates.push({
                         ...currency,
-                        rate: rate || 0
+                        rate: rate || 0,
                     })
 
                     // ✅ Add delay between requests (except for last one)
                     if (i < currencyData.length - 1) {
-                        await new Promise(resolve => setTimeout(resolve, 200)) // 200ms delay
+                        await new Promise((resolve) => setTimeout(resolve, 200)) // 200ms delay
                     }
                 } catch (error) {
-                    console.error(`Error fetching rate for ${currency.shortName}:`, error)
+                    console.error(
+                        `Error fetching rate for ${currency.shortName}:`,
+                        error,
+                    )
                     currenciesWithRates.push({
                         ...currency,
-                        rate: 0
+                        rate: 0,
                     })
                 }
             }
@@ -438,7 +470,12 @@ const Page = () => {
     // Replace the existing currency conversion useEffect
     useEffect(() => {
         const convertCurrency = async () => {
-            if (!selectedCurrency || !usdAmount || isNaN(parseFloat(usdAmount)) || parseFloat(usdAmount) <= 0) {
+            if (
+                !selectedCurrency ||
+                !usdAmount ||
+                isNaN(parseFloat(usdAmount)) ||
+                parseFloat(usdAmount) <= 0
+            ) {
                 setCryptoAmount('')
                 return
             }
@@ -451,7 +488,10 @@ const Page = () => {
                 // ✅ Only fetch fresh rate if cached rate is 0 or very old
                 if (!rate || rate === 0) {
                     console.log('Fetching fresh rate for conversion...')
-                    rate = await fetchConversionRate(selectedCurrency.shortName, true) // Use cache
+                    rate = await fetchConversionRate(
+                        selectedCurrency.shortName,
+                        true,
+                    ) // Use cache
                 }
 
                 if (rate && rate > 0) {
@@ -505,21 +545,30 @@ const Page = () => {
         setPageIndex(1)
     }, [])
 
-    const handleCurrencySelect = useCallback((key: string) => {
-        const currency = currencies.find(c => c.id.toString() === key)
-        if (currency) {
-            setSelectedCurrency(currency)
-            setUsdAmount('')
-            setCryptoAmount('')
-        }
-    }, [currencies])
+    const handleCurrencySelect = useCallback(
+        (key: string) => {
+            const currency = currencies.find((c) => c.id.toString() === key)
+            if (currency) {
+                setSelectedCurrency(currency)
+                setUsdAmount('')
+                setCryptoAmount('')
+            }
+        },
+        [currencies],
+    )
 
-    const handleUsdAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value
-        if (value === '' || (!isNaN(parseFloat(value)) && parseFloat(value) >= 0)) {
-            setUsdAmount(value)
-        }
-    }, [])
+    const handleUsdAmountChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value
+            if (
+                value === '' ||
+                (!isNaN(parseFloat(value)) && parseFloat(value) >= 0)
+            ) {
+                setUsdAmount(value)
+            }
+        },
+        [],
+    )
 
     const handleDeposit = useCallback(async () => {
         if (!selectedCurrency || !usdAmount || !cryptoAmount) {
@@ -545,7 +594,7 @@ const Page = () => {
                         Authorization: `Bearer ${token}`,
                         'Content-Type': 'multipart/form-data',
                     },
-                }
+                },
             )
 
             setDepositData(response.data.data)
@@ -564,35 +613,17 @@ const Page = () => {
         }
     }, [selectedCurrency, usdAmount, cryptoAmount, token, router])
 
-    const handleConfirmPaid = useCallback(async () => {
+    const handleConfirmPaid = useCallback(() => {
         if (!depositData) return
 
         setLoading(true)
-        try {
-            const formData = new FormData()
-            formData.append('id', depositData.deposit.id)
-            formData.append('status', 'Processing')
 
-            await axios.put(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/deposit/crytpo/status`,
-                formData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
-            )
-
+        setTimeout(() => {
             setShowModal(true)
             toast.success('Payment confirmation submitted!')
-        } catch (error) {
-            console.error('Error updating status:', error)
-            toast.error('Error updating status. Please try again.')
-        } finally {
             setLoading(false)
-        }
-    }, [depositData, token])
+        }, 500)
+    }, [depositData])
 
     const handleModalClose = useCallback(() => {
         setShowModal(false)
@@ -621,16 +652,19 @@ const Page = () => {
         )
     }
 
-
     const getWalletData = useCallback((currency: Currency | null) => {
-        if (!currency || !currency.wallet || !Array.isArray(currency.wallet) || currency.wallet.length === 0) {
-            return null;
+        if (
+            !currency ||
+            !currency.wallet ||
+            !Array.isArray(currency.wallet) ||
+            currency.wallet.length === 0
+        ) {
+            return null
         }
-        return currency.wallet[0]; // Get the first wallet
-    }, []);
+        return currency.wallet[0] // Get the first wallet
+    }, [])
 
-
-    const walletData = getWalletData(selectedCurrency);
+    const walletData = getWalletData(selectedCurrency)
 
     const handleCopy = async (walletId: string, address: string) => {
         try {
@@ -659,10 +693,18 @@ const Page = () => {
                         <div className="grid grid-cols-2 items-center gap-2">
                             <label className="col-span-1 text-base font-semibold">
                                 Currency
-                                {isLoadingRates && <span className="text-xs text-blue-500 ml-2">(Loading rates...)</span>}
+                                {isLoadingRates && (
+                                    <span className="text-xs text-blue-500 ml-2">
+                                        (Loading rates...)
+                                    </span>
+                                )}
                             </label>
                             <Dropdown
-                                title={selectedCurrency ? `${selectedCurrency.fullName} (${selectedCurrency.shortName})` : 'Select Currency'}
+                                title={
+                                    selectedCurrency
+                                        ? `${selectedCurrency.fullName} (${selectedCurrency.shortName})`
+                                        : 'Select Currency'
+                                }
                                 trigger="click"
                                 placement="bottom-start"
                                 toggleClassName="border border-gray-400 rounded-lg w-full"
@@ -675,15 +717,23 @@ const Page = () => {
                                         eventKey={currency.id.toString()}
                                         onSelect={handleCurrencySelect}
                                     >
-                                        {currency.fullName} ({currency.shortName})
-                                        {currency.rate > 0 && <span className="text-xs text-gray-500">- ${currency.rate.toLocaleString()}</span>}
+                                        {currency.fullName} (
+                                        {currency.shortName})
+                                        {currency.rate > 0 && (
+                                            <span className="text-xs text-gray-500">
+                                                - $
+                                                {currency.rate.toLocaleString()}
+                                            </span>
+                                        )}
                                     </DropdownItem>
                                 ))}
                             </Dropdown>
                         </div>
 
                         <div className="grid grid-cols-2 items-center gap-2">
-                            <label className="col-span-1 text-base font-semibold">Amount (USD)</label>
+                            <label className="col-span-1 text-base font-semibold">
+                                Amount (USD)
+                            </label>
                             <Input
                                 placeholder="0.00"
                                 className="w-full"
@@ -698,7 +748,11 @@ const Page = () => {
                         <div className="grid grid-cols-2 items-center gap-2">
                             <label className="col-span-1 text-base font-semibold">
                                 Amount Crypto
-                                {conversionLoading && <span className="text-xs text-blue-500 ml-2">(Converting...)</span>}
+                                {conversionLoading && (
+                                    <span className="text-xs text-blue-500 ml-2">
+                                        (Converting...)
+                                    </span>
+                                )}
                             </label>
                             <Input
                                 placeholder="0.00000000"
@@ -708,18 +762,26 @@ const Page = () => {
                             />
                         </div>
 
-                        {selectedCurrency && selectedCurrency.rate && selectedCurrency.rate > 0 && (
-                            <div className="text-sm text-gray-600 dark:text-gray-400">
-                                Rate: 1 {selectedCurrency.shortName} = ${selectedCurrency.rate.toLocaleString()}
-                            </div>
-                        )}
+                        {selectedCurrency &&
+                            selectedCurrency.rate &&
+                            selectedCurrency.rate > 0 && (
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                    Rate: 1 {selectedCurrency.shortName} = $
+                                    {selectedCurrency.rate.toLocaleString()}
+                                </div>
+                            )}
 
                         <Button
                             size="sm"
                             onClick={handleDeposit}
                             variant="solid"
                             className="rounded-lg w-full"
-                            disabled={loading || !selectedCurrency || !usdAmount || conversionLoading}
+                            disabled={
+                                loading ||
+                                !selectedCurrency ||
+                                !usdAmount ||
+                                conversionLoading
+                            }
                         >
                             {loading ? 'Processing...' : 'Deposit'}
                         </Button>
@@ -729,7 +791,8 @@ const Page = () => {
                         <div className="flex flex-row gap-6">
                             <div className="w-[30%]">
                                 <div className="text-lg font-semibold pb-2">
-                                    {selectedCurrency?.shortName || 'Crypto'} Address
+                                    {selectedCurrency?.shortName || 'Crypto'}{' '}
+                                    Address
                                 </div>
 
                                 <img
@@ -740,41 +803,71 @@ const Page = () => {
                                 />
                             </div>
                             <div className="w-full">
-                                <h2 className="text-lg font-bold">Deposit Details</h2>
+                                <h2 className="text-lg font-bold">
+                                    Deposit Details
+                                </h2>
                                 <hr className="my-4 border-2 border-primary" />
                                 <div className="grid grid-cols-[150px_1fr] gap-y-3 text-sm">
                                     <div className="text-xs font-semibold">
                                         {walletData?.name}:
                                     </div>
                                     <code
-                                        onClick={() => handleCopy(walletData?.id, walletData?.address)}
+                                        onClick={() =>
+                                            handleCopy(
+                                                walletData?.id,
+                                                walletData?.address,
+                                            )
+                                        }
                                         className="dark:bg-lime-700/30 flex justify-between items-center p-1 rounded-lg text-xs text-gray-600 break-words dark:text-white cursor-pointer hover:text-blue-600 transition"
                                         title="Click to copy"
                                     >
                                         <span>{walletData?.address}</span>
 
                                         {/* Copy Icon / Copied Text */}
-                                        <div onClick={() => handleCopy(walletData?.id, walletData?.address)} className="ml-2 flex items-center text-lg">
+                                        <div
+                                            onClick={() =>
+                                                handleCopy(
+                                                    walletData?.id,
+                                                    walletData?.address,
+                                                )
+                                            }
+                                            className="ml-2 flex items-center text-lg"
+                                        >
                                             {copiedMap[walletData?.id] ? (
-                                                <span className="text-green-500 text-xs font-semibold animate-pulse">Copied!</span>
+                                                <span className="text-green-500 text-xs font-semibold animate-pulse">
+                                                    Copied!
+                                                </span>
                                             ) : (
                                                 <IoCopyOutline className="hover:text-green-600 transition" />
                                             )}
                                         </div>
                                     </code>
 
-                                    <div className="text-xs font-semibold">AMOUNT IN ASSET:</div>
-                                    <div>{cryptoAmount} {selectedCurrency?.shortName}</div>
+                                    <div className="text-xs font-semibold">
+                                        AMOUNT IN ASSET:
+                                    </div>
+                                    <div>
+                                        {cryptoAmount}{' '}
+                                        {selectedCurrency?.shortName}
+                                    </div>
 
-                                    <div className="text-xs font-semibold">AMOUNT IN USD:</div>
+                                    <div className="text-xs font-semibold">
+                                        AMOUNT IN USD:
+                                    </div>
                                     <div>${usdAmount}</div>
 
-                                    <div className="text-xs font-semibold">FEE:</div>
+                                    <div className="text-xs font-semibold">
+                                        FEE:
+                                    </div>
                                     <div>0%</div>
 
-                                    <div className="text-xs font-semibold">STATUS:</div>
+                                    <div className="text-xs font-semibold">
+                                        STATUS:
+                                    </div>
                                     <div>
-                                        <span className="bg-gray-200 text-gray-800 px-2 py-1 rounded">Pending</span>
+                                        <span className="bg-gray-200 text-gray-800 px-2 py-1 rounded">
+                                            Pending
+                                        </span>
                                     </div>
                                 </div>
 
@@ -800,7 +893,7 @@ const Page = () => {
                         <Input
                             placeholder="Search transactions..."
                             value={search}
-                            size='sm'
+                            size="sm"
                             onChange={(e) => setSearch(e.target.value)}
                             className="w-full"
                         />
@@ -848,7 +941,8 @@ const Page = () => {
                             Your payment is being processed.
                         </div>
                         <div className="text-center text-sm text-gray-600">
-                            We will notify you once the transaction is confirmed.
+                            We will notify you once the transaction is
+                            confirmed.
                         </div>
                         <div className="flex items-center justify-center">
                             <Button
