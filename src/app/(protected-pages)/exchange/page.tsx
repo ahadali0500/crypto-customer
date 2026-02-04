@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import TabList from '@/components/ui/Tabs/TabList';
 import Tabs from '@/components/ui/Tabs/Tabs';
 import TabNav from '@/components/ui/Tabs/TabNav';
@@ -82,6 +82,17 @@ export const SYMBOL_TO_ID_MAP: Record<string, string> = {
   XRP: "ripple",
   XTZ: "tezos",
   ZEC: "zcash",
+  // Full names / alternate labels (e.g. backend may send "Ethereum" or "Bitcoin")
+  BITCOIN: "bitcoin",
+  ETHEREUM: "ethereum",
+  ETHER: "ethereum",
+  LITECOIN: "litecoin",
+  RIPPLE: "ripple",
+  SOLANA: "solana",
+  DOGECOIN: "dogecoin",
+  CARDANO: "cardano",
+  POLKADOT: "polkadot",
+  TETHER: "tether",
 }
 
 const Page = () => {
@@ -97,6 +108,7 @@ const Page = () => {
   const [activeTab, setActiveTab] = useState<string>('available');
   const [loading, setLoading] = useState<boolean>(false);
   const [conversionLoading, setConversionLoading] = useState<boolean>(false);
+  const conversionSeqRef = useRef(0);
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
   const feePercentage = 4;
@@ -131,31 +143,47 @@ const Page = () => {
     fetchAllCurrencies();
   }, []);
 
-  // FIXED: Improved conversion rate function
+  // Resolve symbol/fullName to CoinGecko id (e.g. BTC or "Ethereum" -> ethereum)
+  const getCoinGeckoId = useCallback(
+    (symbol: string): string | null => {
+      const cleaned = symbol.trim().split(/[\s/-]/)[0].toUpperCase();
+      const fromStatic = SYMBOL_TO_ID_MAP[cleaned];
+
+      // IMPORTANT: CoinGecko `coins/list` has many duplicate symbols (e.g. "ETH"),
+      // so a naive symbol->id map can resolve to a random low-cap token.
+      // Always prefer our curated static map for known tickers.
+      if (fromStatic) return fromStatic;
+
+      const fromDynamic = typeof symbolToIdMap === 'object' && symbolToIdMap[cleaned];
+      return fromDynamic || null;
+    },
+    [symbolToIdMap]
+  );
+
+  // Crypto-to-crypto and crypto-to-fiat conversion rate (how many "to" units per 1 "from" unit)
   const fetchConversionRates = useCallback(
     async (fromSymbol: string, toSymbol: string): Promise<number | null> => {
       try {
-        const cleanFromSymbol = fromSymbol.trim().split(/[\s/-]/)[0].toUpperCase();
-        const cleanToSymbol = toSymbol.trim().split(/[\s/-]/)[0].toUpperCase();
-
-        console.log('Converting:', cleanFromSymbol, 'to', cleanToSymbol);
-
-        // Get coin IDs
-        const fromCoinId = symbolToIdMap[cleanFromSymbol] || SYMBOL_TO_ID_MAP[cleanFromSymbol];
-        const toCoinId = symbolToIdMap[cleanToSymbol] || SYMBOL_TO_ID_MAP[cleanToSymbol];
+        const fromCoinId = getCoinGeckoId(fromSymbol);
+        const toCoinId = getCoinGeckoId(toSymbol);
 
         if (!fromCoinId) {
-          console.warn(`No mapping found for from symbol: ${cleanFromSymbol}`);
+          console.warn(`No mapping found for from symbol: ${fromSymbol}`);
           return null;
+        }
+
+        // Same asset: 1:1
+        if (toCoinId && fromCoinId === toCoinId) {
+          return 1;
         }
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-        let conversionRate = null;
+        let conversionRate: number | null = null;
 
         if (toCoinId) {
-          // Crypto to Crypto conversion
+          // Crypto to Crypto (e.g. BTC -> ETH): rate = (BTC price USD) / (ETH price USD)
           const res = await axios.get(
             `https://api.coingecko.com/api/v3/simple/price?ids=${fromCoinId},${toCoinId}&vs_currencies=usd`,
             { signal: controller.signal }
@@ -164,24 +192,29 @@ const Page = () => {
           const fromPriceUSD = res.data[fromCoinId]?.usd;
           const toPriceUSD = res.data[toCoinId]?.usd;
 
-          if (fromPriceUSD && toPriceUSD) {
+          if (
+            typeof fromPriceUSD === 'number' &&
+            typeof toPriceUSD === 'number' &&
+            toPriceUSD > 0
+          ) {
             conversionRate = fromPriceUSD / toPriceUSD;
           }
         } else {
-          // Crypto to Fiat conversion
-          const targetCurrency = cleanToSymbol.toLowerCase();
+          // Crypto to Fiat
+          const targetCurrency = toSymbol.trim().split(/[\s/-]/)[0].toLowerCase();
           const res = await axios.get(
             `https://api.coingecko.com/api/v3/simple/price?ids=${fromCoinId}&vs_currencies=${targetCurrency}`,
             { signal: controller.signal }
           );
 
-          conversionRate = res.data[fromCoinId]?.[targetCurrency];
+          const rate = res.data[fromCoinId]?.[targetCurrency];
+          if (typeof rate === 'number' && rate >= 0) {
+            conversionRate = rate;
+          }
         }
 
         clearTimeout(timeoutId);
-        console.log('Conversion rate:', conversionRate);
         return conversionRate;
-
       } catch (error) {
         if (axios.isCancel(error)) {
           console.error("Request timeout for conversion rate");
@@ -191,7 +224,7 @@ const Page = () => {
         return null;
       }
     },
-    [symbolToIdMap]
+    [getCoinGeckoId]
   );
 
   const [userDetails, setUserDetails] = useState(false);
@@ -256,6 +289,9 @@ const Page = () => {
       c.fullName === key
     );
     if (selected) {
+      conversionSeqRef.current += 1;
+      debouncedCalculateConversion.cancel();
+      setConversionLoading(false);
       setSelectedSellCurrency(selected);
       setSellAmount('');
       setBuyAmount('');
@@ -271,6 +307,9 @@ const Page = () => {
       c.fullName === key
     );
     if (selected) {
+      conversionSeqRef.current += 1;
+      debouncedCalculateConversion.cancel();
+      setConversionLoading(false);
       setSelectedBuyCurrency(selected);
       setSellAmount('');
       setBuyAmount('');
@@ -318,39 +357,52 @@ const Page = () => {
     return isNaN(numericBalance) ? 0 : numericBalance;
   };
 
-  // FIXED: Simplified and improved debounced conversion
+  // Debounced conversion: guard against stale async results overwriting latest input.
   const debouncedCalculateConversion = useCallback(
-    debounce(async (amount: string, fromCurrency: Currency, toCurrency: Currency) => {
+    debounce(async (seq: number, amount: string, fromCurrency: Currency, toCurrency: Currency) => {
       if (!fromCurrency || !toCurrency || !amount || parseFloat(amount) <= 0) {
+        if (seq !== conversionSeqRef.current) return;
         setBuyAmount('');
         setConversionLoading(false);
         return;
       }
 
       try {
-        const fromSymbol = fromCurrency.symbol || fromCurrency.shortName;
-        const toSymbol = toCurrency.symbol || toCurrency.shortName;
+        // Prefer ticker-like fields (shortName), NOT unicode symbols (₿/Ξ) to avoid wrong mapping.
+        const fromKey = fromCurrency.shortName || fromCurrency.symbol || fromCurrency.fullName;
+        const toKey = toCurrency.shortName || toCurrency.symbol || toCurrency.fullName;
 
-        const conversionRate = await fetchConversionRates(fromSymbol, toSymbol);
+        const conversionRate = await fetchConversionRates(fromKey, toKey);
 
-        if (conversionRate !== null && conversionRate > 0) {
+        // Ignore late responses from older debounced calls
+        if (seq !== conversionSeqRef.current) return;
+
+        if (conversionRate !== null && conversionRate > 0 && isFinite(conversionRate)) {
           const convertedAmount = parseFloat(amount) * conversionRate;
-          setBuyAmount(convertedAmount.toFixed(6));
+          setBuyAmount(convertedAmount.toFixed(8));
           setErrorMessage('');
         } else {
           setBuyAmount('');
           setErrorMessage('Unable to fetch conversion rate. Please try again.');
         }
       } catch (error) {
+        if (seq !== conversionSeqRef.current) return;
         console.error('Conversion error:', error);
         setBuyAmount('');
         setErrorMessage('Conversion failed. Please try again.');
       } finally {
+        if (seq !== conversionSeqRef.current) return;
         setConversionLoading(false);
       }
     }, 800),
     [fetchConversionRates]
   );
+
+  useEffect(() => {
+    return () => {
+      debouncedCalculateConversion.cancel();
+    };
+  }, [debouncedCalculateConversion]);
 
   const calculateConversion = async (amount: string) => {
     if (!selectedSellCurrency || !selectedBuyCurrency || !amount || parseFloat(amount) <= 0) {
@@ -359,7 +411,8 @@ const Page = () => {
     }
 
     setConversionLoading(true);
-    debouncedCalculateConversion(amount, selectedSellCurrency, selectedBuyCurrency);
+    const seq = (conversionSeqRef.current += 1);
+    debouncedCalculateConversion(seq, amount, selectedSellCurrency, selectedBuyCurrency);
   };
 
   const calculateFees = (amount: string): number => {
@@ -481,6 +534,9 @@ const Page = () => {
   const handleTabChange = (value: string) => {
     console.log('Tab changed to:', value);
     setActiveTab(value);
+    conversionSeqRef.current += 1;
+    debouncedCalculateConversion.cancel();
+    setConversionLoading(false);
     setSellAmount('');
     setBuyAmount('');
     setErrorMessage('');

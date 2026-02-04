@@ -12,7 +12,7 @@ RUN if [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
 # ---------- Stage 2: builder ----------
 FROM node:20-alpine AS builder
 WORKDIR /app
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat curl wget
 ENV NEXT_TELEMETRY_DISABLED=1
 # Give Node more memory just for the build
 ENV NODE_OPTIONS=--max-old-space-size=3072
@@ -32,7 +32,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat curl wget
 
 # If using output: 'standalone'
 COPY --from=builder /app/.next/standalone ./
