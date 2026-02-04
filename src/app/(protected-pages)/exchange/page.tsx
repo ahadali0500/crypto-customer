@@ -26,75 +26,6 @@ interface Currency {
   icon?: string;
 }
 
-export const SYMBOL_TO_ID_MAP: Record<string, string> = {
-  AAVE: "aave",
-  ADA: "cardano",
-  ALGO: "algorand",
-  APT: "aptos",
-  ARB: "arbitrum",
-  ATOM: "cosmos",
-  AVAX: "avalanche-2",
-  AXS: "axie-infinity",
-  BCH: "bitcoin-cash",
-  BNB: "binancecoin",
-  BONK: "bonk",
-  BTC: "bitcoin",
-  CAKE: "pancakeswap-token",
-  CHZ: "chiliz",
-  COMP: "compound-governance-token",
-  CRV: "curve-dao-token",
-  DOGE: "dogecoin",
-  DOT: "polkadot",
-  EGLD: "elrond-erd-2",
-  ENS: "ethereum-name-service",
-  ETC: "ethereum-classic",
-  ETH: "ethereum",
-  FIL: "filecoin",
-  FTM: "fantom",
-  GRT: "the-graph",
-  ICP: "internet-computer",
-  JUP: "jupiter-exchange-solana",
-  KSM: "kusama",
-  LDO: "lido-dao",
-  LINK: "chainlink",
-  LTC: "litecoin",
-  MATIC: "matic-network",
-  MKR: "maker",
-  NEAR: "near",
-  PEPE: "pepe",
-  QNT: "quant-network",
-  RUNE: "thorchain",
-  SAN: "the-sandbox",
-  SEI: "sei-network",
-  SHIB: "shiba-inu",
-  SNX: "synthetix-network-token",
-  SOL: "solana",
-  STETH: "staked-ether",
-  TON: "the-open-network",
-  TRON: "tron",
-  TRX: "tron",
-  UNI: "uniswap",
-  USDC: "usd-coin",
-  USDT: "tether",
-  VET: "vechain",
-  WBTC: "wrapped-bitcoin",
-  XLM: "stellar",
-  XRP: "ripple",
-  XTZ: "tezos",
-  ZEC: "zcash",
-  // Full names / alternate labels (e.g. backend may send "Ethereum" or "Bitcoin")
-  BITCOIN: "bitcoin",
-  ETHEREUM: "ethereum",
-  ETHER: "ethereum",
-  LITECOIN: "litecoin",
-  RIPPLE: "ripple",
-  SOLANA: "solana",
-  DOGECOIN: "dogecoin",
-  CARDANO: "cardano",
-  POLKADOT: "polkadot",
-  TETHER: "tether",
-}
-
 const Page = () => {
   const [selectedSellCurrency, setSelectedSellCurrency] = useState<Currency | null>(null);
   const [selectedBuyCurrency, setSelectedBuyCurrency] = useState<Currency | null>(null);
@@ -113,67 +44,25 @@ const Page = () => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
   const feePercentage = 4;
 
-  const [localCurr, setLocalCurr] = useState([]);
-  const [allcurr, setAllcurr] = useState([]);
-  const [symbolToIdMap, setSymbolToIdMap] = useState({});
 
-  const fetchAllCurrencies = async () => {
-    try {
-      const [vsCurrenciesRes, cryptoListRes] = await Promise.all([
-        axios.get("https://api.coingecko.com/api/v3/simple/supported_vs_currencies"),
-        axios.get("https://api.coingecko.com/api/v3/coins/list")
-      ]);
+  function getCurrencyType(symbol) {
+    const data = allCurrency.filter(n => n?.shortName == symbol);
+    return data[0]?.type
+  }
 
-      setLocalCurr(vsCurrenciesRes.data);
-      setAllcurr(cryptoListRes.data);
 
-      // Create mapping from SYMBOL to ID
-      const map = {};
-      cryptoListRes.data.forEach((coin) => {
-        map[coin.symbol.toUpperCase()] = coin.id;
-      });
-
-      setSymbolToIdMap(map);
-    } catch (error) {
-      console.error('Error fetching currencies:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchAllCurrencies();
-  }, []);
-
-  // Resolve symbol/fullName to CoinGecko id (e.g. BTC or "Ethereum" -> ethereum)
-  const getCoinGeckoId = useCallback(
-    (symbol: string): string | null => {
-      const cleaned = symbol.trim().split(/[\s/-]/)[0].toUpperCase();
-      const fromStatic = SYMBOL_TO_ID_MAP[cleaned];
-
-      // IMPORTANT: CoinGecko `coins/list` has many duplicate symbols (e.g. "ETH"),
-      // so a naive symbol->id map can resolve to a random low-cap token.
-      // Always prefer our curated static map for known tickers.
-      if (fromStatic) return fromStatic;
-
-      const fromDynamic = typeof symbolToIdMap === 'object' && symbolToIdMap[cleaned];
-      return fromDynamic || null;
-    },
-    [symbolToIdMap]
-  );
-
-  // Crypto-to-crypto and crypto-to-fiat conversion rate (how many "to" units per 1 "from" unit)
   const fetchConversionRates = useCallback(
     async (fromSymbol: string, toSymbol: string): Promise<number | null> => {
       try {
-        const fromCoinId = getCoinGeckoId(fromSymbol);
-        const toCoinId = getCoinGeckoId(toSymbol);
 
-        if (!fromCoinId) {
-          console.warn(`No mapping found for from symbol: ${fromSymbol}`);
-          return null;
-        }
+        const fromType = getCurrencyType(fromSymbol);
+        const toType = getCurrencyType(toSymbol);
 
-        // Same asset: 1:1
-        if (toCoinId && fromCoinId === toCoinId) {
+        toSymbol = toSymbol.trim().split(/[\s/-]/)[0].toLowerCase();
+        fromSymbol = fromSymbol.trim().split(/[\s/-]/)[0].toLowerCase();
+        console.log(fromType, toType, "type");
+
+        if (fromSymbol == toSymbol) {
           return 1;
         }
 
@@ -182,15 +71,14 @@ const Page = () => {
 
         let conversionRate: number | null = null;
 
-        if (toCoinId) {
-          // Crypto to Crypto (e.g. BTC -> ETH): rate = (BTC price USD) / (ETH price USD)
+        if (fromType == "Crypto" && toType == "Crypto") {
           const res = await axios.get(
-            `https://api.coingecko.com/api/v3/simple/price?ids=${fromCoinId},${toCoinId}&vs_currencies=usd`,
+            `https://api.coingecko.com/api/v3/simple/price?ids=${fromSymbol},${toSymbol}&vs_currencies=usd`,
             { signal: controller.signal }
           );
 
-          const fromPriceUSD = res.data[fromCoinId]?.usd;
-          const toPriceUSD = res.data[toCoinId]?.usd;
+          const fromPriceUSD = res.data[fromSymbol]?.usd;
+          const toPriceUSD = res.data[toSymbol]?.usd;
 
           if (
             typeof fromPriceUSD === 'number' &&
@@ -199,19 +87,42 @@ const Page = () => {
           ) {
             conversionRate = fromPriceUSD / toPriceUSD;
           }
-        } else {
+        } else if (fromType == "Crypto" && toType == "Fiat") {
           // Crypto to Fiat
           const targetCurrency = toSymbol.trim().split(/[\s/-]/)[0].toLowerCase();
           const res = await axios.get(
-            `https://api.coingecko.com/api/v3/simple/price?ids=${fromCoinId}&vs_currencies=${targetCurrency}`,
+            `https://api.coingecko.com/api/v3/simple/price?ids=${fromSymbol}&vs_currencies=${toSymbol}`,
             { signal: controller.signal }
           );
 
-          const rate = res.data[fromCoinId]?.[targetCurrency];
+          const rate = res.data[fromSymbol]?.[targetCurrency];
           if (typeof rate === 'number' && rate >= 0) {
             conversionRate = rate;
           }
+        } else if (fromType == "Fiat" && toType == "Crypto") {
+          const res = await axios.get(
+            `https://api.coingecko.com/api/v3/simple/price?ids=${toSymbol}&vs_currencies=${fromSymbol}`,
+            { signal: controller.signal }
+          );
+
+          const cryptoPriceInFiat = res.data[toSymbol]?.[fromSymbol];
+
+          if (typeof cryptoPriceInFiat === 'number' && cryptoPriceInFiat > 0) {
+            conversionRate = 1 / cryptoPriceInFiat;
+          }
+        } else if (fromType == "Fiat" && toType == "Fiat") {
+          const res = await axios.get(
+            `https://api.coingecko.com/api/v3/simple/price?ids=${toSymbol}&vs_currencies=${fromSymbol}`,
+            { signal: controller.signal }
+          );
+
+          const cryptoPriceInFiat = res.data[toSymbol]?.[fromSymbol];
+
+          if (typeof cryptoPriceInFiat === 'number' && cryptoPriceInFiat > 0) {
+            conversionRate = 1 / cryptoPriceInFiat;
+          }
         }
+
 
         clearTimeout(timeoutId);
         return conversionRate;
@@ -224,7 +135,7 @@ const Page = () => {
         return null;
       }
     },
-    [getCoinGeckoId]
+    [allCurrency]
   );
 
   const [userDetails, setUserDetails] = useState(false);
@@ -456,7 +367,7 @@ const Page = () => {
       const maxAllowable = getMaxAllowableAmount();
       const totalWithFees = calculateTotalSellAmount(value);
       const availableBalance = getAvailableBalance();
-      
+
       setErrorMessage(
         `Amount + fees (${totalWithFees.toFixed(6)}) exceeds available balance (${availableBalance.toFixed(6)}). Max amount you can enter: ${maxAllowable.toFixed(6)} ${selectedSellCurrency?.shortName}`
       );
@@ -540,6 +451,20 @@ const Page = () => {
     setSellAmount('');
     setBuyAmount('');
     setErrorMessage('');
+  };
+
+
+  const getReceiveAmount = (): number => {
+    if (!sellAmount || !selectedSellCurrency || !selectedBuyCurrency) return 0;
+
+    const amountNum = parseFloat(sellAmount) || 0;
+    const fees = calculateFees(sellAmount); // fees in sell asset
+    const netAmount = amountNum + fees;
+
+    const conversionRate = parseFloat(buyAmount) / amountNum || 0; // existing conversion rate
+
+    const received = netAmount * conversionRate;
+    return isNaN(received) ? 0 : received;
   };
 
   return (
@@ -673,7 +598,7 @@ const Page = () => {
                       </div>
                       <div className='flex flex-row items-center justify-between gap-4'>
                         <div>{tab === 'locked' ? 'Total pay amount:' : 'You receive:'}</div>
-                        <div>{buyAmount ? parseFloat(buyAmount).toFixed(6) : '0.000000'} {selectedBuyCurrency?.shortName}</div>
+                        <div>{getReceiveAmount().toFixed(6)} {selectedBuyCurrency?.shortName}</div>
                       </div>
                       <div
                         className='text-primary my-2 cursor-pointer hover:underline'
@@ -715,9 +640,9 @@ const Page = () => {
         </div>
 
 
-       <div className='mt-7'>
-            <ExchangeHistory />
-        </div> 
+        <div className='mt-7'>
+          <ExchangeHistory />
+        </div>
       </div>
 
       <Dialog isOpen={dialogOpen} onClose={() => setDialogOpen(false)}>
