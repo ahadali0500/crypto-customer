@@ -45,7 +45,7 @@ const Page = () => {
   const feePercentage = 4;
 
 
-  function getCurrencyType(symbol) {
+  function getCurrencyType(symbol:any) {
     const data = allCurrency.filter(n => n?.shortName == symbol);
     return data[0]?.type
   }
@@ -76,7 +76,6 @@ const Page = () => {
             `https://api.coingecko.com/api/v3/simple/price?ids=${fromSymbol},${toSymbol}&vs_currencies=usd`,
             { signal: controller.signal }
           );
-
           const fromPriceUSD = res.data[fromSymbol]?.usd;
           const toPriceUSD = res.data[toSymbol]?.usd;
 
