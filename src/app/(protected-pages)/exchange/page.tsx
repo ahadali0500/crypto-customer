@@ -333,7 +333,7 @@ const Page = () => {
   const calculateTotalSellAmount = (amount: string): number => {
     const numAmount = parseFloat(amount) || 0;
     const fees = calculateFees(amount);
-    return numAmount + fees;
+    return numAmount - fees;
   };
 
   // FIXED: Calculate max amount considering fees
