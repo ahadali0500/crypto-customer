@@ -227,25 +227,22 @@ const Page = () => {
     }
   };
 
-  // FIXED: Validation now includes fees in calculation
+  // FIXED: Validation now correctly accounts for fee being deducted FROM amount (not added)
   const validateSellAmount = (amount: string): boolean => {
     if (!selectedSellCurrency || !amount) return false;
 
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) return false;
 
-    // Calculate total amount including fees
-    const fees = (numAmount * feePercentage) / 100;
-    const totalAmountWithFees = numAmount + fees;
-
+    // Fee is deducted FROM the amount, not added on top
+    // So we just need to check if amount <= available balance
     const availableBalance = parseFloat(
       activeTab === 'locked'
         ? selectedSellCurrency.lockedBalance || "0"
         : selectedSellCurrency.availableBalance || "0"
     );
 
-    // Check if total amount (including fees) is within available balance
-    return totalAmountWithFees <= availableBalance;
+    return numAmount <= availableBalance;
   };
 
   const getAvailableBalance = (): number => {
@@ -330,18 +327,17 @@ const Page = () => {
     return (numAmount * feePercentage) / 100;
   };
 
+  // FIXED: Total sell amount is the full amount entered (fee is deducted from this)
   const calculateTotalSellAmount = (amount: string): number => {
     const numAmount = parseFloat(amount) || 0;
-    const fees = calculateFees(amount);
-    return numAmount - fees;
+    return numAmount;
   };
 
-  // FIXED: Calculate max amount considering fees
+  // FIXED: Max allowable is simply the available balance (no division needed)
   const getMaxAllowableAmount = (): number => {
     const availableBalance = getAvailableBalance();
-    // Calculate max amount that user can enter (considering 4% will be added as fee)
-    // If available balance is X, then max amount = X / 1.04
-    return availableBalance / (1 + feePercentage / 100);
+    // Since fee is deducted FROM amount, max is simply the available balance
+    return availableBalance;
   };
 
   const handleSellAmountChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -361,14 +357,13 @@ const Page = () => {
       return;
     }
 
-    // FIXED: Better validation message including fees
+    // FIXED: Better validation message
     if (!validateSellAmount(value)) {
       const maxAllowable = getMaxAllowableAmount();
-      const totalWithFees = calculateTotalSellAmount(value);
       const availableBalance = getAvailableBalance();
 
       setErrorMessage(
-        `Amount + fees (${totalWithFees.toFixed(6)}) exceeds available balance (${availableBalance.toFixed(6)}). Max amount you can enter: ${maxAllowable.toFixed(6)} ${selectedSellCurrency?.shortName}`
+        `Amount (${numValue.toFixed(6)}) exceeds available balance (${availableBalance.toFixed(6)}). Max amount you can enter: ${maxAllowable.toFixed(6)} ${selectedSellCurrency?.shortName}`
       );
       setBuyAmount('');
       return;
@@ -530,11 +525,12 @@ const Page = () => {
                       </div>
                     </div>
 
-                    {/* {selectedSellCurrency && (
-                      <div className='text-sm text-primary dark:text-primary mt-2'>
-                        Available: {getCurrentBalanceForDisplay().toFixed(6)} {selectedSellCurrency.shortName}
+                    {/* Balance Display */}
+                    {selectedSellCurrency && (
+                      <div className='text-sm text-primary dark:text-primary mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg'>
+                        {tab === 'locked' ? 'Locked' : 'Available'} Balance: {getAvailableBalance().toFixed(6)} {selectedSellCurrency.shortName}
                       </div>
-                    )} */}
+                    )}
 
                     <div className='flex items-center gap-2 mt-4 bg-gray-200 dark:bg-gray-700 pl-3 rounded-lg'>
                       <span className='whitespace-nowrap text-sm'>Sell amount</span>
@@ -578,7 +574,8 @@ const Page = () => {
 
                     {errorMessage && (
                       <div className='mt-2 p-2 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg'>
-                        <div className='text-sm text-red-700 dark:text-red-300'>
+                        <div className='text-sm text-red-700 dark:text-red-300 flex items-start'>
+                          <AlertCircle className='w-4 h-4 mr-2 flex-shrink-0 mt-0.5' />
                           {errorMessage}
                         </div>
                       </div>
@@ -586,21 +583,26 @@ const Page = () => {
 
                     <hr className='text-primary bg-primary my-8' />
 
-                    <div className='space-y-2'>
-                      <div className='flex flex-row items-center justify-between gap-4'>
+                    <div className='space-y-3'>
+                      <div className='flex flex-row items-center justify-between gap-4 p-2'>
+                        <div>Sell Amount:</div>
+                        <div className='font-semibold'>{parseFloat(sellAmount || '0').toFixed(6)} {selectedSellCurrency?.shortName}</div>
+                      </div>
+
+                      <div className='flex flex-row items-center justify-between gap-4 p-2'>
                         <div>Transaction Fees ({feePercentage}%)</div>
-                        <div>{calculateFees(sellAmount).toFixed(6)} {selectedSellCurrency?.shortName}</div>
+                        <div className='text-red-600'>{calculateFees(sellAmount).toFixed(6)} {selectedSellCurrency?.shortName}</div>
                       </div>
-                      <div className='flex flex-row items-center justify-between gap-4'>
-                        <div>Total sell amount:</div>
-                        <div>{calculateTotalSellAmount(sellAmount).toFixed(6)} {selectedSellCurrency?.shortName}</div>
+
+                      <div className='border-t border-gray-300 dark:border-gray-600 my-2'></div>
+
+                      <div className='flex flex-row items-center justify-between gap-4 p-2 bg-green-50 dark:bg-green-900/20 rounded-lg'>
+                        <div>You Receive:</div>
+                        <div className='font-semibold text-green-700 dark:text-green-300'>{getReceiveAmount().toFixed(6)} {selectedBuyCurrency?.shortName}</div>
                       </div>
-                      <div className='flex flex-row items-center justify-between gap-4'>
-                        <div>{tab === 'locked' ? 'Total pay amount:' : 'You receive:'}</div>
-                        <div>{getReceiveAmount().toFixed(6)} {selectedBuyCurrency?.shortName}</div>
-                      </div>
+
                       <div
-                        className='text-primary my-2 cursor-pointer hover:underline'
+                        className='text-primary my-3 cursor-pointer hover:underline text-sm p-2'
                         onClick={() => {
                           const maxAmount = getMaxAllowableAmount().toString();
                           setSellAmount(maxAmount);
