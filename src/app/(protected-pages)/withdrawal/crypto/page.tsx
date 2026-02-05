@@ -425,16 +425,31 @@ const WithdrawalPage = () => {
     };
 
     const validateWithdrawAmount = (amount: string): boolean => {
-        if (!selectedWithdrawCurrency || !amount) return false;
-        const numAmount = parseFloat(amount);
-        if (isNaN(numAmount) || numAmount <= 0) return false;
-        const availableBalance = parseFloat(
-            activeTab === 'locked'
-                ? selectedWithdrawCurrency.lockedBalance || '0'
-                : selectedWithdrawCurrency.availableBalance || '0'
-        );
-        return numAmount <= availableBalance;
-    };
+    if (!selectedWithdrawCurrency || !amount) return false
+
+    const numAmount = parseFloat(amount)
+    if (isNaN(numAmount) || numAmount <= 0) return false
+
+    const available = parseFloat(selectedWithdrawCurrency.availableBalance || '0') || 0
+    const locked = parseFloat(selectedWithdrawCurrency.lockedBalance || '0') || 0
+
+    const feeRate = feePercent / 100
+    const feeNeeded = feeRate > 0 ? numAmount * feeRate : 0
+
+    if (activeTab === 'locked') {
+        if (numAmount > locked) return false
+
+        if (available < feeNeeded) return false
+
+        return true
+    }
+
+    if (feeRate > 0) {
+        return numAmount <= available / (1 + feeRate)
+    }
+    return numAmount <= available
+}
+
 
     const getAvailableBalance = (): number => {
         if (!selectedWithdrawCurrency) return 0;
@@ -516,13 +531,37 @@ const WithdrawalPage = () => {
             return;
         }
 
-        if (!validateWithdrawAmount(value)) {
-            const availableBalance = getAvailableBalance();
-            setErrorMessage(
-                `Amount exceeds available balance. Available: ${availableBalance.toFixed(6)} ${selectedWithdrawCurrency?.shortName}`
-            );
-            return;
-        }
+        if (!selectedWithdrawCurrency) return
+
+const available = parseFloat(selectedWithdrawCurrency.availableBalance || '0') || 0
+const locked = parseFloat(selectedWithdrawCurrency.lockedBalance || '0') || 0
+const feeRate = feePercent / 100
+const feeNeeded = feeRate > 0 ? numValue * feeRate : 0
+
+if (activeTab === 'locked') {
+    if (numValue > locked) {
+        setErrorMessage(
+            `Amount exceeds locked balance. Locked: ${locked.toFixed(6)} ${selectedWithdrawCurrency.shortName}`
+        )
+        return
+    }
+    if (available < feeNeeded) {
+        setErrorMessage(
+            `Insufficient AVAILABLE balance to deduct fee. Fee needed: ${feeNeeded.toFixed(6)} ${selectedWithdrawCurrency.shortName}, Available: ${available.toFixed(6)}`
+        )
+        return
+    }
+} else {
+    // available tab
+    const max = maxAllowed
+    if (numValue - max > 1e-9) {
+        setErrorMessage(
+            `Amount exceeds max allowed. Max: ${max.toFixed(6)} ${selectedWithdrawCurrency.shortName}`
+        )
+        return
+    }
+}
+
 
         if (selectedFeeBundle && !isBundleEnabled(selectedFeeBundle, value)) {
             const reason = getDisabledReason(selectedFeeBundle, value);
@@ -814,6 +853,10 @@ const WithdrawalPage = () => {
         withdrawAmount &&
         parseFloat(withdrawAmount) - maxAllowed > 1e-9;
 
+        const insufficientFeeBalance =
+    activeTab === 'locked' &&
+    computed.feeInSelectedCurrency > balances.available
+
     return (
         <>
             <div className="p-5">
@@ -1001,6 +1044,12 @@ const WithdrawalPage = () => {
                                                     )}
                                                 </div>
                                             </div>
+                                            {activeTab === 'locked' && computed.feeInSelectedCurrency > balances.available && (
+    <div className="text-sm text-red-500">
+        You have no available balance to deduct the fee. Please add funds to Available.
+    </div>
+)}
+
 
                                             {/* Net Received */}
                                             <div className="flex flex-row items-center justify-between gap-4 font-semibold">
@@ -1055,7 +1104,7 @@ const WithdrawalPage = () => {
                                                 (shouldShowBundleForWithdraw && !selectedFeeBundle) ||
                                                 !!errorMessage ||
                                                 !!feeBundleError ||
-                                                exceedsMaxAllowed
+                                                exceedsMaxAllowed ||insufficientFeeBalance
                                             }
                                         >
                                             {loading ? 'Processing...' : 'Submit Withdrawal'}
