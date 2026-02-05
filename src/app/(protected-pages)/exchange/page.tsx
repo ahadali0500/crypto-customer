@@ -458,7 +458,7 @@ const Page = () => {
 
     const amountNum = parseFloat(sellAmount) || 0;
     const fees = calculateFees(sellAmount); // fees in sell asset
-    const netAmount = amountNum + fees;
+    const netAmount = amountNum - fees;
 
     const conversionRate = parseFloat(buyAmount) / amountNum || 0; // existing conversion rate
 

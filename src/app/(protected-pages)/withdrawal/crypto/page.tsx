@@ -13,6 +13,7 @@ import { toast } from 'react-toastify';
 import { debounce } from 'lodash';
 import DataTable, { ColumnDef, OnSortParam } from '@/components/shared/DataTable';
 
+// ==================== TYPES ====================
 interface Currency {
     currencyId?: number;
     id?: string;
@@ -20,10 +21,8 @@ interface Currency {
     fullName: string;
     symbol?: string;
     type?: string;
-    balance?: string;
     availableBalance?: string;
     lockedBalance?: string;
-    icon?: string;
 }
 
 interface FeeBundle {
@@ -34,16 +33,15 @@ interface FeeBundle {
     name: string;
     rangeMin?: number | null;
     rangeMax?: number | null;
-    descrption?: string;
 }
 
 interface UserDetails {
     withdrawFees?: string | null;
 }
 
-type Withdrawal = {
+interface Withdrawal {
     id: number;
-    withdrawType: 'Bank' | 'Crypto';
+    withdrawType: 'Crypto';
     withdrawStatus: string;
     amount: string;
     fees: string;
@@ -55,663 +53,207 @@ type Withdrawal = {
         shortName: string;
         fullName: string;
     };
-    withdrawBank?: Array<{
-        country: string;
-        bankName: string;
-        accountNumber: string;
-    }>;
     withdrawCrypto?: Array<{
         walletAddress: string;
         network: string;
     }>;
-};
+}
 
+// ==================== COMPONENT ====================
 const WithdrawalPage = () => {
-    const [selectedWithdrawCurrency, setSelectedWithdrawCurrency] = useState<Currency | null>(null);
+    // ========== State ==========
+    const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(null);
     const [selectedFeeBundle, setSelectedFeeBundle] = useState<FeeBundle | null>(null);
-    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-    const [errorMessage, setErrorMessage] = useState<string>('');
-    const [feeBundleError, setFeeBundleError] = useState<string>('');
-    const [crypto, setCrypto] = useState<Currency[]>([]);
-    const [allCurrency, setAllCurrency] = useState<Currency[]>([]);
-    const [activeTab, setActiveTab] = useState<string>('available');
-    const [loading, setLoading] = useState<boolean>(false);
-    const [walletAddress, setWalletAddress] = useState<string>('');
-    const [withdrawAmount, setWithdrawAmount] = useState<string>('');
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [feeBundleError, setFeeBundleError] = useState('');
+    const [cryptoCurrencies, setCryptoCurrencies] = useState<Currency[]>([]);
+    const [activeTab, setActiveTab] = useState('available');
+    const [loading, setLoading] = useState(false);
+    const [walletAddress, setWalletAddress] = useState('');
+    const [withdrawAmount, setWithdrawAmount] = useState('');
     const [exchangeRate, setExchangeRate] = useState<number | null>(null);
-    const [conversionLoading, setConversionLoading] = useState<boolean>(false);
+    const [conversionLoading, setConversionLoading] = useState(false);
+    const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+    const [feeBundles, setFeeBundles] = useState<FeeBundle[]>([]);
+    const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
+    const [tableLoading, setTableLoading] = useState(false);
+    const [pageIndex, setPageIndex] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [sortConfig, setSortConfig] = useState<{ key: string; order: 'asc' | 'desc' | '' }>({
+        key: '',
+        order: '',
+    });
 
     const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-    const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
-    const [bundleDetails, setBundleDetails] = useState<FeeBundle[]>([]);
-    const [symbolToIdMap, setSymbolToIdMap] = useState<Record<string, string>>({});
     const conversionSeqRef = useRef(0);
 
-    const shouldShowBundleForWithdraw = userDetails?.withdrawFees === null || userDetails?.withdrawFees === undefined;
+    // ========== Computed Values ==========
+    const shouldShowBundleForWithdraw = useMemo(
+        () => userDetails?.withdrawFees === null || userDetails?.withdrawFees === undefined,
+        [userDetails]
+    );
 
-    const cryptoBundles = useMemo(() => {
-        return (bundleDetails || [])
-            .filter((bundle) => (bundle.category || '').toLowerCase() === 'crypto')
+    const sortedFeeBundles = useMemo(() => {
+        return feeBundles
+            .filter((bundle) => bundle.category?.toLowerCase() === 'crypto')
             .sort((a, b) => (a.rangeMin || 0) - (b.rangeMin || 0));
-    }, [bundleDetails]);
+    }, [feeBundles]);
 
     const feePercent = useMemo(() => {
-        if (shouldShowBundleForWithdraw && selectedFeeBundle)
+        if (shouldShowBundleForWithdraw && selectedFeeBundle) {
             return parseFloat(selectedFeeBundle.value || '0');
-        if (!shouldShowBundleForWithdraw && userDetails?.withdrawFees)
+        }
+        if (!shouldShowBundleForWithdraw && userDetails?.withdrawFees) {
             return parseFloat(userDetails.withdrawFees || '0');
+        }
         return 0;
     }, [shouldShowBundleForWithdraw, selectedFeeBundle, userDetails]);
 
-    // Calculate all amounts based on exchange rate
-    const computed = useMemo(() => {
-        const amountInSelectedCurrency = parseFloat(withdrawAmount || '0') || 0;
-        const feeInSelectedCurrency = amountInSelectedCurrency * (feePercent / 100);
-        const netInSelectedCurrency = amountInSelectedCurrency - feeInSelectedCurrency;
-
-        const amountInUSD = exchangeRate ? amountInSelectedCurrency * exchangeRate : 0;
-        const feeInUSD = exchangeRate ? feeInSelectedCurrency * exchangeRate : 0;
-        const netInUSD = exchangeRate ? netInSelectedCurrency * exchangeRate : 0;
-
-        return {
-            // Selected currency amounts
-            amountInSelectedCurrency,
-            feeInSelectedCurrency,
-            netInSelectedCurrency,
-            // USD amounts
-            amountInUSD,
-            feeInUSD,
-            netInUSD,
-            // Rate
-            rate: exchangeRate,
-        };
-    }, [withdrawAmount, feePercent, exchangeRate]);
-
     const balances = useMemo(() => {
-        const available = parseFloat(selectedWithdrawCurrency?.availableBalance || '0') || 0;
-        const locked = parseFloat(selectedWithdrawCurrency?.lockedBalance || '0') || 0;
+        const available = parseFloat(selectedCurrency?.availableBalance || '0') || 0;
+        const locked = parseFloat(selectedCurrency?.lockedBalance || '0') || 0;
         return { available, locked };
-    }, [selectedWithdrawCurrency]);
+    }, [selectedCurrency]);
 
     const maxAllowed = useMemo(() => {
-        if (!selectedWithdrawCurrency) return 0;
-        const available = balances.available;
-        const locked = balances.locked;
+        if (!selectedCurrency) return 0;
+
+        const { available, locked } = balances;
+        const feeRate = feePercent / 100;
+
         if (feePercent <= 0) {
             return activeTab === 'locked' ? locked : available;
         }
-        const feeRate = feePercent / 100;
+
         if (activeTab === 'locked') {
+            // For locked: min(locked balance, available/feeRate)
             const maxByLocked = locked;
             const maxByFee = available / feeRate;
             return Math.max(0, Math.min(maxByLocked, maxByFee));
         }
+
+        // For available: available/(1 + feeRate)
         return Math.max(0, available / (1 + feeRate));
-    }, [balances, feePercent, selectedWithdrawCurrency, activeTab]);
+    }, [balances, feePercent, selectedCurrency, activeTab]);
 
-    // Fetch currency symbol to CoinGecko ID mapping
-    const fetchAllCurrencies = useCallback(async () => {
-        try {
-            const cryptoListRes = await axios.get('https://api.coingecko.com/api/v3/coins/list');
-            const map: Record<string, string> = {};
-            cryptoListRes.data.forEach((coin: any) => {
-                map[coin.symbol.toUpperCase()] = coin.id;
-            });
-            setSymbolToIdMap(map);
-        } catch (error) {
-            console.error('Error fetching currencies:', error);
-        }
-    }, []);
+    const computed = useMemo(() => {
+        const amount = parseFloat(withdrawAmount || '0') || 0;
+        const fee = amount * (feePercent / 100);
+        const net = amount - fee;
 
-    useEffect(() => {
-        fetchAllCurrencies();
-    }, [fetchAllCurrencies]);
+        const amountUSD = exchangeRate ? amount * exchangeRate : 0;
+        const feeUSD = exchangeRate ? fee * exchangeRate : 0;
+        const netUSD = exchangeRate ? net * exchangeRate : 0;
 
-    const getCoinGeckoId = useCallback(
-        (symbol: string): string | null => {
-            const cleaned = symbol.trim().split(/[\s/-]/)[0].toUpperCase();
-            const fromDynamic = typeof symbolToIdMap === 'object' && symbolToIdMap[cleaned];
-            return fromDynamic || null;
-        },
-        [symbolToIdMap]
-    );
-
-    const getCurrencyType = useCallback(
-        (symbol: string): string | null => {
-            const data = allCurrency.filter((n) => n?.shortName === symbol);
-            return data[0]?.type || null;
-        },
-        [allCurrency]
-    );
-
-    // Fetch conversion rate - same logic as reference component
-    const fetchConversionRate = useCallback(
-        async (fromSymbol: string, toSymbol: string): Promise<number | null> => {
-            try {
-                const fromType = getCurrencyType(fromSymbol);
-                const toType = getCurrencyType(toSymbol);
-
-                const cleanFromSymbol = fromSymbol.trim().split(/[\s/-]/)[0].toLowerCase();
-                const cleanToSymbol = toSymbol.trim().split(/[\s/-]/)[0].toLowerCase();
-
-                if (cleanFromSymbol === cleanToSymbol) {
-                    return 1;
-                }
-
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-                let conversionRate: number | null = null;
-
-                // Determine actual types with fallback for common currencies
-                const actualFromType = fromType || 'Crypto';
-                const actualToType = toType || 'Fiat'; // USD is Fiat
-
-                if (actualFromType === 'Crypto' && actualToType === 'Crypto') {
-                    // Crypto to Crypto: Get both prices in USD, then divide
-                    const res = await axios.get(
-                        `https://api.coingecko.com/api/v3/simple/price?ids=${cleanFromSymbol},${cleanToSymbol}&vs_currencies=usd`,
-                        { signal: controller.signal }
-                    );
-                    const fromPriceUSD = res.data[cleanFromSymbol]?.usd;
-                    const toPriceUSD = res.data[cleanToSymbol]?.usd;
-                    if (
-                        typeof fromPriceUSD === 'number' &&
-                        typeof toPriceUSD === 'number' &&
-                        toPriceUSD > 0
-                    ) {
-                        conversionRate = fromPriceUSD / toPriceUSD;
-                    }
-                } else if (actualFromType === 'Crypto' && actualToType === 'Fiat') {
-                    // Crypto to Fiat: Direct conversion (e.g., BTC to USD)
-                    const res = await axios.get(
-                        `https://api.coingecko.com/api/v3/simple/price?ids=${cleanFromSymbol}&vs_currencies=${cleanToSymbol}`,
-                        { signal: controller.signal }
-                    );
-                    const rate = res.data[cleanFromSymbol]?.[cleanToSymbol];
-                    if (typeof rate === 'number' && rate >= 0) {
-                        conversionRate = rate;
-                    }
-                } else if (actualFromType === 'Fiat' && actualToType === 'Crypto') {
-                    // Fiat to Crypto: Inverse of crypto price in fiat
-                    const res = await axios.get(
-                        `https://api.coingecko.com/api/v3/simple/price?ids=${cleanToSymbol}&vs_currencies=${cleanFromSymbol}`,
-                        { signal: controller.signal }
-                    );
-                    const cryptoPriceInFiat = res.data[cleanToSymbol]?.[cleanFromSymbol];
-                    if (typeof cryptoPriceInFiat === 'number' && cryptoPriceInFiat > 0) {
-                        conversionRate = 1 / cryptoPriceInFiat;
-                    }
-                }
-                else if (actualFromType === 'Fiat' && actualToType === 'Fiat') {
-                    const res = await axios.get(
-                        `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${cleanFromSymbol},${cleanToSymbol}`,
-                        { signal: controller.signal }
-                    );
-                    const btcInFrom = res.data.bitcoin?.[cleanFromSymbol]; // BTC price in EUR
-                    const btcInTo = res.data.bitcoin?.[cleanToSymbol];
-                    if (typeof btcInFrom === 'number' && typeof btcInTo === 'number' && btcInFrom > 0) {
-                        // 1 EUR = (BTC price in USD) / (BTC price in EUR)
-                        conversionRate = btcInTo / btcInFrom;
-                    }
-                }
-
-                clearTimeout(timeoutId);
-                return conversionRate;
-            } catch (error) {
-                if (axios.isCancel(error)) {
-                    console.error('Request timeout for conversion rate');
-                } else {
-                    console.error('Error fetching conversion rate:', error);
-                }
-                return null;
-            }
-        },
-        [getCurrencyType]
-    );
-
-    // Debounced conversion calculation
-    const debouncedCalculateConversion = useCallback(
-        debounce(async (seq: number, amount: string) => {
-            if (!amount || parseFloat(amount) <= 0) {
-                if (seq !== conversionSeqRef.current) return;
-                setExchangeRate(null);
-                setConversionLoading(false);
-                return;
-            }
-
-            try {
-                const fromSymbol = selectedWithdrawCurrency?.shortName || selectedWithdrawCurrency?.symbol || '';
-
-                if (!fromSymbol) {
-                    console.warn('No fromSymbol available');
-                    setExchangeRate(null);
-                    setConversionLoading(false);
-                    return;
-                }
-
-                console.log('Fetching conversion rate for:', fromSymbol, 'to USD');
-
-                // Get conversion rate to USD
-                const conversionRate = await fetchConversionRate(fromSymbol, 'USD');
-
-                if (seq !== conversionSeqRef.current) return;
-
-                console.log('Conversion rate received:', conversionRate);
-
-                if (conversionRate !== null && conversionRate > 0 && isFinite(conversionRate)) {
-                    setExchangeRate(conversionRate);
-                } else {
-                    console.warn('Invalid conversion rate:', conversionRate);
-                    setExchangeRate(null);
-                }
-            } catch (error) {
-                if (seq !== conversionSeqRef.current) return;
-                console.error('Conversion error:', error);
-                setExchangeRate(null);
-            } finally {
-                if (seq !== conversionSeqRef.current) return;
-                setConversionLoading(false);
-            }
-        }, 800),
-        [selectedWithdrawCurrency, fetchConversionRate]
-    );
-
-    useEffect(() => {
-        return () => {
-            debouncedCalculateConversion.cancel();
+        return {
+            amount,
+            fee,
+            net,
+            amountUSD,
+            feeUSD,
+            netUSD,
         };
-    }, [debouncedCalculateConversion]);
+    }, [withdrawAmount, feePercent, exchangeRate]);
 
-    const calculateConversion = useCallback(
-        async (amount: string) => {
-            if (!selectedWithdrawCurrency || !amount || parseFloat(amount) <= 0) {
-                setExchangeRate(null);
-                return;
+    const sortedWithdrawals = useMemo(() => {
+        if (!sortConfig.key || sortConfig.order === '') {
+            return withdrawals;
+        }
+
+        const direction = sortConfig.order === 'asc' ? 1 : -1;
+        return [...withdrawals].sort((a, b) => {
+            const valA = (a as any)[sortConfig.key];
+            const valB = (b as any)[sortConfig.key];
+
+            if (sortConfig.key === 'createdAt') {
+                return (new Date(valA).getTime() - new Date(valB).getTime()) * direction;
             }
-            setConversionLoading(true);
-            const seq = (conversionSeqRef.current += 1);
-            debouncedCalculateConversion(seq, amount);
-        },
-        [selectedWithdrawCurrency, debouncedCalculateConversion]
-    );
 
-    useEffect(() => {
-        calculateConversion(withdrawAmount);
-    }, [withdrawAmount, selectedWithdrawCurrency, calculateConversion]);
+            if (['amount', 'fees', 'total'].includes(sortConfig.key)) {
+                const numA = parseFloat(String(valA).replace(/[^0-9.-]+/g, ''));
+                const numB = parseFloat(String(valB).replace(/[^0-9.-]+/g, ''));
+                return (numA - numB) * direction;
+            }
 
-    const fetchUserDetails = async () => {
+            if (typeof valA === 'number' && typeof valB === 'number') {
+                return (valA - valB) * direction;
+            }
+
+            return String(valA).localeCompare(String(valB)) * direction;
+        });
+    }, [withdrawals, sortConfig]);
+
+    const paginatedWithdrawals = useMemo(() => {
+        const start = (pageIndex - 1) * pageSize;
+        const end = start + pageSize;
+        return sortedWithdrawals.slice(start, end);
+    }, [sortedWithdrawals, pageIndex, pageSize]);
+
+    // ========== API Calls ==========
+    const fetchUserDetails = useCallback(async () => {
+        if (!token) return;
         try {
             const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/auth/fetch`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setUserDetails(res.data.data);
         } catch (error) {
-            console.log('Error fetching user details:', error);
+            console.error('Error fetching user details:', error);
         }
-    };
+    }, [token]);
 
-    const fetchBundleDetails = async () => {
+    const fetchFeeBundles = useCallback(async () => {
+        if (!token) return;
         try {
             const res = await axios.get(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/fees/bundle/fetch?category=Crypto`,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            const bundleData = res.data.data;
-            if (Array.isArray(bundleData)) {
-                setBundleDetails(bundleData);
-            } else if (bundleData) {
-                setBundleDetails([bundleData]);
-            } else {
-                setBundleDetails([]);
-            }
+            const data = res.data.data;
+            setFeeBundles(Array.isArray(data) ? data : data ? [data] : []);
         } catch (error) {
-            console.log('Error fetching bundle details:', error);
-            setBundleDetails([]);
-        }
-    };
-
-    const fetchCurrencies = async () => {
-        try {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/currency/user/fetch`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            const res1 = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/currency/fetch`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            setCrypto(res.data.data || []);
-            setAllCurrency(res1.data.data || []);
-
-            if (res.data.data && res.data.data.length > 0) {
-                setSelectedWithdrawCurrency(res.data.data[0]);
-            }
-        } catch (error) {
-            console.log('Error fetching currencies:', error);
-        }
-    };
-
-    useEffect(() => {
-        if (token) {
-            fetchUserDetails();
-            fetchBundleDetails();
-            fetchCurrencies();
+            console.error('Error fetching fee bundles:', error);
+            setFeeBundles([]);
         }
     }, [token]);
 
-    const getCurrencyKey = (currency: Currency): string => {
-        return currency.currencyId?.toString() || currency.id || currency.shortName;
-    };
-
-    const handleWithdrawCurrencySelect = (key: string) => {
-        const selected = crypto.find(
-            (c) =>
-                (c.currencyId && c.currencyId.toString() === key) ||
-                (c.id && c.id === key) ||
-                c.shortName === key ||
-                c.fullName === key
-        );
-        if (selected) {
-            conversionSeqRef.current += 1;
-            debouncedCalculateConversion.cancel();
-            setConversionLoading(false);
-            setSelectedWithdrawCurrency(selected);
-            setWithdrawAmount('');
-            setErrorMessage('');
-            setFeeBundleError('');
-            setSelectedFeeBundle(null);
-            setExchangeRate(null);
-        }
-    };
-
-    const validateWithdrawAmount = (amount: string): boolean => {
-    if (!selectedWithdrawCurrency || !amount) return false
-
-    const numAmount = parseFloat(amount)
-    if (isNaN(numAmount) || numAmount <= 0) return false
-
-    const available = parseFloat(selectedWithdrawCurrency.availableBalance || '0') || 0
-    const locked = parseFloat(selectedWithdrawCurrency.lockedBalance || '0') || 0
-
-    const feeRate = feePercent / 100
-    const feeNeeded = feeRate > 0 ? numAmount * feeRate : 0
-
-    if (activeTab === 'locked') {
-        if (numAmount > locked) return false
-
-        if (available < feeNeeded) return false
-
-        return true
-    }
-
-    if (feeRate > 0) {
-        return numAmount <= available / (1 + feeRate)
-    }
-    return numAmount <= available
-}
-
-
-    const getAvailableBalance = (): number => {
-        if (!selectedWithdrawCurrency) return 0;
-        const balance =
-            activeTab === 'locked'
-                ? selectedWithdrawCurrency.lockedBalance || '0'
-                : selectedWithdrawCurrency.availableBalance || '0';
-        return parseFloat(balance.toString());
-    };
-
-    const getFeeEligibility = useCallback(
-        (amount: string, bundle: FeeBundle): boolean => {
-            if (!amount) return true;
-            if (selectedWithdrawCurrency?.shortName !== 'BTC') return true;
-            const numAmount = parseFloat(amount);
-            if (isNaN(numAmount) || numAmount <= 0) return false;
-            const percent = parseFloat(bundle.value || '0');
-            if (percent === 2) return numAmount <= 1;
-            if (percent === 3.5) return numAmount <= 3;
-            if (percent === 5) return numAmount <= 7;
-            if (percent === 7) return true;
-            return true;
-        },
-        [selectedWithdrawCurrency]
-    );
-
-    const isBundleEnabled = useCallback(
-        (bundle: FeeBundle, amount: string) => getFeeEligibility(amount, bundle),
-        [getFeeEligibility]
-    );
-
-    const getDisabledReason = useCallback(
-        (bundle: FeeBundle, amount: string): string => {
-            if (!amount) return '';
-            if (selectedWithdrawCurrency?.shortName !== 'BTC') return '';
-            const numAmount = parseFloat(amount);
-            if (isNaN(numAmount) || numAmount <= 0) return '';
-            const percent = parseFloat(bundle.value || '0');
-            if (percent === 2 && numAmount > 1) return 'Not available above 1 BTC';
-            if (percent === 3.5 && numAmount > 3) return 'Not available above 3 BTC';
-            if (percent === 5 && numAmount > 7) return 'Not available above 7 BTC';
-            return '';
-        },
-        [selectedWithdrawCurrency]
-    );
-
-    const handleFeeBundleSelect = (bundle: FeeBundle) => {
-        setFeeBundleError('');
-        if (!withdrawAmount) {
-            setFeeBundleError('Please enter withdraw amount first');
-            setSelectedFeeBundle(bundle);
-            return;
-        }
-        const isEligible = isBundleEnabled(bundle, withdrawAmount);
-        if (!isEligible) {
-            const reason = getDisabledReason(bundle, withdrawAmount);
-            setFeeBundleError(reason);
-            setSelectedFeeBundle(bundle);
-            return;
-        }
-        setSelectedFeeBundle(bundle);
-    };
-
-    const handleWithdrawAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setWithdrawAmount(value);
-        setFeeBundleError('');
-        setErrorMessage('');
-
-        if (!value) {
-            setExchangeRate(null);
-            setSelectedFeeBundle(null);
-            return;
-        }
-
-        const numValue = parseFloat(value);
-        if (isNaN(numValue) || numValue <= 0) {
-            setErrorMessage('Please enter a valid amount');
-            return;
-        }
-
-        if (!selectedWithdrawCurrency) return
-
-const available = parseFloat(selectedWithdrawCurrency.availableBalance || '0') || 0
-const locked = parseFloat(selectedWithdrawCurrency.lockedBalance || '0') || 0
-const feeRate = feePercent / 100
-const feeNeeded = feeRate > 0 ? numValue * feeRate : 0
-
-if (activeTab === 'locked') {
-    if (numValue > locked) {
-        setErrorMessage(
-            `Amount exceeds locked balance. Locked: ${locked.toFixed(6)} ${selectedWithdrawCurrency.shortName}`
-        )
-        return
-    }
-    if (available < feeNeeded) {
-        setErrorMessage(
-            `Insufficient AVAILABLE balance to deduct fee. Fee needed: ${feeNeeded.toFixed(6)} ${selectedWithdrawCurrency.shortName}, Available: ${available.toFixed(6)}`
-        )
-        return
-    }
-} else {
-    // available tab
-    const max = maxAllowed
-    if (numValue - max > 1e-9) {
-        setErrorMessage(
-            `Amount exceeds max allowed. Max: ${max.toFixed(6)} ${selectedWithdrawCurrency.shortName}`
-        )
-        return
-    }
-}
-
-
-        if (selectedFeeBundle && !isBundleEnabled(selectedFeeBundle, value)) {
-            const reason = getDisabledReason(selectedFeeBundle, value);
-            setFeeBundleError(reason);
-        }
-    };
-
-    const handleWalletAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setWalletAddress(e.target.value);
-        setErrorMessage('');
-    };
-
-    const handleWithdrawClick = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        if (!selectedWithdrawCurrency || !withdrawAmount || !walletAddress) {
-            const message = 'Please fill in all required fields';
-            setErrorMessage(message);
-            toast.error(message);
-            return;
-        }
-
-        const numAmount = parseFloat(withdrawAmount);
-        if (isNaN(numAmount) || numAmount <= 0) {
-            const message = 'Please enter a valid positive amount';
-            setErrorMessage(message);
-            toast.error(message);
-            return;
-        }
-
-        if (shouldShowBundleForWithdraw && !selectedFeeBundle) {
-            const message = 'Please select a fee option';
-            setErrorMessage(message);
-            toast.error(message);
-            return;
-        }
-
-        if (shouldShowBundleForWithdraw && selectedFeeBundle) {
-            const isEligible = isBundleEnabled(selectedFeeBundle, withdrawAmount);
-            if (!isEligible) {
-                const message = 'Selected fee option is not eligible. Please choose another.';
-                setErrorMessage(message);
-                toast.error(message);
-                return;
-            }
-        }
-
-        if (!validateWithdrawAmount(withdrawAmount)) {
-            const message = `Insufficient balance.`;
-            setErrorMessage(message);
-            toast.error(message);
-            return;
-        }
-
-        setLoading(true);
-        setErrorMessage('');
-
+    const fetchCryptoCurrencies = useCallback(async () => {
+        if (!token) return;
         try {
-            const formData = new FormData();
-            formData.append('balancetype', activeTab === 'locked' ? 'Locked' : 'Available');
-            formData.append(
-                'currencyId',
-                selectedWithdrawCurrency.currencyId?.toString() || selectedWithdrawCurrency.id || ''
-            );
-            formData.append('walletAddress', walletAddress);
-            formData.append('amount', withdrawAmount);
+            const [userCurrenciesRes, allCurrenciesRes] = await Promise.all([
+                axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/currency/user/fetch`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                }),
+                axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/currency/fetch`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                }),
+            ]);
 
-            const feeAmount = computed.feeInSelectedCurrency;
-            const netAmount = computed.netInSelectedCurrency;
+            const userCurrencies = userCurrenciesRes.data.data || [];
+            const allCurrencies = allCurrenciesRes.data.data || [];
 
-            if (exchangeRate && exchangeRate > 0) {
-                const netUSD = netAmount * exchangeRate;
-                formData.append('total', netUSD.toFixed(2));
-            } else {
-                formData.append('total', netAmount.toFixed(6));
+            // Filter only crypto currencies
+            const cryptoOnly = userCurrencies.filter((currency: Currency) => {
+                const currencyInfo = allCurrencies.find(
+                    (c: Currency) => c.shortName === currency.shortName || c.id === currency.id
+                );
+                return currencyInfo?.type?.toLowerCase() === 'crypto';
+            });
+
+            setCryptoCurrencies(cryptoOnly);
+
+            // Auto-select first crypto currency
+            if (cryptoOnly.length > 0 && !selectedCurrency) {
+                setSelectedCurrency(cryptoOnly[0]);
             }
-
-            if (shouldShowBundleForWithdraw && selectedFeeBundle) {
-                formData.append('FeesType', 'Package');
-                formData.append('feesBundleId', selectedFeeBundle.id || '');
-                formData.append('fees', selectedFeeBundle.value);
-            } else {
-                formData.append('FeesType', 'Default');
-                formData.append('fees', userDetails?.withdrawFees || '0');
-            }
-
-            const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/withdraw/crytpo/create`,
-                formData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
-            );
-
-            if (response.data) {
-                setDialogOpen(true);
-                setWithdrawAmount('');
-                setWalletAddress('');
-                setErrorMessage('');
-                setFeeBundleError('');
-                setSelectedFeeBundle(null);
-                setExchangeRate(null);
-                await fetchCurrencies();
-                toast.success('Withdrawal submitted successfully!');
-            }
-        } catch (error: any) {
-            console.error('Withdrawal error:', error);
-            const errorMsg = error.response?.data?.message || 'Withdrawal failed.';
-            setErrorMessage(errorMsg);
-            toast.error(errorMsg);
-        } finally {
-            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching currencies:', error);
         }
-    };
+    }, [token, selectedCurrency]);
 
-    const handleTabChange = (value: string) => {
-        setActiveTab(value);
-        conversionSeqRef.current += 1;
-        debouncedCalculateConversion.cancel();
-        setConversionLoading(false);
-        setWithdrawAmount('');
-        setWalletAddress('');
-        setErrorMessage('');
-        setFeeBundleError('');
-        setLoading(false);
-        setSelectedFeeBundle(null);
-        setExchangeRate(null);
-    };
-
-    const floorTo = (num: number, decimals: number) => {
-        const factor = Math.pow(10, decimals);
-        return Math.floor(num * factor) / factor;
-    };
-
-    const handleMaxWithdrawAmountClick = () => {
-        setWithdrawAmount(floorTo(maxAllowed, 6).toFixed(6));
-    };
-
-    const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
-    const [tableLoading, setTableLoading] = useState(false);
-    const [pageIndex, setPageIndex] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
-    const [sortConfig, setSortConfig] = useState<{
-        key: string;
-        order: 'asc' | 'desc' | '';
-    }>({ key: '', order: '' });
-
-    const fetchWithdrawalHistory = async () => {
+    const fetchWithdrawalHistory = useCallback(async () => {
+        if (!token) return;
         setTableLoading(true);
         try {
             const res = await axios.get(
@@ -724,72 +266,445 @@ if (activeTab === 'locked') {
         } finally {
             setTableLoading(false);
         }
-    };
+    }, [token]);
 
-    const sortedData = useMemo(() => {
-        if (!sortConfig.key || sortConfig.order === '') {
-            return withdrawals;
+    const fetchConversionRate = useCallback(async (cryptoSymbol: string): Promise<number | null> => {
+        try {
+            const cleanSymbol = cryptoSymbol.trim().split(/[\s/-]/)[0].toLowerCase();
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+            const res = await axios.get(
+                `https://api.coingecko.com/api/v3/simple/price?ids=${cleanSymbol}&vs_currencies=usd`,
+                { signal: controller.signal }
+            );
+
+            clearTimeout(timeoutId);
+            const rate = res.data[cleanSymbol]?.usd;
+            return typeof rate === 'number' && rate >= 0 ? rate : null;
+        } catch (error) {
+            if (axios.isCancel(error)) {
+                console.error('Request timeout for conversion rate');
+            } else {
+                console.error('Error fetching conversion rate:', error);
+            }
+            return null;
         }
-        const direction = sortConfig.order === 'asc' ? 1 : -1;
-        return [...withdrawals].sort((a, b) => {
-            const A = (a as any)[sortConfig.key];
-            const B = (b as any)[sortConfig.key];
-
-            if (sortConfig.key === 'createdAt') {
-                return (new Date(A).getTime() - new Date(B).getTime()) * direction;
-            }
-
-            if (['amount', 'fees', 'total'].includes(sortConfig.key)) {
-                const numA = parseFloat(String(A).replace(/[^0-9.-]+/g, ''));
-                const numB = parseFloat(String(B).replace(/[^0-9.-]+/g, ''));
-                return (numA - numB) * direction;
-            }
-
-            if (typeof A === 'number' && typeof B === 'number') {
-                return (A - B) * direction;
-            }
-
-            return String(A).localeCompare(String(B)) * direction;
-        });
-    }, [withdrawals, sortConfig]);
-
-    const currentPageData = useMemo(() => {
-        const start = (pageIndex - 1) * pageSize;
-        const end = start + pageSize;
-        return sortedData.slice(start, end);
-    }, [sortedData, pageIndex, pageSize]);
-
-    const totalCount = sortedData.length;
-
-    const handleSort = (sort: OnSortParam) => {
-        setSortConfig({ key: String(sort.key), order: sort.order });
-        setPageIndex(1);
-    };
-
-    const handlePageChange = (newPage: number) => {
-        setPageIndex(newPage);
-    };
-
-    const handlePageSizeChange = (newSize: number) => {
-        setPageSize(newSize);
-        setPageIndex(1);
-    };
-
-    useEffect(() => {
-        fetchWithdrawalHistory();
     }, []);
 
+    // ========== Effects ==========
+    useEffect(() => {
+        if (token) {
+            fetchUserDetails();
+            fetchFeeBundles();
+            fetchCryptoCurrencies();
+            fetchWithdrawalHistory();
+        }
+    }, [token, fetchUserDetails, fetchFeeBundles, fetchCryptoCurrencies, fetchWithdrawalHistory]);
+
+    const debouncedCalculateConversion = useCallback(
+        debounce(async (seq: number, amount: string) => {
+            if (!amount || parseFloat(amount) <= 0) {
+                if (seq !== conversionSeqRef.current) return;
+                setExchangeRate(null);
+                setConversionLoading(false);
+                return;
+            }
+
+            try {
+                const cryptoSymbol = selectedCurrency?.shortName || selectedCurrency?.symbol || '';
+
+                if (!cryptoSymbol) {
+                    setExchangeRate(null);
+                    setConversionLoading(false);
+                    return;
+                }
+
+                const conversionRate = await fetchConversionRate(cryptoSymbol);
+
+                if (seq !== conversionSeqRef.current) return;
+
+                if (conversionRate !== null && conversionRate > 0 && isFinite(conversionRate)) {
+                    setExchangeRate(conversionRate);
+                } else {
+                    setExchangeRate(null);
+                }
+            } catch (error) {
+                if (seq !== conversionSeqRef.current) return;
+                console.error('Conversion error:', error);
+                setExchangeRate(null);
+            } finally {
+                if (seq !== conversionSeqRef.current) return;
+                setConversionLoading(false);
+            }
+        }, 800),
+        [selectedCurrency, fetchConversionRate]
+    );
+
+    useEffect(() => {
+        return () => {
+            debouncedCalculateConversion.cancel();
+        };
+    }, [debouncedCalculateConversion]);
+
+    useEffect(() => {
+        if (selectedCurrency && withdrawAmount && parseFloat(withdrawAmount) > 0) {
+            setConversionLoading(true);
+            const seq = (conversionSeqRef.current += 1);
+            debouncedCalculateConversion(seq, withdrawAmount);
+        } else {
+            setExchangeRate(null);
+        }
+    }, [withdrawAmount, selectedCurrency, debouncedCalculateConversion]);
+
+    // ========== Validation ==========
+    const validateWithdrawAmount = useCallback(
+        (amount: string): boolean => {
+            if (!selectedCurrency || !amount) return false;
+
+            const numAmount = parseFloat(amount);
+            if (isNaN(numAmount) || numAmount <= 0) return false;
+
+            const { available, locked } = balances;
+            const feeRate = feePercent / 100;
+            const feeNeeded = feeRate > 0 ? numAmount * feeRate : 0;
+
+            if (activeTab === 'locked') {
+                if (numAmount > locked) return false;
+                if (available < feeNeeded) return false;
+                return true;
+            }
+
+            if (feeRate > 0) {
+                return numAmount <= available / (1 + feeRate);
+            }
+            return numAmount <= available;
+        },
+        [selectedCurrency, balances, feePercent, activeTab]
+    );
+
+    const getFeeEligibility = useCallback(
+        (amount: string, bundle: FeeBundle): boolean => {
+            if (!amount) return true;
+            if (selectedCurrency?.shortName !== 'BTC') return true;
+
+            const numAmount = parseFloat(amount);
+            if (isNaN(numAmount) || numAmount <= 0) return false;
+
+            const percent = parseFloat(bundle.value || '0');
+            if (percent === 2) return numAmount <= 1;
+            if (percent === 3.5) return numAmount <= 3;
+            if (percent === 5) return numAmount <= 7;
+            if (percent === 7) return true;
+
+            return true;
+        },
+        [selectedCurrency]
+    );
+
+    const getDisabledReason = useCallback(
+        (bundle: FeeBundle, amount: string): string => {
+            if (!amount || selectedCurrency?.shortName !== 'BTC') return '';
+
+            const numAmount = parseFloat(amount);
+            if (isNaN(numAmount) || numAmount <= 0) return '';
+
+            const percent = parseFloat(bundle.value || '0');
+            if (percent === 2 && numAmount > 1) return 'Not available above 1 BTC';
+            if (percent === 3.5 && numAmount > 3) return 'Not available above 3 BTC';
+            if (percent === 5 && numAmount > 7) return 'Not available above 7 BTC';
+
+            return '';
+        },
+        [selectedCurrency]
+    );
+
+    // ========== Event Handlers ==========
+    const handleCurrencySelect = useCallback(
+        (key: string) => {
+            const selected = cryptoCurrencies.find(
+                (c) =>
+                    (c.currencyId && c.currencyId.toString() === key) ||
+                    (c.id && c.id === key) ||
+                    c.shortName === key ||
+                    c.fullName === key
+            );
+
+            if (selected) {
+                conversionSeqRef.current += 1;
+                debouncedCalculateConversion.cancel();
+                setConversionLoading(false);
+                setSelectedCurrency(selected);
+                setWithdrawAmount('');
+                setErrorMessage('');
+                setFeeBundleError('');
+                setSelectedFeeBundle(null);
+                setExchangeRate(null);
+            }
+        },
+        [cryptoCurrencies, debouncedCalculateConversion]
+    );
+
+    const handleFeeBundleSelect = useCallback(
+        (bundle: FeeBundle) => {
+            setFeeBundleError('');
+
+            if (!withdrawAmount) {
+                setFeeBundleError('Please enter withdraw amount first');
+                setSelectedFeeBundle(bundle);
+                return;
+            }
+
+            const isEligible = getFeeEligibility(withdrawAmount, bundle);
+            if (!isEligible) {
+                const reason = getDisabledReason(bundle, withdrawAmount);
+                setFeeBundleError(reason);
+            }
+
+            setSelectedFeeBundle(bundle);
+        },
+        [withdrawAmount, getFeeEligibility, getDisabledReason]
+    );
+
+    const handleAmountChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            setWithdrawAmount(value);
+            setFeeBundleError('');
+            setErrorMessage('');
+
+            if (!value) {
+                setExchangeRate(null);
+                setSelectedFeeBundle(null);
+                return;
+            }
+
+            const numValue = parseFloat(value);
+            if (isNaN(numValue) || numValue <= 0) {
+                setErrorMessage('Please enter a valid amount');
+                return;
+            }
+
+            if (!selectedCurrency) return;
+
+            const { available, locked } = balances;
+            const feeRate = feePercent / 100;
+            const feeNeeded = feeRate > 0 ? numValue * feeRate : 0;
+
+            if (activeTab === 'locked') {
+                if (numValue > locked) {
+                    setErrorMessage(
+                        `Amount exceeds locked balance. Locked: ${locked.toFixed(6)} ${selectedCurrency.shortName}`
+                    );
+                    return;
+                }
+                if (available < feeNeeded) {
+                    setErrorMessage(
+                        `Insufficient available balance to deduct fee. Fee needed: ${feeNeeded.toFixed(6)} ${selectedCurrency.shortName}, Available: ${available.toFixed(6)}`
+                    );
+                    return;
+                }
+            } else {
+                if (numValue - maxAllowed > 1e-9) {
+                    setErrorMessage(
+                        `Amount exceeds max allowed. Max: ${maxAllowed.toFixed(6)} ${selectedCurrency.shortName}`
+                    );
+                    return;
+                }
+            }
+
+            if (selectedFeeBundle && !getFeeEligibility(value, selectedFeeBundle)) {
+                const reason = getDisabledReason(selectedFeeBundle, value);
+                setFeeBundleError(reason);
+            }
+        },
+        [selectedCurrency, balances, feePercent, activeTab, maxAllowed, selectedFeeBundle, getFeeEligibility, getDisabledReason]
+    );
+
+    const handleWalletAddressChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setWalletAddress(e.target.value);
+        setErrorMessage('');
+    }, []);
+
+    const handleTabChange = useCallback(
+        (value: string) => {
+            setActiveTab(value);
+            conversionSeqRef.current += 1;
+            debouncedCalculateConversion.cancel();
+            setConversionLoading(false);
+            setWithdrawAmount('');
+            setWalletAddress('');
+            setErrorMessage('');
+            setFeeBundleError('');
+            setLoading(false);
+            setSelectedFeeBundle(null);
+            setExchangeRate(null);
+        },
+        [debouncedCalculateConversion]
+    );
+
+    const handleMaxClick = useCallback(() => {
+        const floored = Math.floor(maxAllowed * 1e6) / 1e6;
+        setWithdrawAmount(floored.toFixed(6));
+    }, [maxAllowed]);
+
+    const handleWithdrawSubmit = useCallback(
+        async (e: React.MouseEvent) => {
+            e.preventDefault();
+
+            // Validation
+            if (!selectedCurrency || !withdrawAmount || !walletAddress) {
+                const message = 'Please fill in all required fields';
+                setErrorMessage(message);
+                toast.error(message);
+                return;
+            }
+
+            const numAmount = parseFloat(withdrawAmount);
+            if (isNaN(numAmount) || numAmount <= 0) {
+                const message = 'Please enter a valid positive amount';
+                setErrorMessage(message);
+                toast.error(message);
+                return;
+            }
+
+            if (shouldShowBundleForWithdraw && !selectedFeeBundle) {
+                const message = 'Please select a fee option';
+                setErrorMessage(message);
+                toast.error(message);
+                return;
+            }
+
+            if (shouldShowBundleForWithdraw && selectedFeeBundle) {
+                const isEligible = getFeeEligibility(withdrawAmount, selectedFeeBundle);
+                if (!isEligible) {
+                    const message = 'Selected fee option is not eligible. Please choose another.';
+                    setErrorMessage(message);
+                    toast.error(message);
+                    return;
+                }
+            }
+
+            if (!validateWithdrawAmount(withdrawAmount)) {
+                const message = 'Insufficient balance.';
+                setErrorMessage(message);
+                toast.error(message);
+                return;
+            }
+
+            setLoading(true);
+            setErrorMessage('');
+
+            try {
+                const formData = new FormData();
+                formData.append('balancetype', activeTab === 'locked' ? 'Locked' : 'Available');
+                formData.append(
+                    'currencyId',
+                    selectedCurrency.currencyId?.toString() || selectedCurrency.id || ''
+                );
+                formData.append('walletAddress', walletAddress);
+                formData.append('amount', withdrawAmount);
+
+                const netAmount = computed.net;
+                if (exchangeRate && exchangeRate > 0) {
+                    const netUSD = netAmount * exchangeRate;
+                    formData.append('total', netUSD.toFixed(2));
+                } else {
+                    formData.append('total', netAmount.toFixed(6));
+                }
+
+                if (shouldShowBundleForWithdraw && selectedFeeBundle) {
+                    formData.append('FeesType', 'Package');
+                    formData.append('feesBundleId', selectedFeeBundle.id || '');
+                    formData.append('fees', selectedFeeBundle.value);
+                } else {
+                    formData.append('FeesType', 'Default');
+                    formData.append('fees', userDetails?.withdrawFees || '0');
+                }
+
+                const response = await axios.post(
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/withdraw/crytpo/create`,
+                    formData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                );
+
+                if (response.data) {
+                    setDialogOpen(true);
+                    setWithdrawAmount('');
+                    setWalletAddress('');
+                    setErrorMessage('');
+                    setFeeBundleError('');
+                    setSelectedFeeBundle(null);
+                    setExchangeRate(null);
+                    await fetchCryptoCurrencies();
+                    await fetchWithdrawalHistory();
+                    toast.success('Withdrawal submitted successfully!');
+                }
+            } catch (error: any) {
+                console.error('Withdrawal error:', error);
+                const errorMsg = error.response?.data?.message || 'Withdrawal failed.';
+                setErrorMessage(errorMsg);
+                toast.error(errorMsg);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [
+            selectedCurrency,
+            withdrawAmount,
+            walletAddress,
+            shouldShowBundleForWithdraw,
+            selectedFeeBundle,
+            getFeeEligibility,
+            validateWithdrawAmount,
+            activeTab,
+            computed.net,
+            exchangeRate,
+            userDetails,
+            token,
+            fetchCryptoCurrencies,
+            fetchWithdrawalHistory,
+        ]
+    );
+
+    const handleSort = useCallback((sort: OnSortParam) => {
+        setSortConfig({ key: String(sort.key), order: sort.order });
+        setPageIndex(1);
+    }, []);
+
+    const handlePageChange = useCallback((newPage: number) => {
+        setPageIndex(newPage);
+    }, []);
+
+    const handlePageSizeChange = useCallback((newSize: number) => {
+        setPageSize(newSize);
+        setPageIndex(1);
+    }, []);
+
+    // ========== Helper Functions ==========
+    const getCurrencyKey = (currency: Currency): string => {
+        return currency.currencyId?.toString() || currency.id || currency.shortName;
+    };
+
+    const exceedsMaxAllowed =
+        selectedCurrency?.shortName === 'BTC' &&
+        withdrawAmount &&
+        parseFloat(withdrawAmount) - maxAllowed > 1e-9;
+
+    const insufficientFeeBalance = activeTab === 'locked' && computed.fee > balances.available;
+
+    // ========== Table Configuration ==========
     const statusColorMap: Record<string, string> = {
         Pending: 'bg-yellow-500 text-white',
         Completed: 'bg-green-500 text-white',
         Rejected: 'bg-red-500 text-white',
         Execute: 'bg-blue-500 text-white',
         Decline: 'bg-red-500 text-white',
-    };
-
-    const typeColorMap: Record<string, string> = {
-        Bank: 'bg-blue-500 text-white',
-        Crypto: 'bg-purple-500 text-white',
     };
 
     const columns: ColumnDef<Withdrawal>[] = [
@@ -826,39 +741,24 @@ if (activeTab === 'locked') {
             ),
         },
         {
-            header: 'Type',
-            accessorKey: 'withdrawType',
-            cell: ({ row }) => {
-                const type = row.original.withdrawType || 'Unknown';
-                return (
-                    <span className={`px-2 py-1 rounded text-xs ${typeColorMap[type] || 'bg-gray-500 text-white'}`}>
-                        {type}
-                    </span>
-                );
-            },
-        },
-        {
             header: 'Status',
             accessorKey: 'withdrawStatus',
             cell: ({ row }) => (
-                <span className={`px-2 py-1 rounded text-xs ${statusColorMap[row.original.withdrawStatus] || 'bg-gray-500'}`}>
+                <span
+                    className={`px-2 py-1 rounded text-xs ${
+                        statusColorMap[row.original.withdrawStatus] || 'bg-gray-500'
+                    }`}
+                >
                     {row.original.withdrawStatus}
                 </span>
             ),
         },
     ];
 
-    const exceedsMaxAllowed =
-        selectedWithdrawCurrency?.shortName === 'BTC' &&
-        withdrawAmount &&
-        parseFloat(withdrawAmount) - maxAllowed > 1e-9;
-
-        const insufficientFeeBalance =
-    activeTab === 'locked' &&
-    computed.feeInSelectedCurrency > balances.available
-
+    // ========== Render ==========
     return (
         <>
+            {/* Withdrawal Form */}
             <div className="p-5">
                 <div className="flex items-center justify-center">
                     <div className="w-full md:w-[60%] p-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
@@ -878,8 +778,8 @@ if (activeTab === 'locked') {
                                             <label className="text-sm">Select Crypto Currency:</label>
                                             <Dropdown
                                                 title={
-                                                    selectedWithdrawCurrency
-                                                        ? `${selectedWithdrawCurrency.shortName} - ${selectedWithdrawCurrency.fullName}`
+                                                    selectedCurrency
+                                                        ? `${selectedCurrency.shortName} - ${selectedCurrency.fullName}`
                                                         : 'Select Currency'
                                                 }
                                                 trigger="click"
@@ -887,12 +787,12 @@ if (activeTab === 'locked') {
                                                 toggleClassName="border border-gray-400 rounded-lg w-full"
                                                 menuClass="w-full"
                                             >
-                                                {crypto.map((currency) => (
+                                                {cryptoCurrencies.map((currency) => (
                                                     <DropdownItem
                                                         key={getCurrencyKey(currency)}
                                                         className="text-center w-full"
                                                         eventKey={getCurrencyKey(currency)}
-                                                        onSelect={handleWithdrawCurrencySelect}
+                                                        onSelect={handleCurrencySelect}
                                                     >
                                                         {currency.shortName} - {currency.fullName}
                                                     </DropdownItem>
@@ -901,15 +801,15 @@ if (activeTab === 'locked') {
                                         </div>
 
                                         {/* Balance Display */}
-                                        {selectedWithdrawCurrency && (
+                                        {selectedCurrency && (
                                             <div className="text-sm text-primary dark:text-primary mb-4">
                                                 {tab === 'available' ? 'Available' : 'Locked'} Balance:{' '}
                                                 {parseFloat(
                                                     tab === 'locked'
-                                                        ? selectedWithdrawCurrency.lockedBalance || '0'
-                                                        : selectedWithdrawCurrency.availableBalance || '0'
+                                                        ? selectedCurrency.lockedBalance || '0'
+                                                        : selectedCurrency.availableBalance || '0'
                                                 ).toFixed(6)}{' '}
-                                                {selectedWithdrawCurrency.shortName}
+                                                {selectedCurrency.shortName}
                                             </div>
                                         )}
 
@@ -934,7 +834,7 @@ if (activeTab === 'locked') {
                                                 step="0.000001"
                                                 min="0"
                                                 value={withdrawAmount}
-                                                onChange={handleWithdrawAmountChange}
+                                                onChange={handleAmountChange}
                                             />
                                         </div>
 
@@ -943,8 +843,8 @@ if (activeTab === 'locked') {
                                             <div className="w-full mb-4">
                                                 <label className="text-sm mb-2 block">Fee Options:</label>
                                                 <div className="grid grid-cols-2 gap-2">
-                                                    {cryptoBundles.map((bundle) => {
-                                                        const isEligible = isBundleEnabled(bundle, withdrawAmount);
+                                                    {sortedFeeBundles.map((bundle) => {
+                                                        const isEligible = getFeeEligibility(withdrawAmount, bundle);
                                                         const isSelected = selectedFeeBundle?.id === bundle.id;
                                                         const disabledReason = !isEligible
                                                             ? getDisabledReason(bundle, withdrawAmount)
@@ -955,35 +855,45 @@ if (activeTab === 'locked') {
                                                                 key={bundle.id}
                                                                 type="button"
                                                                 onClick={() => handleFeeBundleSelect(bundle)}
-                                                                disabled={!isEligible && withdrawAmount}
-                                                                className={`p-3 rounded-lg text-left text-sm transition-all border-2 ${isSelected
-                                                                    ? isEligible
-                                                                        ? 'bg-blue-500 text-white border-blue-600'
-                                                                        : 'bg-red-500 text-white border-red-600'
-                                                                    : !isEligible && withdrawAmount
+                                                                disabled={!isEligible && !!withdrawAmount}
+                                                                className={`p-3 rounded-lg text-left text-sm transition-all border-2 ${
+                                                                    isSelected
+                                                                        ? isEligible
+                                                                            ? 'bg-blue-500 text-white border-blue-600'
+                                                                            : 'bg-red-500 text-white border-red-600'
+                                                                        : !isEligible && withdrawAmount
                                                                         ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 border-gray-300 dark:border-gray-600 cursor-not-allowed opacity-60'
                                                                         : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                                    }`}
+                                                                }`}
                                                             >
                                                                 <div className="font-medium flex items-center justify-between">
                                                                     <span>
                                                                         {bundle.name} ({bundle.value}%)
                                                                     </span>
                                                                 </div>
-                                                                {/* DUAL CURRENCY FEE DISPLAY */}
                                                                 <div className="text-xs mt-2 space-y-1">
                                                                     <div>
-                                                                        {selectedWithdrawCurrency?.shortName}: {(parseFloat(withdrawAmount || '0') * (parseFloat(bundle.value) / 100)).toFixed(6)}
+                                                                        {selectedCurrency?.shortName}:{' '}
+                                                                        {(
+                                                                            parseFloat(withdrawAmount || '0') *
+                                                                            (parseFloat(bundle.value) / 100)
+                                                                        ).toFixed(6)}
                                                                     </div>
                                                                     {exchangeRate && withdrawAmount && (
                                                                         <div>
-                                                                            USD: ${(parseFloat(withdrawAmount || '0') * exchangeRate * (parseFloat(bundle.value) / 100)).toFixed(2)}
+                                                                            USD: $
+                                                                            {(
+                                                                                parseFloat(withdrawAmount || '0') *
+                                                                                exchangeRate *
+                                                                                (parseFloat(bundle.value) / 100)
+                                                                            ).toFixed(2)}
                                                                         </div>
                                                                     )}
                                                                 </div>
-
                                                                 {disabledReason && (
-                                                                    <div className="text-xs mt-2 font-medium">{disabledReason}</div>
+                                                                    <div className="text-xs mt-2 font-medium">
+                                                                        {disabledReason}
+                                                                    </div>
                                                                 )}
                                                             </button>
                                                         );
@@ -1013,18 +923,18 @@ if (activeTab === 'locked') {
 
                                         <hr className="text-primary bg-primary my-6" />
 
-                                        {/* Summary Section - DUAL CURRENCY */}
+                                        {/* Summary Section */}
                                         <div className="space-y-2 mb-6">
                                             {/* Withdrawal Amount */}
                                             <div className="flex flex-row items-center justify-between gap-4">
                                                 <div>Withdrawal Amount:</div>
                                                 <div className="space-y-1 text-right">
                                                     <div>
-                                                        {computed.amountInSelectedCurrency.toFixed(6)} {selectedWithdrawCurrency?.shortName}
+                                                        {computed.amount.toFixed(6)} {selectedCurrency?.shortName}
                                                     </div>
                                                     {exchangeRate && withdrawAmount && (
                                                         <div className="text-sm text-gray-500">
-                                                            ${computed.amountInUSD.toFixed(2)} USD
+                                                            ${computed.amountUSD.toFixed(2)} USD
                                                         </div>
                                                     )}
                                                 </div>
@@ -1035,58 +945,50 @@ if (activeTab === 'locked') {
                                                 <div>Fee ({feePercent}%):</div>
                                                 <div className="space-y-1 text-right">
                                                     <div>
-                                                        -{computed.feeInSelectedCurrency.toFixed(6)} {selectedWithdrawCurrency?.shortName}
+                                                        -{computed.fee.toFixed(6)} {selectedCurrency?.shortName}
                                                     </div>
                                                     {exchangeRate && withdrawAmount && (
                                                         <div className="text-sm text-gray-500">
-                                                            -${computed.feeInUSD.toFixed(2)} USD
+                                                            -${computed.feeUSD.toFixed(2)} USD
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
-                                            {activeTab === 'locked' && computed.feeInSelectedCurrency > balances.available && (
-    <div className="text-sm text-red-500">
-        You have no available balance to deduct the fee. Please add funds to Available.
-    </div>
-)}
 
+                                            {insufficientFeeBalance && (
+                                                <div className="text-sm text-red-500">
+                                                    Insufficient available balance to deduct the fee. Please add funds
+                                                    to Available.
+                                                </div>
+                                            )}
 
                                             {/* Net Received */}
                                             <div className="flex flex-row items-center justify-between gap-4 font-semibold">
                                                 <div>You Will Receive:</div>
                                                 <div className="space-y-1 text-right">
                                                     <div>
-                                                        {computed.netInSelectedCurrency.toFixed(6)} {selectedWithdrawCurrency?.shortName}
+                                                        {computed.net.toFixed(6)} {selectedCurrency?.shortName}
                                                     </div>
                                                     {exchangeRate && withdrawAmount && (
                                                         <div className="text-sm text-gray-500">
-                                                            ${computed.netInUSD.toFixed(2)} USD
+                                                            ${computed.netUSD.toFixed(2)} USD
                                                         </div>
                                                     )}
-                                                </div>
-                                            </div>
-
-                                            {/* Exchange Rate */}
-                                            <div className="flex flex-row items-center justify-between gap-4 text-sm text-gray-500 mt-4">
-                                                <div>Exchange Rate:</div>
-                                                <div>
-                                                    {exchangeRate
-                                                        ? `1 ${selectedWithdrawCurrency?.shortName} = $${exchangeRate.toFixed(2)}`
-                                                        : 'Loading...'}
                                                 </div>
                                             </div>
 
                                             {/* Max Amount */}
                                             <div
                                                 className="text-primary my-2 cursor-pointer hover:underline"
-                                                onClick={handleMaxWithdrawAmountClick}
+                                                onClick={handleMaxClick}
                                             >
-                                                Max allowed: {maxAllowed.toFixed(6)} {selectedWithdrawCurrency?.shortName}
+                                                Max allowed: {maxAllowed.toFixed(6)} {selectedCurrency?.shortName}
                                             </div>
 
                                             {exceedsMaxAllowed && (
                                                 <div className="text-sm text-red-500">
-                                                    Amount exceeds max allowed ({maxAllowed.toFixed(6)} {selectedWithdrawCurrency?.shortName})
+                                                    Amount exceeds max allowed ({maxAllowed.toFixed(6)}{' '}
+                                                    {selectedCurrency?.shortName})
                                                 </div>
                                             )}
                                         </div>
@@ -1095,16 +997,17 @@ if (activeTab === 'locked') {
                                             variant="solid"
                                             className="rounded-lg w-full"
                                             size="sm"
-                                            onClick={handleWithdrawClick}
+                                            onClick={handleWithdrawSubmit}
                                             disabled={
                                                 loading ||
-                                                !selectedWithdrawCurrency ||
+                                                !selectedCurrency ||
                                                 !withdrawAmount ||
                                                 !walletAddress ||
                                                 (shouldShowBundleForWithdraw && !selectedFeeBundle) ||
                                                 !!errorMessage ||
                                                 !!feeBundleError ||
-                                                exceedsMaxAllowed ||insufficientFeeBalance
+                                                exceedsMaxAllowed ||
+                                                insufficientFeeBalance
                                             }
                                         >
                                             {loading ? 'Processing...' : 'Submit Withdrawal'}
@@ -1117,13 +1020,17 @@ if (activeTab === 'locked') {
                 </div>
             </div>
 
+            {/* Success Dialog */}
             <Dialog isOpen={dialogOpen} onClose={() => setDialogOpen(false)}>
                 <div className="text-center">
                     <CheckCircle2 className="text-green-500 mx-auto mb-4" size={60} />
-                    <h3 className="text-xl font-semibold">Withdrawal request has been successfully submitted.</h3>
+                    <h3 className="text-xl font-semibold">
+                        Withdrawal request has been successfully submitted.
+                    </h3>
                 </div>
             </Dialog>
 
+            {/* Withdrawal History Table */}
             <div className="p-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg m-5">
                 <div className="text-xl mb-4 font-semibold">Withdrawal History</div>
                 {tableLoading ? (
@@ -1132,10 +1039,10 @@ if (activeTab === 'locked') {
                     </div>
                 ) : (
                     <DataTable
-                        data={currentPageData}
+                        data={paginatedWithdrawals}
                         columns={columns}
                         loading={tableLoading}
-                        pagingData={{ total: totalCount, pageIndex, pageSize }}
+                        pagingData={{ total: sortedWithdrawals.length, pageIndex, pageSize }}
                         onPaginationChange={handlePageChange}
                         onSelectChange={handlePageSizeChange}
                         onSort={handleSort}
