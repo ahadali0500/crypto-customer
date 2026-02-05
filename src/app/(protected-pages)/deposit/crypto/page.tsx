@@ -49,6 +49,18 @@ type DepositData = {
     address: string
 }
 
+// ✅ REMOVED: Static SYMBOL_TO_ID_MAP
+// The following was deleted:
+/*
+export const SYMBOL_TO_ID_MAP: Record<string, string> = {
+    AAVE: 'aave',
+    ADA: 'cardano',
+    // ... 50+ entries removed
+    BTC: 'bitcoin',
+    ETH: 'ethereum',
+    // etc
+}
+*/
 
 const statusColorMap: Record<string, string> = {
     Pending: 'bg-gray-200 text-gray-800',
@@ -137,7 +149,7 @@ const Page = () => {
     const [dataLoading, setDataLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const { session } = useSessionContext()
-    
+
     // Pagination and Sorting
     const [pageIndex, setPageIndex] = useState(1)
     const [pageSize, setPageSize] = useState(10)
@@ -153,7 +165,7 @@ const Page = () => {
     const searchParams = useSearchParams()
     const router = useRouter()
     const tableRef = useRef<HTMLDivElement>(null)
-    
+
     // Rate caching
     const [rateCache, setRateCache] = useState<{
         [key: string]: { rate: number; timestamp: number }
@@ -246,80 +258,48 @@ const Page = () => {
         fetchAllCurrencies()
     }, [])
 
-    // ✅ FIXED: fetchConversionRate - removed static SYMBOL_TO_ID_MAP fallback
+    // fetch conversion rate
     const fetchConversionRate = useCallback(
-        async (
-            symbol: string,
-            useCache: boolean = true,
-        ): Promise<number | null> => {
-            const upperSymbol = symbol.toUpperCase()
+        async (coinGeckoId: string, useCache = true): Promise<number | null> => {
+            const cleanId = coinGeckoId.toLowerCase()
+            const cacheKey = `${cleanId}_USD`
 
-            // Check cache first (cache for 5 minutes)
-            if (useCache && rateCache[upperSymbol]) {
-                const cached = rateCache[upperSymbol]
-                const now = Date.now()
-                if (now - cached.timestamp < 300000) {
-                    // 5 minutes
-                    console.log(
-                        `Using cached rate for ${upperSymbol}:`,
-                        cached.rate,
-                    )
+            if (useCache && rateCache[cacheKey]) {
+                const cached = rateCache[cacheKey]
+                if (Date.now() - cached.timestamp < 300000) {
                     return cached.rate
                 }
             }
 
-            // ✅ ONLY use dynamic mapping (removed static fallback)
-            const coinId = symbolToIdMap[upperSymbol]
-
-            console.log(
-                'Fetching fresh rate for symbol:',
-                symbol,
-                '| coinId:',
-                coinId,
-            )
-            
-            if (!coinId) {
-                console.warn(`No mapping found for symbol: ${symbol}`)
-                return null
-            }
-
             try {
-                const controller = new AbortController()
-                const timeoutId = setTimeout(() => controller.abort(), 15000)
-
                 const res = await axios.get(
-                    `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`,
+                    'https://api.coingecko.com/api/v3/simple/price',
                     {
-                        signal: controller.signal,
-                    },
+                        params: {
+                            ids: cleanId,
+                            vs_currencies: 'usd',
+                        },
+                    }
                 )
 
-                clearTimeout(timeoutId)
-                const rate = res.data[coinId]?.usd ?? null
+                const rate = res.data?.[cleanId]?.usd ?? null
 
-                // Cache the result
-                if (rate !== null) {
+                if (rate) {
                     setRateCache((prev) => ({
                         ...prev,
-                        [upperSymbol]: {
-                            rate,
-                            timestamp: Date.now(),
-                        },
+                        [cacheKey]: { rate, timestamp: Date.now() },
                     }))
                 }
 
                 return rate
-            } catch (err) {
-                if (axios.isCancel(err)) {
-                    console.error('Request timeout for conversion rate')
-                } else {
-                    console.error('Error fetching conversion rate:', err)
-                }
+            } catch (e) {
+                console.error('Rate fetch failed:', e)
                 return null
             }
         },
-        [symbolToIdMap, rateCache],  // ✅ Only dynamic map dependency
+        [rateCache]
     )
+
 
     // Fetch deposit history
     const fetchDepositHistory = useCallback(async () => {
@@ -618,7 +598,7 @@ const Page = () => {
             console.error('Failed to copy address:', err)
         }
     }
-    
+
     return (
         <>
             <div className="lg:w-[70%] mx-auto space-y-4 font-inter p-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
