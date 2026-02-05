@@ -940,9 +940,16 @@ const WithdrawalPage = () => {
                                                 </div>
                                             </div>
 
-                                            {/* Fee */}
+                                            {/* Fee Information */}
                                             <div className="flex flex-row items-center justify-between gap-4">
-                                                <div>Fee ({feePercent}%):</div>
+                                                <div>
+                                                    <span>Fee ({feePercent}%):</span>
+                                                    {activeTab === 'locked' && (
+                                                        <span className="text-xs text-gray-500 ml-2">
+                                                            (from Available)
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <div className="space-y-1 text-right">
                                                     <div>
                                                         -{computed.fee.toFixed(6)} {selectedCurrency?.shortName}
@@ -956,30 +963,74 @@ const WithdrawalPage = () => {
                                             </div>
 
                                             {insufficientFeeBalance && (
-                                                <div className="text-sm text-red-500">
-                                                    Insufficient available balance to deduct the fee. Please add funds
-                                                    to Available.
+                                                <div className="p-2 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg mt-2">
+                                                    <div className="text-sm text-red-700 dark:text-red-300 flex items-start">
+                                                        <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
+                                                        <span>
+                                                            Insufficient available balance to deduct the fee ({computed.fee.toFixed(6)} {selectedCurrency?.shortName}). 
+                                                            Please add funds to Available balance.
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             )}
 
-                                            {/* Net Received */}
-                                            <div className="flex flex-row items-center justify-between gap-4 font-semibold">
-                                                <div>You Will Receive:</div>
+                                            {/* Divider */}
+                                            <div className="border-t border-gray-300 dark:border-gray-600 my-3"></div>
+
+                                            {/* You Will Receive */}
+                                            <div className="flex flex-row items-center justify-between gap-4 font-semibold bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
+                                                <div>
+                                                    <span>You Will Receive:</span>
+                                                    {activeTab === 'locked' && (
+                                                        <span className="text-xs text-green-700 dark:text-green-300 ml-2 font-normal">
+                                                            (Full Amount)
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <div className="space-y-1 text-right">
-                                                    <div>
-                                                        {computed.net.toFixed(6)} {selectedCurrency?.shortName}
+                                                    <div className="text-green-700 dark:text-green-300">
+                                                        {activeTab === 'locked' 
+                                                            ? computed.amount.toFixed(6) 
+                                                            : computed.net.toFixed(6)} {selectedCurrency?.shortName}
                                                     </div>
                                                     {exchangeRate && withdrawAmount && (
                                                         <div className="text-sm text-gray-500">
-                                                            ${computed.netUSD.toFixed(2)} USD
+                                                            ${activeTab === 'locked' 
+                                                                ? computed.amountUSD.toFixed(2)
+                                                                : computed.netUSD.toFixed(2)} USD
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
 
+                                            {/* Info Box - Locked */}
+                                            {activeTab === 'locked' && (
+                                                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-lg mt-3">
+                                                    <div className="text-sm text-blue-700 dark:text-blue-300 flex items-start">
+                                                        <CheckCircle2 className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
+                                                        <span>
+                                                            When withdrawing from Locked balance, you receive the full withdrawal amount. 
+                                                            The fee ({computed.fee.toFixed(6)} {selectedCurrency?.shortName}) is deducted separately from your Available balance.
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Info Box - Available */}
+                                            {activeTab === 'available' && (
+                                                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-lg mt-3">
+                                                    <div className="text-sm text-blue-700 dark:text-blue-300 flex items-start">
+                                                        <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
+                                                        <span>
+                                                            When withdrawing from Available balance, both the amount and fee are deducted from your Available balance.
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             {/* Max Amount */}
                                             <div
-                                                className="text-primary my-2 cursor-pointer hover:underline"
+                                                className="text-primary my-2 cursor-pointer hover:underline text-sm"
                                                 onClick={handleMaxClick}
                                             >
                                                 Max allowed: {maxAllowed.toFixed(6)} {selectedCurrency?.shortName}
