@@ -124,12 +124,20 @@ const BankTransferForm = () => {
 
     const [fiatCurrencies, setFiatCurrencies] = useState<Currency[]>([])
 
+
     const [selectedWithdrawCurrency, setSelectedWithdrawCurrency] =
         useState<Currency | null>(null)
+        
     const [userDetails, setUserDetails] = useState<UserDetails | null>(null)
     const [bundleDetails, setBundleDetails] = useState<FeeBundle[]>([])
     const [selectedFeeBundle, setSelectedFeeBundle] =
         useState<FeeBundle | null>(null)
+
+        const getInputValue = (eOrValue: any) => {
+    if (typeof eOrValue === 'string' || typeof eOrValue === 'number') return String(eOrValue)
+    if (eOrValue?.target?.value !== undefined) return String(eOrValue.target.value)
+    return ''
+}
 
     const shouldShowBundleForWithdraw =
         userDetails?.withdrawFees === null ||
@@ -165,6 +173,14 @@ const BankTransferForm = () => {
                     setErrors(newErrors)
                     return false
                 }
+
+                // ✅ If fee cannot be deducted from available, block the step with correct message
+if (feeFiat > balance) {
+    newErrors.amount = `No available balance to deduct fee. Fee required: ${feeFiat.toFixed(2)} ${selectedWithdrawCurrency.shortName}, Available: ${balance.toFixed(2)}`
+    setErrors(newErrors)
+    return false
+}
+
 
                 // ✅ Check 2: Total with fees exceeds available
                 if (totalFiat > balance) {
@@ -452,11 +468,13 @@ const BankTransferForm = () => {
     const fetchfiatCurrencies = async () => {
         try {
             const fiatCurrenciesRes = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/currency/fetch?type=Fiat`,
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/currency/user/fetch?type=Fiat`,
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 },
             )
+           
+            
 
             setFiatCurrencies(fiatCurrenciesRes.data.data || [])
 
@@ -495,30 +513,30 @@ const BankTransferForm = () => {
         )
     }
 
+    
     const handleWithdrawCurrencySelect = (key: string) => {
-        const selected = fiatCurrencies.find(
-            (c) =>
-                (c.currencyId && c.currencyId.toString() === key) ||
-                (c.id && c.id === key) ||
-                c.shortName === key ||
-                c.fullName === key,
-        )
-        console.log('[BANK] selected currency:', selected)
-        console.log(
-            '[BANK] setting currencyId:',
-            (selected.id ?? selected.currencyId ?? '').toString(),
-        )
+    const selected = fiatCurrencies.find(
+        (c) =>
+            (c.currencyId && c.currencyId.toString() === key) ||
+            (c.id && c.id === key) ||
+            c.shortName === key ||
+            c.fullName === key,
+    )
 
-        if (selected) {
-            setSelectedWithdrawCurrency(selected)
-            updateFormData(
-                'currencyId',
-                (selected.id ?? selected.currencyId ?? '').toString(),
-            )
+    if (!selected) return
 
-            updateFormData('amount', '')
-        }
-    }
+    
+
+    setSelectedWithdrawCurrency(selected)
+
+    updateFormData(
+        'currencyId',
+        (selected.id ?? selected.currencyId ?? '').toString(),
+    )
+
+    updateFormData('amount', '')
+}
+
 
     const handleFeeBundleSelect = (bundle: FeeBundle) => {
         setSelectedFeeBundle(bundle)
@@ -852,6 +870,16 @@ const BankTransferForm = () => {
                                                 toggleClassName="border border-gray-400 rounded-lg w-full"
                                                 menuClass="w-full"
                                             >
+                                                {selectedWithdrawCurrency && (
+    <div className="mt-2 text-xs text-gray-500">
+        Available:{" "}
+        <span className="font-semibold">
+            {parseFloat(selectedWithdrawCurrency.availableBalance || '0').toFixed(2)}
+        </span>{" "}
+        {selectedWithdrawCurrency.shortName}
+    </div>
+)}
+
                                                 {fiatCurrencies.map(
                                                     (currency) => (
                                                         <DropdownItem
@@ -909,12 +937,42 @@ const BankTransferForm = () => {
                                                         e.preventDefault()
                                                     }
                                                 }}
-                                                onChange={(e: any) =>
-                                                    updateFormData(
-                                                        'amount',
-                                                        e.target.value,
-                                                    )
-                                                }
+                                             
+                                                onChange={(e: any) => {
+    const value = e.target.value
+    updateFormData('amount', value)
+
+    const num = parseFloat(value)
+
+    if (!value) {
+        setErrors((prev) => ({ ...prev, amount: undefined }))
+        return
+    }
+
+    if (isNaN(num) || num <= 0) {
+        setErrors((prev) => ({
+            ...prev,
+            amount: 'Please enter a valid amount',
+        }))
+        return
+    }
+
+    if (num > availableFiat) {
+        setErrors((prev) => ({
+            ...prev,
+            amount: `Amount exceeds available balance. Available: ${availableFiat.toFixed(
+                2,
+            )} ${selectedWithdrawCurrency?.shortName}`,
+        }))
+        return
+    }
+
+    
+    setErrors((prev) => ({ ...prev, amount: undefined }))
+}}
+
+
+
                                                 className="border border-gray-300 focus:ring-0  dark:bg-gray-800 rounded-lg"
                                             />
                                             {errors.amount && (
@@ -923,6 +981,30 @@ const BankTransferForm = () => {
                                                 </p>
                                             )}
                                         </div>
+
+{selectedWithdrawCurrency && feePercent > 0 && (
+    (() => {
+        const available = parseFloat(selectedWithdrawCurrency.availableBalance || '0') || 0
+        const feeNeeded = feeFiat // uses your computed memo
+        const locked = parseFloat(selectedWithdrawCurrency.lockedBalance || '0') || 0
+
+        // If user withdraws from Locked in future, fee still must be from Available.
+        const tryingLocked = balanceType === 'Locked'
+
+        if (tryingLocked && locked > 0 && available < feeNeeded) {
+            return (
+                <div className="p-2 bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg">
+                    <div className="text-sm text-yellow-800 dark:text-yellow-200">
+                        No available balance to deduct the withdrawal fee.
+                        Please add funds to Available balance.
+                    </div>
+                </div>
+            )
+        }
+
+        return null
+    })()
+)}
 
                                         {/* <div className="text-sm text-green-400">
                       Max sum:  ({selectedWithdrawCurrency ?
@@ -1085,7 +1167,9 @@ const BankTransferForm = () => {
                                                 amountFiat <= 0 ||
                                                 amountFiat > availableFiat || 
                                                 totalFiat > availableFiat ||
-                                                (shouldShowBundleForWithdraw && !selectedFeeBundle)
+                                                (shouldShowBundleForWithdraw && !selectedFeeBundle) ||
+                                                feeFiat > availableFiat
+
                                             }
                                         >
                                             NEXT
