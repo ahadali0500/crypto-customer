@@ -49,63 +49,6 @@ type DepositData = {
     address: string
 }
 
-export const SYMBOL_TO_ID_MAP: Record<string, string> = {
-    AAVE: 'aave',
-    ADA: 'cardano',
-    ALGO: 'algorand',
-    APT: 'aptos',
-    ARB: 'arbitrum',
-    ATOM: 'cosmos',
-    AVAX: 'avalanche-2',
-    AXS: 'axie-infinity',
-    BCH: 'bitcoin-cash',
-    BNB: 'binancecoin',
-    BONK: 'bonk',
-    BTC: 'bitcoin',
-    CAKE: 'pancakeswap-token',
-    CHZ: 'chiliz',
-    COMP: 'compound-governance-token',
-    CRV: 'curve-dao-token',
-    DOGE: 'dogecoin',
-    DOT: 'polkadot',
-    EGLD: 'elrond-erd-2',
-    ENS: 'ethereum-name-service',
-    ETC: 'ethereum-classic',
-    ETH: 'ethereum',
-    FIL: 'filecoin',
-    FTM: 'fantom',
-    GRT: 'the-graph',
-    ICP: 'internet-computer',
-    JUP: 'jupiter-exchange-solana',
-    KSM: 'kusama',
-    LDO: 'lido-dao',
-    LINK: 'chainlink',
-    LTC: 'litecoin',
-    MATIC: 'matic-network',
-    MKR: 'maker',
-    NEAR: 'near',
-    PEPE: 'pepe',
-    QNT: 'quant-network',
-    RUNE: 'thorchain',
-    SAN: 'the-sandbox',
-    SEI: 'sei-network',
-    SHIB: 'shiba-inu',
-    SNX: 'synthetix-network-token',
-    SOL: 'solana',
-    STETH: 'staked-ether',
-    TON: 'the-open-network',
-    TRON: 'tron',
-    TRX: 'tron',
-    UNI: 'uniswap',
-    USDC: 'usd-coin',
-    USDT: 'tether',
-    VET: 'vechain',
-    WBTC: 'wrapped-bitcoin',
-    XLM: 'stellar',
-    XRP: 'ripple',
-    XTZ: 'tezos',
-    ZEC: 'zcash',
-}
 
 const statusColorMap: Record<string, string> = {
     Pending: 'bg-gray-200 text-gray-800',
@@ -145,7 +88,6 @@ const columns: ColumnDef<Transaction>[] = [
         accessorKey: 'amount',
         cell: ({ getValue }) => {
             const value = getValue() as string
-            // Convert to number, then fix to 6 decimal places
             const formattedValue = parseFloat(value).toFixed(6)
             return (
                 <span className="text-green-600 font-medium">
@@ -195,6 +137,7 @@ const Page = () => {
     const [dataLoading, setDataLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const { session } = useSessionContext()
+    
     // Pagination and Sorting
     const [pageIndex, setPageIndex] = useState(1)
     const [pageSize, setPageSize] = useState(10)
@@ -210,7 +153,8 @@ const Page = () => {
     const searchParams = useSearchParams()
     const router = useRouter()
     const tableRef = useRef<HTMLDivElement>(null)
-    // Add these state variables at the top with other states
+    
+    // Rate caching
     const [rateCache, setRateCache] = useState<{
         [key: string]: { rate: number; timestamp: number }
     }>({})
@@ -278,8 +222,7 @@ const Page = () => {
         return sortedData?.slice(start, end)
     }, [sortedData, pageIndex, pageSize])
 
-    const [localCurr, setLocalCurr] = useState([])
-    const [allcurr, setAllcurr] = useState([])
+    // ✅ ONLY dynamic symbol mapping (no static object)
     const [symbolToIdMap, setSymbolToIdMap] = useState({})
 
     const fetchAllCurrencies = async () => {
@@ -290,10 +233,7 @@ const Page = () => {
             axios.get('https://api.coingecko.com/api/v3/coins/list'),
         ])
 
-        setLocalCurr(vsCurrenciesRes.data) // fiat and some crypto vs currencies
-        setAllcurr(cryptoListRes.data) // full list of coins with {id, symbol, name}
-
-        // Create mapping from SYMBOL to ID (use lowercase to avoid case mismatches)
+        // Create mapping from SYMBOL to ID
         const map = {}
         cryptoListRes.data.forEach((coin) => {
             map[coin.symbol.toUpperCase()] = coin.id
@@ -306,6 +246,7 @@ const Page = () => {
         fetchAllCurrencies()
     }, [])
 
+    // ✅ FIXED: fetchConversionRate - removed static SYMBOL_TO_ID_MAP fallback
     const fetchConversionRate = useCallback(
         async (
             symbol: string,
@@ -313,7 +254,7 @@ const Page = () => {
         ): Promise<number | null> => {
             const upperSymbol = symbol.toUpperCase()
 
-            // ✅ Check cache first (cache for 5 minutes)
+            // Check cache first (cache for 5 minutes)
             if (useCache && rateCache[upperSymbol]) {
                 const cached = rateCache[upperSymbol]
                 const now = Date.now()
@@ -327,8 +268,8 @@ const Page = () => {
                 }
             }
 
-            const coinId =
-                symbolToIdMap[upperSymbol] || SYMBOL_TO_ID_MAP[upperSymbol]
+            // ✅ ONLY use dynamic mapping (removed static fallback)
+            const coinId = symbolToIdMap[upperSymbol]
 
             console.log(
                 'Fetching fresh rate for symbol:',
@@ -336,6 +277,7 @@ const Page = () => {
                 '| coinId:',
                 coinId,
             )
+            
             if (!coinId) {
                 console.warn(`No mapping found for symbol: ${symbol}`)
                 return null
@@ -343,7 +285,7 @@ const Page = () => {
 
             try {
                 const controller = new AbortController()
-                const timeoutId = setTimeout(() => controller.abort(), 15000) // Increased timeout
+                const timeoutId = setTimeout(() => controller.abort(), 15000)
 
                 const res = await axios.get(
                     `https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`,
@@ -355,7 +297,7 @@ const Page = () => {
                 clearTimeout(timeoutId)
                 const rate = res.data[coinId]?.usd ?? null
 
-                // ✅ Cache the result
+                // Cache the result
                 if (rate !== null) {
                     setRateCache((prev) => ({
                         ...prev,
@@ -376,7 +318,7 @@ const Page = () => {
                 return null
             }
         },
-        [symbolToIdMap, rateCache],
+        [symbolToIdMap, rateCache],  // ✅ Only dynamic map dependency
     )
 
     // Fetch deposit history
@@ -403,7 +345,7 @@ const Page = () => {
         }
     }, [token])
 
-    // Replace the existing fetchCryptocurrencies function
+    // Fetch cryptocurrencies with rates
     const fetchCryptocurrencies = useCallback(async () => {
         if (!token) return
 
@@ -420,7 +362,7 @@ const Page = () => {
 
             const currencyData = response.data.data || []
 
-            // ✅ Sequential processing with delay to avoid rate limiting
+            // Sequential processing with delay to avoid rate limiting
             const currenciesWithRates: Currency[] = []
 
             for (let i = 0; i < currencyData.length; i++) {
@@ -437,9 +379,9 @@ const Page = () => {
                         rate: rate || 0,
                     })
 
-                    // ✅ Add delay between requests (except for last one)
+                    // Add delay between requests (except for last one)
                     if (i < currencyData.length - 1) {
-                        await new Promise((resolve) => setTimeout(resolve, 200)) // 200ms delay
+                        await new Promise((resolve) => setTimeout(resolve, 200))
                     }
                 } catch (error) {
                     console.error(
@@ -467,7 +409,6 @@ const Page = () => {
     }, [token, fetchConversionRate])
 
     // Currency conversion effect
-    // Replace the existing currency conversion useEffect
     useEffect(() => {
         const convertCurrency = async () => {
             if (
@@ -485,13 +426,13 @@ const Page = () => {
             try {
                 let rate = selectedCurrency.rate
 
-                // ✅ Only fetch fresh rate if cached rate is 0 or very old
+                // Only fetch fresh rate if cached rate is 0 or very old
                 if (!rate || rate === 0) {
                     console.log('Fetching fresh rate for conversion...')
                     rate = await fetchConversionRate(
                         selectedCurrency.shortName,
                         true,
-                    ) // Use cache
+                    )
                 }
 
                 if (rate && rate > 0) {
@@ -510,8 +451,8 @@ const Page = () => {
             }
         }
 
-        // ✅ Increased debounce time to reduce API calls
-        const timeoutId = setTimeout(convertCurrency, 1000) // Increased from 500ms to 1000ms
+        // Debounce to reduce API calls
+        const timeoutId = setTimeout(convertCurrency, 1000)
         return () => clearTimeout(timeoutId)
     }, [selectedCurrency, usdAmount, fetchConversionRate])
 
@@ -661,7 +602,7 @@ const Page = () => {
         ) {
             return null
         }
-        return currency.wallet[0] // Get the first wallet
+        return currency.wallet[0]
     }, [])
 
     const walletData = getWalletData(selectedCurrency)
@@ -677,6 +618,7 @@ const Page = () => {
             console.error('Failed to copy address:', err)
         }
     }
+    
     return (
         <>
             <div className="lg:w-[70%] mx-auto space-y-4 font-inter p-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
@@ -708,7 +650,7 @@ const Page = () => {
                                 trigger="click"
                                 placement="bottom-start"
                                 toggleClassName="border border-gray-400 rounded-lg w-full"
-                                disabled={isLoadingRates} // ✅ Disable during rate loading
+                                disabled={isLoadingRates}
                             >
                                 {currencies.map((currency) => (
                                     <DropdownItem
@@ -823,7 +765,6 @@ const Page = () => {
                                     >
                                         <span>{walletData?.address}</span>
 
-                                        {/* Copy Icon / Copied Text */}
                                         <div
                                             onClick={() =>
                                                 handleCopy(

@@ -156,14 +156,21 @@ const BankTransferForm = () => {
             if (!formData.amount) {
                 newErrors.amount = 'Amount is required'
             } else if (selectedWithdrawCurrency) {
-                const balance =
-                    balanceType === 'Available'
-                        ? parseFloat(selectedWithdrawCurrency.availableBalance)
-                        : parseFloat(selectedWithdrawCurrency.lockedBalance)
+                const balance = parseFloat(selectedWithdrawCurrency.availableBalance)
                 const amount = parseFloat(formData.amount)
 
+                // ✅ Check 1: Amount exceeds available
                 if (amount > balance) {
-                    newErrors.amount = `Amount cannot exceed ${balance} ${selectedWithdrawCurrency.shortName}`
+                    newErrors.amount = `Amount cannot exceed available balance. Available: ${balance.toFixed(2)} ${selectedWithdrawCurrency.shortName}`
+                    setErrors(newErrors)
+                    return false
+                }
+
+                // ✅ Check 2: Total with fees exceeds available
+                if (totalFiat > balance) {
+                    newErrors.amount = `Total with fees (${totalFiat.toFixed(2)}) exceeds available balance (${balance.toFixed(2)} ${selectedWithdrawCurrency.shortName})`
+                    setErrors(newErrors)
+                    return false
                 }
             }
             if (!formData.currencyId) {
@@ -177,24 +184,17 @@ const BankTransferForm = () => {
             if (!formData.country) newErrors.country = 'Country is required'
             if (!formData.canton) newErrors.canton = 'Canton is required'
             if (!formData.address) newErrors.address = 'Address is required'
-            if (!formData.postalCode)
-                newErrors.postalCode = 'Postal code is required'
+            if (!formData.postalCode) newErrors.postalCode = 'Postal code is required'
             if (!formData.city) newErrors.city = 'City is required'
             if (!formData.phone) newErrors.phone = 'Phone is required'
         } else if (activeTab === 'billing') {
-            if (!formData.accountHolder)
-                newErrors.accountHolder = 'Account holder is required'
+            if (!formData.accountHolder) newErrors.accountHolder = 'Account holder is required'
             if (!formData.bank) newErrors.bank = 'Bank is required'
-            if (!formData.billingCity)
-                newErrors.billingCity = 'City is required'
-            if (!formData.accountNumber)
-                newErrors.accountNumber = 'Account number is required'
+            if (!formData.billingCity) newErrors.billingCity = 'City is required'
+            if (!formData.accountNumber) newErrors.accountNumber = 'Account number is required'
             if (!formData.iban) newErrors.iban = 'IBAN is required'
-            if (!formData.swiftCode)
-                newErrors.swiftCode = 'Swift code is required'
-            if (!formData.paymentReferenceNumber)
-                newErrors.paymentReferenceNumber =
-                    'Payment reference is required'
+            if (!formData.swiftCode) newErrors.swiftCode = 'Swift code is required'
+            if (!formData.paymentReferenceNumber) newErrors.paymentReferenceNumber = 'Payment reference is required'
         }
 
         setErrors(newErrors)
@@ -280,7 +280,16 @@ const BankTransferForm = () => {
         if (!formData.amount || amountFiat <= 0) return false
         if (shouldShowBundleForWithdraw && !selectedFeeBundle) return false
         if (!selectedWithdrawCurrency) return false
+
+
+        if (amountFiat > availableFiat) return false
+
+
+        if (totalFiat > availableFiat) return false
+
+
         if (feeFiat > availableFiat) return false
+
         return true
     }, [
         formData.currencyId,
@@ -291,6 +300,7 @@ const BankTransferForm = () => {
         selectedWithdrawCurrency,
         feeFiat,
         availableFiat,
+        totalFiat  // ← Add this dependency
     ])
 
     const isContactsStepValid = useMemo(() => {
@@ -703,8 +713,8 @@ const BankTransferForm = () => {
                     ((row.original.withdrawBank?.length ?? 0) > 0
                         ? 'Bank'
                         : (row.original.withdrawfiatCurrencies?.length ?? 0) > 0
-                          ? 'fiatCurrencies'
-                          : 'Unknown')
+                            ? 'fiatCurrencies'
+                            : 'Unknown')
                 return (
                     <span
                         className={`px-2 py-1 rounded text-xs ${typeColorMap[type] || 'bg-gray-500 text-white'}`}
@@ -780,31 +790,28 @@ const BankTransferForm = () => {
                                 <div className="flex border-b border-gray-200 mb-4">
                                     <button
                                         onClick={() => setActiveTab('currency')}
-                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                                            activeTab === 'currency'
-                                                ? 'border-primary text-primary'
-                                                : 'border-transparent'
-                                        }`}
+                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'currency'
+                                            ? 'border-primary text-primary'
+                                            : 'border-transparent'
+                                            }`}
                                     >
                                         Currency
                                     </button>
                                     <button
                                         onClick={goToContacts}
-                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                                            activeTab === 'contacts'
-                                                ? 'border-primary text-primary'
-                                                : 'border-transparent'
-                                        }`}
+                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'contacts'
+                                            ? 'border-primary text-primary'
+                                            : 'border-transparent'
+                                            }`}
                                     >
                                         Contacts
                                     </button>
                                     <button
                                         onClick={goToBilling}
-                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                                            activeTab === 'billing'
-                                                ? 'border-primary text-primary'
-                                                : 'border-transparent'
-                                        }`}
+                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'billing'
+                                            ? 'border-primary text-primary'
+                                            : 'border-transparent'
+                                            }`}
                                     >
                                         Billing info
                                     </button>
@@ -951,11 +958,10 @@ const BankTransferForm = () => {
                                                                             bundle,
                                                                         )
                                                                     }
-                                                                    className={`p-3 rounded-lg text-left text-sm transition-all ${
-                                                                        isSelected
-                                                                            ? 'bg-blue-500 text-white border-2 border-blue-600'
-                                                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                                    }`}
+                                                                    className={`p-3 rounded-lg text-left text-sm transition-all ${isSelected
+                                                                        ? 'bg-blue-500 text-white border-2 border-blue-600'
+                                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                                        }`}
                                                                 >
                                                                     <div className="font-medium">
                                                                         {
@@ -1075,8 +1081,11 @@ const BankTransferForm = () => {
                                             iconAlignment="end"
                                             disabled={
                                                 !formData.amount ||
-                                                (shouldShowBundleForWithdraw &&
-                                                    !selectedFeeBundle)
+                                                !formData.currencyId ||
+                                                amountFiat <= 0 ||
+                                                amountFiat > availableFiat || 
+                                                totalFiat > availableFiat ||
+                                                (shouldShowBundleForWithdraw && !selectedFeeBundle)
                                             }
                                         >
                                             NEXT
