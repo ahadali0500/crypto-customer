@@ -27,8 +27,7 @@ const _UserDropdown = () => {
     const handleSignOut = async () => {
         try {
             localStorage.removeItem('authToken')
-            localStorage.removeItem('userName')
-            localStorage.removeItem('userEmail')
+            localStorage.removeItem('userInfo')
             setSession(null)
             await signOut()
             toast.success('Logged out successfully!')

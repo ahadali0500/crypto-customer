@@ -24,15 +24,30 @@ type AuthProviderProps = {
 // Hydrate session from localStorage on mount (for page refresh)
 function getStoredSession(): Session | null {
     if (typeof window === 'undefined') return null
+
     const token = localStorage.getItem('authToken')
-    const name = localStorage.getItem('userName')
-    const email = localStorage.getItem('userEmail')
-    if (!token) return null
+    const userInfoRaw = localStorage.getItem('userInfo')
+
+    if (!token || !userInfoRaw) return null
+
+    let userInfo: { name?: string; email?: string }
+
+    try {
+        userInfo = JSON.parse(userInfoRaw)
+    } catch {
+        return null // corrupted userInfo
+    }
+
     return {
-        user: { name: name || undefined, email: email || undefined, token },
+        user: {
+            name: userInfo.name,
+            email: userInfo.email,
+            token,
+        },
         expires: '',
     }
 }
+
 
 const AuthProvider = (props: AuthProviderProps) => {
     const { children } = props
