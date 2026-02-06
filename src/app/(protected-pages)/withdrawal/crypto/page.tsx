@@ -761,6 +761,28 @@ const maxBalance = useMemo(() => {
                 </span>
             ),
         },
+
+         {
+    header: 'Balance',
+    accessorKey: 'balancetype',
+    cell: ({ row }) => {
+        const balanceType = row.original.balancetype;
+
+        const isAvailable = balanceType === 'Available';
+
+        const bgColor = isAvailable ? 'bg-green-100' : 'bg-yellow-100';
+        const textColor = isAvailable ? 'text-green-800' : 'text-yellow-800';
+        const statusText = isAvailable ? 'Available' : 'Locked';
+
+        return (
+            <span
+                className={`px-3 py-1 text-xs font-semibold rounded-full ${bgColor} ${textColor}`}
+            >
+                {statusText}
+            </span>
+        );
+    },
+},
     ];
 
     // ========== Render ==========

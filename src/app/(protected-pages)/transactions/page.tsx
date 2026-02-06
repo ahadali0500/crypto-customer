@@ -528,6 +528,7 @@ const Page = () => {
         rawData = data?.withdraw || [];
         break;
     }
+console.log("rawData",rawData);
 
     const { sortBy, sortOrder, pageIndex, pageSize } = pagination[tabKey];
 
@@ -678,6 +679,7 @@ const Page = () => {
         </span>
       ),
     },
+    
     {
       accessorKey: 'amount',
       header: 'Amount',
@@ -687,6 +689,9 @@ const Page = () => {
         </span>
       ),
     },
+    
+
+     
     {
       accessorKey: 'createdAt',
       header: 'Date',

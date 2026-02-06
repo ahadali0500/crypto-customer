@@ -75,11 +75,16 @@ const columns: ColumnDef<Transaction>[] = [
       );
     },
   },
+  
 ];
 
 const ExchangeHistory = () => {
   const [exchangeData, setExchangeData] = useState<any[]>([]);
+
+ 
+  
   const [processedData, setProcessedData] = useState<Transaction[]>([]);
+  
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [totalCount, setTotalCount] = useState(0);
