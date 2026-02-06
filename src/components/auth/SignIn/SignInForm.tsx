@@ -69,6 +69,7 @@ const SignInForm = (props: SignInFormProps) => {
     const handleSignIn = async (values: SignInFormSchema) => {
         setSubmitting(true)
         setMessage('')
+
         try {
             const formData = new FormData()
             formData.append('email', values.email)
@@ -84,29 +85,44 @@ const SignInForm = (props: SignInFormProps) => {
                 }
             )
 
-            if (!response.data?.data || !response.data.data.token) {
+            const loginData = response.data?.data
+
+            if (!loginData || !loginData.token) {
                 toast.error('Login failed: No token received.')
                 setSubmitting(false)
                 return
             }
-            const loginData = response.data.data
 
+            // ✅ Store token separately
             localStorage.setItem('authToken', loginData.token)
+
+            // ✅ Store all other user info in an object
+            const userInfo = {
+                name: loginData.name,   // from backend
+                email: loginData.email, // from backend
+                // add more fields if needed
+            }
+            localStorage.setItem('userInfo', JSON.stringify(userInfo))
+
+            // Update session context
             setSession({
                 user: loginData,
                 expires: '',
             })
 
             toast.success('Login successful!')
+
             if (onSignIn) onSignIn({ values, setSubmitting, setMessage })
 
             router.push(redirectUrl)
         } catch (error: any) {
-            toast.error(error.response.data.message);
+            toast.error(error.response?.data?.message || 'Login failed')
         } finally {
             setSubmitting(false)
         }
     }
+
+
 
     return (
         <>

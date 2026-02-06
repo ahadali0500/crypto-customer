@@ -1,10 +1,9 @@
 'use server'
 
-import { signOut } from '@/auth'
-import appConfig from '@/configs/app.config'
-
+// Custom auth - sign out is handled entirely on the client (clear localStorage, redirect)
+// This export exists for compatibility with UserProfileDropdown which calls it
 const handleSignOut = async () => {
-    await signOut({ redirectTo: appConfig.unAuthenticatedEntryPath })
+    // No-op - client handles everything
 }
 
 export default handleSignOut

@@ -1,5 +1,4 @@
-import { auth } from '@/auth'
-
+// Custom backend auth - no server session
 export default async function getServerSession() {
-    return await auth()
+    return null
 }

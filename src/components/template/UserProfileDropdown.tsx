@@ -27,10 +27,12 @@ const _UserDropdown = () => {
     const handleSignOut = async () => {
         try {
             localStorage.removeItem('authToken')
+            localStorage.removeItem('userName')
+            localStorage.removeItem('userEmail')
             setSession(null)
             await signOut()
             toast.success('Logged out successfully!')
-            router.push('/');
+            router.replace('/')
         } catch (error) {
             console.log('Logout error:', error)
             toast.error('Error while logging out.')

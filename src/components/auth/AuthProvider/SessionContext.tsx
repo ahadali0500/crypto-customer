@@ -1,16 +1,24 @@
 'use client'
 
-import { createContext, useContext, useState } from 'react'
-import type { User } from 'next-auth'
+import { createContext, useContext } from 'react'
 
-type Session = {
-    user?: User & Record<string, any>
-    expires: string
+type User = {
+    id?: string
+    name?: string
+    email?: string
+    image?: string
+    token?: string
+    [key: string]: any
 }
 
+export type Session = {
+    user?: User
+    expires?: string
+} | null
+
 interface SessionContextType {
-    session: Session | null
-    setSession: (session: Session | null) => void
+    session: Session
+    setSession: (session: Session) => void
 }
 
 const SessionContext = createContext<SessionContextType>({

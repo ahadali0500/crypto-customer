@@ -1,27 +1,51 @@
 'use client'
 
-import { SessionProvider as NextAuthSessionProvider } from 'next-auth/react'
 import SessionContext from './SessionContext'
-import { useState } from 'react'
-import type { Session as NextAuthSession } from 'next-auth'
+import { useState, useEffect } from 'react'
 
-type Session = NextAuthSession | null
+type User = {
+    id?: string
+    name?: string
+    email?: string
+    image?: string
+    token?: string
+    [key: string]: any
+}
+
+type Session = {
+    user?: User
+    expires?: string
+} | null
 
 type AuthProviderProps = {
-    session: Session | null
     children: React.ReactNode
 }
 
+// Hydrate session from localStorage on mount (for page refresh)
+function getStoredSession(): Session | null {
+    if (typeof window === 'undefined') return null
+    const token = localStorage.getItem('authToken')
+    const name = localStorage.getItem('userName')
+    const email = localStorage.getItem('userEmail')
+    if (!token) return null
+    return {
+        user: { name: name || undefined, email: email || undefined, token },
+        expires: '',
+    }
+}
+
 const AuthProvider = (props: AuthProviderProps) => {
-    const { session: initialSession, children } = props
-    const [session, setSession] = useState(initialSession)
+    const { children } = props
+    const [session, setSession] = useState<Session>(null)
+
+    useEffect(() => {
+        setSession(getStoredSession())
+    }, [])
 
     return (
-        <NextAuthSessionProvider session={session} refetchOnWindowFocus={false}>
-            <SessionContext.Provider value={{ session, setSession }}>
-                {children}
-            </SessionContext.Provider>
-        </NextAuthSessionProvider>
+        <SessionContext.Provider value={{ session, setSession }}>
+            {children}
+        </SessionContext.Provider>
     )
 }
 

@@ -1,15 +1,9 @@
 'use server'
 
-import { signIn } from '@/auth'
-import appConfig from '@/configs/app.config'
-
-const handleOauthSignIn = async (
-    signInMethod: string,
-    callbackUrl?: string,
-) => {
-    await signIn(signInMethod, {
-        redirectTo: callbackUrl || appConfig.authenticatedEntryPath,
-    })
+// OAuth disabled - using custom backend auth only
+// Re-add NextAuth if you need Google/GitHub login
+const handleOauthSignIn = async (_signInMethod: string, _callbackUrl?: string) => {
+    throw new Error('OAuth is not configured. Use email/password sign-in.')
 }
 
 export default handleOauthSignIn
