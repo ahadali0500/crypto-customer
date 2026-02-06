@@ -116,26 +116,34 @@ const WithdrawalPage = () => {
         return { available, locked };
     }, [selectedCurrency]);
 
+const maxBalance = useMemo(() => {
+    if (!selectedCurrency) return 0;
+
+    return activeTab === 'locked'
+        ? balances.locked
+        : balances.available;
+}, [balances, selectedCurrency, activeTab]);
+
+
     const maxAllowed = useMemo(() => {
-        if (!selectedCurrency) return 0;
+    if (!selectedCurrency) return 0;
 
-        const { available, locked } = balances;
-        const feeRate = feePercent / 100;
+    const { available, locked } = balances;
+    const feeRate = feePercent / 100;
 
-        if (feePercent <= 0) {
-            return activeTab === 'locked' ? locked : available;
-        }
+    if (feePercent <= 0) {
+        return activeTab === 'locked' ? locked : available;
+    }
 
-        if (activeTab === 'locked') {
-            // For locked: min(locked balance, available/feeRate)
-            const maxByLocked = locked;
-            const maxByFee = available / feeRate;
-            return Math.max(0, Math.min(maxByLocked, maxByFee));
-        }
+    if (activeTab === 'locked') {
+        const maxByLocked = locked;
+        const maxByFee = available / feeRate;
+        return Math.max(0, Math.min(maxByLocked, maxByFee));
+    }
 
-        // For available: available/(1 + feeRate)
-        return Math.max(0, available / (1 + feeRate));
-    }, [balances, feePercent, selectedCurrency, activeTab]);
+    return Math.max(0, available / (1 + feeRate));
+}, [balances, feePercent, selectedCurrency, activeTab]);
+
 
     const computed = useMemo(() => {
         const amount = parseFloat(withdrawAmount || '0') || 0;
@@ -1003,37 +1011,16 @@ const WithdrawalPage = () => {
                                                 </div>
                                             </div>
 
-                                            {/* Info Box - Locked */}
-                                            {activeTab === 'locked' && (
-                                                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-lg mt-3">
-                                                    <div className="text-sm text-blue-700 dark:text-blue-300 flex items-start">
-                                                        <CheckCircle2 className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                                                        <span>
-                                                            When withdrawing from Locked balance, you receive the full withdrawal amount. 
-                                                            The fee ({computed.fee.toFixed(6)} {selectedCurrency?.shortName}) is deducted separately from your Available balance.
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            )}
+                                        
 
-                                            {/* Info Box - Available */}
-                                            {activeTab === 'available' && (
-                                                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-lg mt-3">
-                                                    <div className="text-sm text-blue-700 dark:text-blue-300 flex items-start">
-                                                        <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
-                                                        <span>
-                                                            When withdrawing from Available balance, both the amount and fee are deducted from your Available balance.
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            )}
+                                           
 
                                             {/* Max Amount */}
                                             <div
                                                 className="text-primary my-2 cursor-pointer hover:underline text-sm"
                                                 onClick={handleMaxClick}
                                             >
-                                                Max allowed: {maxAllowed.toFixed(6)} {selectedCurrency?.shortName}
+                                                 Max balance: {maxBalance.toFixed(6)} {selectedCurrency?.shortName}
                                             </div>
 
                                             {exceedsMaxAllowed && (

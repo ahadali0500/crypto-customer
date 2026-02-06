@@ -129,6 +129,9 @@ const BankTransferForm = () => {
         useState<Currency | null>(null)
         
     const [userDetails, setUserDetails] = useState<UserDetails | null>(null)
+
+    console.log("userDetails",userDetails);
+    
     const [bundleDetails, setBundleDetails] = useState<FeeBundle[]>([])
     const [selectedFeeBundle, setSelectedFeeBundle] =
         useState<FeeBundle | null>(null)
@@ -228,6 +231,8 @@ if (feeFiat > balance) {
                     },
                 },
             )
+            
+            
             setUserDetails(res.data.data)
         } catch (error) {
             console.log('Error occur during fetch user details:', error)
