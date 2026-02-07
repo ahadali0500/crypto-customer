@@ -383,6 +383,28 @@ const Page = () => {
                 </span>
             ),
         },
+
+          {
+  header: 'Balance Type',
+  accessorKey: 'IsRealTransaction',
+  cell: ({ getValue }) => {
+    const isReal = getValue() as boolean
+
+    const value = isReal ? 'Available' : 'Locked'
+    const color =
+      value === 'Available'
+        ? 'bg-green-100 text-green-800'
+        : 'bg-yellow-100 text-yellow-800'
+
+    return (
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full cursor-pointer hover:opacity-80 ${color}`}
+      >
+        {value}
+      </span>
+    )
+  },
+},
         {
             accessorKey: 'amount',
             header: 'Amount',
