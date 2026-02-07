@@ -119,8 +119,8 @@ const BankTransferForm = () => {
     const [selectedWithdrawCurrency, setSelectedWithdrawCurrency] = useState<Currency | null>(null)
     const [userDetails, setUserDetails] = useState<UserDetails | null>(null)
 
-    console.log("userDetails",userDetails);
-    
+    console.log("userDetails", userDetails);
+
     const [bundleDetails, setBundleDetails] = useState<FeeBundle[]>([])
     const [selectedFeeBundle, setSelectedFeeBundle] = useState<FeeBundle | null>(null)
 
@@ -203,8 +203,8 @@ const BankTransferForm = () => {
                     headers: { Authorization: `Bearer ${token}` },
                 },
             )
-            
-            
+
+
             setUserDetails(res.data.data)
         } catch (error) {
             console.log('Error fetching user details:', error)
@@ -325,6 +325,7 @@ const BankTransferForm = () => {
         }
     }
 
+
     const handlePrevious = () => {
         if (activeTab === 'contacts') {
             setActiveTab('currency')
@@ -333,8 +334,23 @@ const BankTransferForm = () => {
         }
     }
 
+    const sanitizeAmount = (value: number | string, decimals: number = 2): string => {
+        let numValue = typeof value === 'string' ? parseFloat(value) : value
+        if (!isFinite(numValue)) return '0'
+        if (Math.abs(numValue) < 0.01) return '0'  // ← Catches 3.9e-7
+        const rounded = Math.round(numValue * Math.pow(10, decimals)) / Math.pow(10, decimals)
+        if (Math.abs(rounded) < 0.01) return '0'
+        return rounded.toString()
+    }
     const handleSetMaxAmount = () => {
-        updateFormData('amount', availableFiat.toString())
+        const cleanAmount = sanitizeAmount(availableFiat, 2)
+
+        if (cleanAmount === '0' || parseFloat(cleanAmount) <= 0) {
+            toast.error('No available balance to withdraw')
+            return
+        }
+
+        updateFormData('amount', cleanAmount)
         setErrors((prev) => ({ ...prev, amount: undefined }))
     }
 
@@ -526,7 +542,7 @@ const BankTransferForm = () => {
 
     const sortedData = useMemo(() => {
         if (!sortConfig.key || sortConfig.order === '') return withdrawals
-        
+
         const direction = sortConfig.order === 'asc' ? 1 : -1
         return [...withdrawals].sort((a, b) => {
             const A = (a as any)[sortConfig.key]
@@ -679,31 +695,28 @@ const BankTransferForm = () => {
                                 <div className="flex border-b border-gray-200 mb-4">
                                     <button
                                         onClick={() => setActiveTab('currency')}
-                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                                            activeTab === 'currency'
-                                                ? 'border-primary text-primary'
-                                                : 'border-transparent'
-                                        }`}
+                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'currency'
+                                            ? 'border-primary text-primary'
+                                            : 'border-transparent'
+                                            }`}
                                     >
                                         Currency
                                     </button>
                                     <button
                                         onClick={goToContacts}
-                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                                            activeTab === 'contacts'
-                                                ? 'border-primary text-primary'
-                                                : 'border-transparent'
-                                        }`}
+                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'contacts'
+                                            ? 'border-primary text-primary'
+                                            : 'border-transparent'
+                                            }`}
                                     >
                                         Contacts
                                     </button>
                                     <button
                                         onClick={goToBilling}
-                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
-                                            activeTab === 'billing'
-                                                ? 'border-primary text-primary'
-                                                : 'border-transparent'
-                                        }`}
+                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'billing'
+                                            ? 'border-primary text-primary'
+                                            : 'border-transparent'
+                                            }`}
                                     >
                                         Billing info
                                     </button>
@@ -812,10 +825,18 @@ const BankTransferForm = () => {
                                                 <button
                                                     type="button"
                                                     onClick={handleSetMaxAmount}
-                                                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+                                                    disabled={sanitizeAmount(availableFiat, 2) === '0' || availableFiat <= 0}
+                                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
+    bg-blue-500 text-white
+    ${sanitizeAmount(availableFiat, 2) === '0' || availableFiat <= 0
+                                                            ? 'opacity-60 cursor-not-allowed pointer-events-none'
+                                                            : 'hover:bg-blue-600'
+                                                        }
+  `}
                                                 >
                                                     MAX
                                                 </button>
+
                                             </div>
                                             {errors.amount && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.amount}</p>
@@ -836,11 +857,10 @@ const BankTransferForm = () => {
                                                                 key={bundle.id}
                                                                 type="button"
                                                                 onClick={() => handleFeeBundleSelect(bundle)}
-                                                                className={`p-3 rounded-lg text-left text-sm transition-all ${
-                                                                    isSelected
-                                                                        ? 'bg-blue-500 text-white border-2 border-blue-600'
-                                                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                                }`}
+                                                                className={`p-3 rounded-lg text-left text-sm transition-all ${isSelected
+                                                                    ? 'bg-blue-500 text-white border-2 border-blue-600'
+                                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                                                    }`}
                                                             >
                                                                 <div className="font-medium">
                                                                     {bundle.name} ({bundle.value}%)
