@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import axios from 'axios'
 import Tabs from '@/components/ui/Tabs/Tabs'
 import { Button, Dropdown, Select, Spinner } from '@/components/ui'
@@ -12,26 +12,18 @@ import TabContent from '@/components/ui/Tabs/TabContent'
 import { countriesOption } from '@/constants/countries'
 import DropdownItem from '@/components/ui/Dropdown/DropdownItem'
 import { toast } from 'react-toastify'
-import DataTable, {
-    ColumnDef,
-    OnSortParam,
-} from '@/components/shared/DataTable'
+import DataTable, { ColumnDef, OnSortParam } from '@/components/shared/DataTable'
 
 interface FormData {
-    // Currency tab
     currencyId: string
     amount: string
     feeType: 'Default' | 'High'
-
-    // Contacts tab
     country: string
     canton: string
     address: string
     postalCode: string
     city: string
     phone: string
-
-    // Billing info tab
     accountHolder: string
     bank: string
     billingCity: string
@@ -58,7 +50,7 @@ interface FeeBundle {
     name: string
     descrption?: string
 }
-// Define the withdrawal type based on your API response
+
 type Withdrawal = {
     id: number
     withdrawType: 'Bank' | 'fiatCurrencies'
@@ -88,29 +80,31 @@ interface UserDetails {
     withdrawFees?: string | null
 }
 
+const INITIAL_FORM_DATA: FormData = {
+    currencyId: '',
+    amount: '',
+    feeType: 'Default',
+    country: '',
+    canton: '',
+    address: '',
+    postalCode: '',
+    city: '',
+    phone: '',
+    accountHolder: '',
+    bank: '',
+    billingCity: '',
+    accountNumber: '',
+    iban: '',
+    swiftCode: '',
+    paymentReferenceNumber: '',
+}
+
 const BankTransferForm = () => {
     const [activeTab, setActiveTab] = useState('currency')
     const [balanceType, setBalanceType] = useState('Available')
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const [formData, setFormData] = useState<FormData>({
-        currencyId: '',
-        amount: '',
-        feeType: 'Default',
-        country: '',
-        canton: '',
-        address: '',
-        postalCode: '',
-        city: '',
-        phone: '',
-        accountHolder: '',
-        bank: '',
-        billingCity: '',
-        accountNumber: '',
-        iban: '',
-        swiftCode: '',
-        paymentReferenceNumber: '',
-    })
+    const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA)
     const [errors, setErrors] = useState<Partial<FormData>>({})
     const [success, setSuccess] = useState<{
         amount: number
@@ -119,44 +113,35 @@ const BankTransferForm = () => {
     } | null>(null)
     const [formLocked, setFormLocked] = useState(false)
 
-    const token =
-        typeof window !== 'undefined' ? localStorage.getItem('authToken') : null
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null
 
     const [fiatCurrencies, setFiatCurrencies] = useState<Currency[]>([])
-
-
-    const [selectedWithdrawCurrency, setSelectedWithdrawCurrency] =
-        useState<Currency | null>(null)
-        
+    const [selectedWithdrawCurrency, setSelectedWithdrawCurrency] = useState<Currency | null>(null)
     const [userDetails, setUserDetails] = useState<UserDetails | null>(null)
     const [bundleDetails, setBundleDetails] = useState<FeeBundle[]>([])
-    const [selectedFeeBundle, setSelectedFeeBundle] =
-        useState<FeeBundle | null>(null)
+    const [selectedFeeBundle, setSelectedFeeBundle] = useState<FeeBundle | null>(null)
 
-        const getInputValue = (eOrValue: any) => {
-    if (typeof eOrValue === 'string' || typeof eOrValue === 'number') return String(eOrValue)
-    if (eOrValue?.target?.value !== undefined) return String(eOrValue.target.value)
-    return ''
-}
+    const shouldShowBundleForWithdraw = userDetails?.withdrawFees === null || userDetails?.withdrawFees === undefined
 
-    const shouldShowBundleForWithdraw =
-        userDetails?.withdrawFees === null ||
-        userDetails?.withdrawFees === undefined
-
-    // Filter bank bundles only
     const bankBundles = useMemo(() => {
         return bundleDetails.filter((bundle) => bundle.category === 'Bank')
     }, [bundleDetails])
 
     const updateFormData = (field: keyof FormData, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }))
-        // Clear error when field is updated
         if (errors[field]) {
             setErrors((prev) => ({ ...prev, [field]: undefined }))
         }
     }
 
-    // Validate current tab fields before proceeding
+    const resetFormCompletely = () => {
+        setFormData({ ...INITIAL_FORM_DATA })
+        setErrors({})
+        setSelectedFeeBundle(null)
+        setSelectedWithdrawCurrency(null)
+        setSuccess(null)
+    }
+
     const validateCurrentTab = () => {
         const newErrors: Partial<FormData> = {}
 
@@ -167,24 +152,14 @@ const BankTransferForm = () => {
                 const balance = parseFloat(selectedWithdrawCurrency.availableBalance)
                 const amount = parseFloat(formData.amount)
 
-                // ✅ Check 1: Amount exceeds available
                 if (amount > balance) {
                     newErrors.amount = `Amount cannot exceed available balance. Available: ${balance.toFixed(2)} ${selectedWithdrawCurrency.shortName}`
                     setErrors(newErrors)
                     return false
                 }
 
-                // ✅ If fee cannot be deducted from available, block the step with correct message
-if (feeFiat > balance) {
-    newErrors.amount = `No available balance to deduct fee. Fee required: ${feeFiat.toFixed(2)} ${selectedWithdrawCurrency.shortName}, Available: ${balance.toFixed(2)}`
-    setErrors(newErrors)
-    return false
-}
-
-
-                // ✅ Check 2: Total with fees exceeds available
-                if (totalFiat > balance) {
-                    newErrors.amount = `Total with fees (${totalFiat.toFixed(2)}) exceeds available balance (${balance.toFixed(2)} ${selectedWithdrawCurrency.shortName})`
+                if (amountFiat > availableFiat) {
+                    newErrors.amount = `Amount exceeds available balance. Available: ${availableFiat.toFixed(2)} ${selectedWithdrawCurrency.shortName}`
                     setErrors(newErrors)
                     return false
                 }
@@ -217,49 +192,35 @@ if (feeFiat > balance) {
         return Object.keys(newErrors).length === 0
     }
 
-    //fetch user details
     const fetchUserDetails = async () => {
         try {
             const res = await axios.get(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/auth/fetch`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                 },
             )
             setUserDetails(res.data.data)
         } catch (error) {
-            console.log('Error occur during fetch user details:', error)
+            console.log('Error fetching user details:', error)
         }
     }
-    //fetch bundle fee data from backend - updated to fetch Bank category
+
     const fetchBundleDetails = async () => {
         try {
             const res = await axios.get(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/fees/bundle/fetch?category=Bank`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                 },
             )
-
             const bundleData = res.data.data
-            if (Array.isArray(bundleData)) {
-                setBundleDetails(bundleData)
-            } else if (bundleData) {
-                setBundleDetails([bundleData])
-            } else {
-                setBundleDetails([])
-            }
+            setBundleDetails(Array.isArray(bundleData) ? bundleData : bundleData ? [bundleData] : [])
         } catch (error) {
-            console.log('Error occur during fetch bundle details:', error)
+            console.log('Error fetching bundle details:', error)
             setBundleDetails([])
         }
     }
-
-    // Update conversion when amount or currency changes
 
     const feePercent = useMemo(() => {
         if (shouldShowBundleForWithdraw && selectedFeeBundle)
@@ -274,38 +235,36 @@ if (feeFiat > balance) {
         [formData.amount],
     )
 
-    const feeFiat = useMemo(
-        () => amountFiat * (feePercent / 100),
-        [amountFiat, feePercent],
-    )
-
-    const totalFiat = useMemo(() => amountFiat + feeFiat, [amountFiat, feeFiat])
-
     const availableFiat = useMemo(() => {
         if (!selectedWithdrawCurrency) return 0
         return parseFloat(selectedWithdrawCurrency.availableBalance || '0') || 0
     }, [selectedWithdrawCurrency])
 
+    const feeFiat = useMemo(
+        () => amountFiat * (feePercent / 100),
+        [amountFiat, feePercent],
+    )
+
+    const netAmountFiat = useMemo(
+        () => Math.max(amountFiat - feeFiat, 0),
+        [amountFiat, feeFiat]
+    )
+
+    const totalDeductedFiat = useMemo(
+        () => amountFiat,
+        [amountFiat]
+    )
+
     const remainingAfterSubmit = useMemo(() => {
-        // Fees taken from Available only (requirement)
-        return Math.max(availableFiat - feeFiat, 0)
-    }, [availableFiat, feeFiat])
+        return Math.max(availableFiat - amountFiat, 0)
+    }, [availableFiat, amountFiat])
 
     const isCurrencyStepValid = useMemo(() => {
         if (!formData.currencyId) return false
         if (!formData.amount || amountFiat <= 0) return false
         if (shouldShowBundleForWithdraw && !selectedFeeBundle) return false
         if (!selectedWithdrawCurrency) return false
-
-
         if (amountFiat > availableFiat) return false
-
-
-        if (totalFiat > availableFiat) return false
-
-
-        if (feeFiat > availableFiat) return false
-
         return true
     }, [
         formData.currencyId,
@@ -314,9 +273,7 @@ if (feeFiat > balance) {
         shouldShowBundleForWithdraw,
         selectedFeeBundle,
         selectedWithdrawCurrency,
-        feeFiat,
         availableFiat,
-        totalFiat  // ← Add this dependency
     ])
 
     const isContactsStepValid = useMemo(() => {
@@ -355,10 +312,7 @@ if (feeFiat > balance) {
     }
 
     const handleNext = () => {
-        if (!validateCurrentTab()) {
-            return
-        }
-
+        if (!validateCurrentTab()) return
         if (activeTab === 'currency') {
             setActiveTab('contacts')
         } else if (activeTab === 'contacts') {
@@ -374,22 +328,32 @@ if (feeFiat > balance) {
         }
     }
 
+    const handleSetMaxAmount = () => {
+        updateFormData('amount', availableFiat.toString())
+        setErrors((prev) => ({ ...prev, amount: undefined }))
+    }
+
     const handleSubmit = async () => {
-        if (!validateCurrentTab()) {
-            return
-        }
+        if (!validateCurrentTab()) return
 
         setIsSubmitting(true)
 
         try {
+            // DEBUG: Log submission data
+            console.log('=== WITHDRAWAL SUBMISSION ===')
+            console.log('Entered amount:', formData.amount)
+            console.log('Calculated net (user receives):', netAmountFiat.toFixed(2))
+            console.log('Fee:', feeFiat.toFixed(2))
+            console.log('Total deducted:', amountFiat.toFixed(2))
+            console.log('==============================')
+
             const submitData = new FormData()
 
-            // Add all form data to FormData object
             submitData.append('balancetype', balanceType)
             submitData.append('currencyId', formData.currencyId)
-            submitData.append('total', totalFiat.toString())
-            submitData.append('fees', feePercent.toString())
-            submitData.append('amount', formData.amount)
+            submitData.append('amount', netAmountFiat.toString())
+            submitData.append('total', amountFiat.toString())
+            submitData.append('feeAmount', feeFiat.toFixed(2))
 
             if (shouldShowBundleForWithdraw && selectedFeeBundle) {
                 submitData.append('FeesType', 'Package')
@@ -397,7 +361,7 @@ if (feeFiat > balance) {
                 submitData.append('fees', selectedFeeBundle.value)
             } else {
                 submitData.append('FeesType', 'Default')
-                submitData.append('fees', userDetails?.withdrawFees || '0') // Change withdrawFee to withdrawFees
+                submitData.append('fees', userDetails?.withdrawFees || '0')
             }
 
             submitData.append('country', formData.country)
@@ -412,10 +376,7 @@ if (feeFiat > balance) {
             submitData.append('accountNumber', formData.accountNumber)
             submitData.append('IBAN', formData.iban)
             submitData.append('swiftCode', formData.swiftCode)
-            submitData.append(
-                'paymentReferenceNumber',
-                formData.paymentReferenceNumber,
-            )
+            submitData.append('paymentReferenceNumber', formData.paymentReferenceNumber)
 
             const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/withdraw/bank/create`,
@@ -427,36 +388,27 @@ if (feeFiat > balance) {
                     },
                 },
             )
+
+            console.log('Backend Response:', response.data)
+
             setSuccess({
-                amount: amountFiat,
+                amount: netAmountFiat,
                 currency: selectedWithdrawCurrency?.shortName || '',
                 fee: feeFiat,
             })
 
             setFormLocked(true)
-
-            // console.log("Form submitted successfully:", response.data)
-            // toast.success('Bank transfer request submitted successfully!')
             setActiveTab('currency')
-            setFormData({
-                currencyId: '',
-                amount: '0',
-                feeType: 'Default',
-                country: '',
-                canton: '',
-                address: '',
-                postalCode: '',
-                city: '',
-                phone: '',
-                accountHolder: '',
-                bank: '',
-                billingCity: '',
-                accountNumber: '',
-                iban: '',
-                swiftCode: '',
-                paymentReferenceNumber: '',
-            })
-            setSelectedFeeBundle(null)
+
+            // CRITICAL: Reset everything completely
+            resetFormCompletely()
+
+            // Refresh balances
+            setTimeout(() => {
+                fetchfiatCurrencies()
+                fetchUserDetails()
+                fetchBundleDetails()
+            }, 500)
         } catch (error) {
             console.error('Error submitting form:', error)
             toast.error('Error submitting form. Please try again.')
@@ -473,25 +425,16 @@ if (feeFiat > balance) {
                     headers: { Authorization: `Bearer ${token}` },
                 },
             )
-           
-            
 
             setFiatCurrencies(fiatCurrenciesRes.data.data || [])
 
-            if (
-                fiatCurrenciesRes.data.data &&
-                fiatCurrenciesRes.data.data.length > 0
-            ) {
-                setSelectedWithdrawCurrency(fiatCurrenciesRes.data.data[0])
-
+            if (fiatCurrenciesRes.data.data && fiatCurrenciesRes.data.data.length > 0) {
                 const first = fiatCurrenciesRes.data.data[0]
-                updateFormData(
-                    'currencyId',
-                    (first.id ?? first.currencyId ?? '').toString(),
-                )
+                setSelectedWithdrawCurrency(first)
+                updateFormData('currencyId', (first.id ?? first.currencyId ?? '').toString())
             }
         } catch (error) {
-            console.log('Error occur during fetch currencies:', error)
+            console.log('Error fetching currencies:', error)
         }
     }
 
@@ -508,54 +451,34 @@ if (feeFiat > balance) {
     }
 
     const getCurrencyKey = (currency: Currency): string => {
-        return (
-            currency.currencyId?.toString() || currency.id || currency.shortName
-        )
+        return currency.currencyId?.toString() || currency.id || currency.shortName
     }
 
-    
     const handleWithdrawCurrencySelect = (key: string) => {
-    const selected = fiatCurrencies.find(
-        (c) =>
-            (c.currencyId && c.currencyId.toString() === key) ||
-            (c.id && c.id === key) ||
-            c.shortName === key ||
-            c.fullName === key,
-    )
+        const selected = fiatCurrencies.find(
+            (c) =>
+                (c.currencyId && c.currencyId.toString() === key) ||
+                (c.id && c.id === key) ||
+                c.shortName === key ||
+                c.fullName === key,
+        )
 
-    if (!selected) return
+        if (!selected) return
 
-    
-
-    setSelectedWithdrawCurrency(selected)
-
-    updateFormData(
-        'currencyId',
-        (selected.id ?? selected.currencyId ?? '').toString(),
-    )
-
-    updateFormData('amount', '')
-}
-
+        setSelectedWithdrawCurrency(selected)
+        updateFormData('currencyId', (selected.id ?? selected.currencyId ?? '').toString())
+        updateFormData('amount', '')
+        setErrors({})
+    }
 
     const handleFeeBundleSelect = (bundle: FeeBundle) => {
         setSelectedFeeBundle(bundle)
     }
 
-    const balanceKeyMap: { [key: string]: keyof Currency } = {
-        Available: 'availableBalance',
-        Locked: 'lockedBalance',
-    }
-
     const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([])
     const [loading, setLoading] = useState(false)
     const [tableLoading, setTableLoading] = useState(false)
-    const [selectedRows, setSelectedRows] = useState<number[]>([])
-    const [selectedStatus, setSelectedStatus] = useState<string>('Pending')
-    const [updating, setUpdating] = useState(false)
-
-    // Pagination and Sorting
-    const [pageIndex, setPageIndex] = useState(1) // 1-based
+    const [pageIndex, setPageIndex] = useState(1)
     const [pageSize, setPageSize] = useState(10)
     const [sortConfig, setSortConfig] = useState<{
         key: string
@@ -565,20 +488,15 @@ if (feeFiat > balance) {
         order: '',
     })
 
-    // const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null
-
     const fetchWithdrawalHistory = async () => {
         setTableLoading(true)
         try {
             const res = await axios.get(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/withdraw/fetch?withdrawType=Bank`,
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                 },
             )
-
             setWithdrawals(res.data.data || [])
         } catch (error) {
             console.error('Error fetching withdrawal data', error)
@@ -588,23 +506,6 @@ if (feeFiat > balance) {
         }
     }
 
-    const handleRowSelect = (id: number, checked: boolean) => {
-        if (checked) {
-            setSelectedRows((prev) => [...prev, id])
-        } else {
-            setSelectedRows((prev) => prev.filter((rowId) => rowId !== id))
-        }
-    }
-
-    const handleSelectAll = (checked: boolean) => {
-        if (checked) {
-            setSelectedRows(currentPageData.map((w: any) => w.id))
-        } else {
-            setSelectedRows([])
-        }
-    }
-
-    // Status color mapping
     const statusColorMap: Record<string, string> = {
         Pending: 'bg-yellow-500 text-white',
         Completed: 'bg-green-500 text-white',
@@ -613,81 +514,63 @@ if (feeFiat > balance) {
         Decline: 'bg-red-500 text-white',
     }
 
-    // Type color mapping
     const typeColorMap: Record<string, string> = {
         Bank: 'bg-blue-500 text-white',
         fiatCurrencies: 'bg-purple-500 text-white',
     }
 
-    // Client-side sorting
     const sortedData = useMemo(() => {
-        if (!sortConfig.key || sortConfig.order === '') {
-            return withdrawals
-        }
+        if (!sortConfig.key || sortConfig.order === '') return withdrawals
+        
         const direction = sortConfig.order === 'asc' ? 1 : -1
         return [...withdrawals].sort((a, b) => {
             const A = (a as any)[sortConfig.key]
             const B = (b as any)[sortConfig.key]
 
-            // Handle date sorting
             if (sortConfig.key === 'createdAt') {
-                return (
-                    (new Date(A).getTime() - new Date(B).getTime()) * direction
-                )
+                return (new Date(A).getTime() - new Date(B).getTime()) * direction
             }
 
-            // Handle numeric sorting (for amount, fees, total)
-            if (
-                sortConfig.key === 'amount' ||
-                sortConfig.key === 'fees' ||
-                sortConfig.key === 'total'
-            ) {
+            if (['amount', 'fees', 'total'].includes(sortConfig.key)) {
                 const numA = parseFloat(String(A).replace(/[^0-9.-]+/g, ''))
                 const numB = parseFloat(String(B).replace(/[^0-9.-]+/g, ''))
                 return (numA - numB) * direction
             }
 
-            // Handle numeric sorting for id
             if (typeof A === 'number' && typeof B === 'number') {
                 return (A - B) * direction
             }
 
-            // Handle string sorting
             return String(A).localeCompare(String(B)) * direction
         })
     }, [withdrawals, sortConfig])
 
-    // Client-side pagination
     const currentPageData = useMemo(() => {
         const start = (pageIndex - 1) * pageSize
         const end = start + pageSize
         return sortedData.slice(start, end)
     }, [sortedData, pageIndex, pageSize])
 
-    // Total count for pagination
     const totalCount = sortedData.length
 
-    // Sorting handler
     const handleSort = (sort: OnSortParam) => {
         setSortConfig({ key: String(sort.key), order: sort.order })
-        setPageIndex(1) // Reset to first page when sorting changes
+        setPageIndex(1)
     }
 
-    // Pagination handlers
     const handlePageChange = (newPage: number) => {
         setPageIndex(newPage)
     }
 
     const handlePageSizeChange = (newSize: number) => {
         setPageSize(newSize)
-        setPageIndex(1) // Reset to first page when page size changes
+        setPageIndex(1)
     }
 
     useEffect(() => {
         fetchWithdrawalHistory()
     }, [])
 
-    // Columns configuration
     const columns: ColumnDef<Withdrawal>[] = [
         {
             header: 'ID',
@@ -725,7 +608,6 @@ if (feeFiat > balance) {
             header: 'Type',
             accessorKey: 'withdrawType',
             cell: ({ row }) => {
-                // Determine type based on available data
                 const type =
                     row.original.withdrawType ||
                     ((row.original.withdrawBank?.length ?? 0) > 0
@@ -757,21 +639,12 @@ if (feeFiat > balance) {
 
     return (
         <>
-            <div className="min-h-screen p-6  shadow-sm bg-white dark:bg-gray-800 rounded-lg">
-                <Tabs
-                    defaultValue="Available"
-                    onChange={handleBalanceTypeChange}
-                >
+            <div className="min-h-screen p-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
+                <Tabs defaultValue="Available" onChange={handleBalanceTypeChange}>
                     <TabList>
-                        <TabNav
-                            value="Available"
-                            className={
-                                balanceType === 'Available' ? 'active' : ''
-                            }
-                        >
+                        <TabNav value="Available" className={balanceType === 'Available' ? 'active' : ''}>
                             Available
                         </TabNav>
-                        {/* <TabNav value="Locked" className={balanceType === 'Locked' ? 'active' : ''}>Locked</TabNav> */}
                     </TabList>
 
                     {['Available', 'Locked'].map((tab) => (
@@ -782,25 +655,18 @@ if (feeFiat > balance) {
                         >
                             <div className="max-w-4xl mx-auto">
                                 <div className="mt-4">
-                                    <div className="text-2xl font-semibold mb-2">
-                                        Bank Transfer
-                                    </div>
-                                    <div className="mb-4">
-                                        Enter payment information
-                                    </div>
+                                    <div className="text-2xl font-semibold mb-2">Bank Transfer</div>
+                                    <div className="mb-4">Enter payment information</div>
                                 </div>
-                                {/* ✅ SUCCESS MESSAGE HERE */}
+
                                 {success && (
                                     <div className="p-4 mb-4 rounded-lg bg-green-100 border border-green-300 text-green-800">
-                                        <div className="font-semibold">
-                                            ✅ Successfully submitted your bank
-                                            withdrawal.
-                                        </div>
+                                        <div className="font-semibold">✅ Successfully submitted your bank withdrawal.</div>
                                         <div className="text-sm mt-1">
-                                            Amount: {success.amount}{' '}
-                                            {success.currency} — Fee:{' '}
-                                            {success.fee.toFixed(2)}{' '}
-                                            {success.currency}
+                                            You will receive: {success.amount.toFixed(2)} {success.currency}
+                                        </div>
+                                        <div className="text-sm">
+                                            Fee deducted: {success.fee.toFixed(2)} {success.currency}
                                         </div>
                                     </div>
                                 )}
@@ -808,57 +674,45 @@ if (feeFiat > balance) {
                                 <div className="flex border-b border-gray-200 mb-4">
                                     <button
                                         onClick={() => setActiveTab('currency')}
-                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'currency'
-                                            ? 'border-primary text-primary'
-                                            : 'border-transparent'
-                                            }`}
+                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                                            activeTab === 'currency'
+                                                ? 'border-primary text-primary'
+                                                : 'border-transparent'
+                                        }`}
                                     >
                                         Currency
                                     </button>
                                     <button
                                         onClick={goToContacts}
-                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'contacts'
-                                            ? 'border-primary text-primary'
-                                            : 'border-transparent'
-                                            }`}
+                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                                            activeTab === 'contacts'
+                                                ? 'border-primary text-primary'
+                                                : 'border-transparent'
+                                        }`}
                                     >
                                         Contacts
                                     </button>
                                     <button
                                         onClick={goToBilling}
-                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === 'billing'
-                                            ? 'border-primary text-primary'
-                                            : 'border-transparent'
-                                            }`}
+                                        className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                                            activeTab === 'billing'
+                                                ? 'border-primary text-primary'
+                                                : 'border-transparent'
+                                        }`}
                                     >
                                         Billing info
                                     </button>
                                 </div>
+
                                 {stepWarning && (
-                                    <div className="text-sm text-red-500 mt-2">
-                                        {stepWarning}
-                                    </div>
+                                    <div className="text-sm text-red-500 mt-2">{stepWarning}</div>
                                 )}
 
                                 {/* Currency Tab */}
                                 {activeTab === 'currency' && (
                                     <div className="space-y-4">
-                                        <div className="flex justify-between items-center">
-                                            <span className="">
-                                                {balanceType}
-                                            </span>
-                                            {/* <span className="">
-                        ({selectedWithdrawCurrency ?
-                          `${selectedWithdrawCurrency[balanceKeyMap[balanceType]]} ${selectedWithdrawCurrency.shortName}` :
-                          '$00000000'
-                        })
-                      </span> */}
-                                        </div>
-
                                         <div>
-                                            <label className="block text-sm font-medium mb-1">
-                                                Currency
-                                            </label>
+                                            <label className="block text-sm font-medium mb-1">Currency</label>
                                             <Dropdown
                                                 title={
                                                     selectedWithdrawCurrency
@@ -871,285 +725,168 @@ if (feeFiat > balance) {
                                                 menuClass="w-full"
                                             >
                                                 {selectedWithdrawCurrency && (
-    <div className="mt-2 text-xs text-gray-500">
-        Available:{" "}
-        <span className="font-semibold">
-            {parseFloat(selectedWithdrawCurrency.availableBalance || '0').toFixed(2)}
-        </span>{" "}
-        {selectedWithdrawCurrency.shortName}
-    </div>
-)}
-
-                                                {fiatCurrencies.map(
-                                                    (currency) => (
-                                                        <DropdownItem
-                                                            key={getCurrencyKey(
-                                                                currency,
-                                                            )}
-                                                            className="text-center w-full"
-                                                            eventKey={getCurrencyKey(
-                                                                currency,
-                                                            )}
-                                                            onSelect={
-                                                                handleWithdrawCurrencySelect
-                                                            }
-                                                        >
-                                                            {currency.shortName}{' '}
-                                                            -{' '}
-                                                            {currency.fullName}
-                                                        </DropdownItem>
-                                                    ),
+                                                    <div className="mt-2 text-xs text-gray-500">
+                                                        Available:{" "}
+                                                        <span className="font-semibold">
+                                                            {parseFloat(selectedWithdrawCurrency.availableBalance || '0').toFixed(2)}
+                                                        </span>{" "}
+                                                        {selectedWithdrawCurrency.shortName}
+                                                    </div>
                                                 )}
+
+                                                {fiatCurrencies.map((currency) => (
+                                                    <DropdownItem
+                                                        key={getCurrencyKey(currency)}
+                                                        className="text-center w-full"
+                                                        eventKey={getCurrencyKey(currency)}
+                                                        onSelect={handleWithdrawCurrencySelect}
+                                                    >
+                                                        {currency.shortName} - {currency.fullName}
+                                                    </DropdownItem>
+                                                ))}
                                             </Dropdown>
                                             {errors.currencyId && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {errors.currencyId}
-                                                </p>
+                                                <p className="text-red-500 text-sm mt-1">{errors.currencyId}</p>
                                             )}
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium mb-1">
-                                                Amount (
-                                                {selectedWithdrawCurrency?.shortName ||
-                                                    'Fiat'}
-                                                )
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <Input
-                                                type="number"
-                                                placeholder="Enter amount"
-                                                value={formData.amount}
-                                                size="sm"
-                                                min="0" // Ensures only positive numbers
-                                                onKeyDown={(e) => {
-                                                    // Block negative sign, 'e', 'E', '+'
-                                                    if (
-                                                        [
-                                                            '-',
-                                                            'e',
-                                                            'E',
-                                                            '+',
-                                                        ].includes(e.key)
-                                                    ) {
-                                                        e.preventDefault()
-                                                    }
-                                                }}
-                                             
-                                                onChange={(e: any) => {
-    const value = e.target.value
-    updateFormData('amount', value)
+                                            <div className="flex justify-between items-center mb-1">
+                                                <label className="block text-sm font-medium">
+                                                    Amount ({selectedWithdrawCurrency?.shortName || 'Fiat'})
+                                                    <span className="text-red-500">*</span>
+                                                </label>
+                                                <div className="text-xs text-gray-600 dark:text-gray-400">
+                                                    Max: {availableFiat.toFixed(2)} {selectedWithdrawCurrency?.shortName}
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Input
+                                                    type="number"
+                                                    placeholder="Enter amount"
+                                                    value={formData.amount}
+                                                    size="sm"
+                                                    min="0"
+                                                    onKeyDown={(e) => {
+                                                        if (['-', 'e', 'E', '+'].includes(e.key)) {
+                                                            e.preventDefault()
+                                                        }
+                                                    }}
+                                                    onChange={(e: any) => {
+                                                        const value = e.target.value
+                                                        console.log('User entered amount:', value)
+                                                        updateFormData('amount', value)
 
-    const num = parseFloat(value)
+                                                        const num = parseFloat(value)
 
-    if (!value) {
-        setErrors((prev) => ({ ...prev, amount: undefined }))
-        return
-    }
+                                                        if (!value) {
+                                                            setErrors((prev) => ({ ...prev, amount: undefined }))
+                                                            return
+                                                        }
 
-    if (isNaN(num) || num <= 0) {
-        setErrors((prev) => ({
-            ...prev,
-            amount: 'Please enter a valid amount',
-        }))
-        return
-    }
+                                                        if (isNaN(num) || num <= 0) {
+                                                            setErrors((prev) => ({
+                                                                ...prev,
+                                                                amount: 'Please enter a valid amount',
+                                                            }))
+                                                            return
+                                                        }
 
-    if (num > availableFiat) {
-        setErrors((prev) => ({
-            ...prev,
-            amount: `Amount exceeds available balance. Available: ${availableFiat.toFixed(
-                2,
-            )} ${selectedWithdrawCurrency?.shortName}`,
-        }))
-        return
-    }
+                                                        if (num > availableFiat) {
+                                                            setErrors((prev) => ({
+                                                                ...prev,
+                                                                amount: `Max amount is ${availableFiat.toFixed(2)} ${selectedWithdrawCurrency?.shortName}`,
+                                                            }))
+                                                            return
+                                                        }
 
-    
-    setErrors((prev) => ({ ...prev, amount: undefined }))
-}}
-
-
-
-                                                className="border border-gray-300 focus:ring-0  dark:bg-gray-800 rounded-lg"
-                                            />
+                                                        setErrors((prev) => ({ ...prev, amount: undefined }))
+                                                    }}
+                                                    className="border border-gray-300 focus:ring-0 dark:bg-gray-800 rounded-lg flex-1"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={handleSetMaxAmount}
+                                                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+                                                >
+                                                    MAX
+                                                </button>
+                                            </div>
                                             {errors.amount && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {errors.amount}
-                                                </p>
+                                                <p className="text-red-500 text-sm mt-1">{errors.amount}</p>
                                             )}
                                         </div>
 
-{selectedWithdrawCurrency && feePercent > 0 && (
-    (() => {
-        const available = parseFloat(selectedWithdrawCurrency.availableBalance || '0') || 0
-        const feeNeeded = feeFiat // uses your computed memo
-        const locked = parseFloat(selectedWithdrawCurrency.lockedBalance || '0') || 0
-
-        // If user withdraws from Locked in future, fee still must be from Available.
-        const tryingLocked = balanceType === 'Locked'
-
-        if (tryingLocked && locked > 0 && available < feeNeeded) {
-            return (
-                <div className="p-2 bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded-lg">
-                    <div className="text-sm text-yellow-800 dark:text-yellow-200">
-                        No available balance to deduct the withdrawal fee.
-                        Please add funds to Available balance.
-                    </div>
-                </div>
-            )
-        }
-
-        return null
-    })()
-)}
-
-                                        {/* <div className="text-sm text-green-400">
-                      Max sum:  ({selectedWithdrawCurrency ?
-                        `${selectedWithdrawCurrency[balanceKeyMap[balanceType]]} ${selectedWithdrawCurrency.shortName}` :
-                        '$00000000'
-                      })
-                    </div> */}
-
-                                        {/* Fee Bundle Selection Buttons - Updated for Bank */}
                                         {shouldShowBundleForWithdraw && (
                                             <div className="w-full mb-4">
                                                 <label className="text-sm mb-2 block">
-                                                    Fee Options:{' '}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
+                                                    Fee Options: <span className="text-red-500">*</span>
                                                 </label>
                                                 <div className="grid grid-cols-2 gap-2">
-                                                    {bankBundles.map(
-                                                        (bundle) => {
-                                                            const isSelected =
-                                                                selectedFeeBundle?.id ===
-                                                                bundle.id
+                                                    {bankBundles.map((bundle) => {
+                                                        const isSelected = selectedFeeBundle?.id === bundle.id
 
-                                                            return (
-                                                                <button
-                                                                    key={
-                                                                        bundle.id
-                                                                    }
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        handleFeeBundleSelect(
-                                                                            bundle,
-                                                                        )
-                                                                    }
-                                                                    className={`p-3 rounded-lg text-left text-sm transition-all ${isSelected
+                                                        return (
+                                                            <button
+                                                                key={bundle.id}
+                                                                type="button"
+                                                                onClick={() => handleFeeBundleSelect(bundle)}
+                                                                className={`p-3 rounded-lg text-left text-sm transition-all ${
+                                                                    isSelected
                                                                         ? 'bg-blue-500 text-white border-2 border-blue-600'
                                                                         : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                                                        }`}
-                                                                >
-                                                                    <div className="font-medium">
-                                                                        {
-                                                                            bundle.name
-                                                                        }{' '}
-                                                                        (
-                                                                        {
-                                                                            bundle.value
-                                                                        }
-                                                                        %)
-                                                                    </div>
-                                                                    <div className="text-xs mt-1 opacity-80">
-                                                                        {bundle.descrption ||
-                                                                            bundle.description}
-                                                                    </div>
-                                                                </button>
-                                                            )
-                                                        },
-                                                    )}
+                                                                }`}
+                                                            >
+                                                                <div className="font-medium">
+                                                                    {bundle.name} ({bundle.value}%)
+                                                                </div>
+                                                                <div className="text-xs mt-1 opacity-80">
+                                                                    {bundle.descrption || bundle.description}
+                                                                </div>
+                                                            </button>
+                                                        )
+                                                    })}
                                                 </div>
                                                 {bankBundles.length === 0 && (
                                                     <div className="mt-2 text-sm text-gray-500">
-                                                        No fee bundles available
-                                                        for Bank transfers
+                                                        No fee bundles available for Bank transfers
                                                     </div>
                                                 )}
                                             </div>
                                         )}
 
-                                        {!shouldShowBundleForWithdraw &&
-                                            userDetails?.withdrawFees && ( // Change withdrawFee to withdrawFees
-                                                <div className="p-3 bg-blue-100 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-lg">
-                                                    <div className="text-sm text-blue-700 dark:text-blue-300">
-                                                        Your withdrawal fee:{' '}
-                                                        {
-                                                            userDetails.withdrawFees
-                                                        }
-                                                        % (Default rate) //
-                                                        Change withdrawFee to
-                                                        withdrawFees
-                                                    </div>
+                                        {!shouldShowBundleForWithdraw && userDetails?.withdrawFees && (
+                                            <div className="p-3 bg-blue-100 dark:bg-blue-900/20 border border-blue-300 dark:border-blue-700 rounded-lg">
+                                                <div className="text-sm text-blue-700 dark:text-blue-300">
+                                                    Your withdrawal fee: {userDetails.withdrawFees}% (Default rate)
                                                 </div>
-                                            )}
+                                            </div>
+                                        )}
 
                                         <div className="space-y-2 pt-4 border-t border-gray-300">
-                                            {/* Withdrawal Amount */}
                                             <div className="flex justify-between">
-                                                <span>
-                                                    Withdrawal Amount (
-                                                    {
-                                                        selectedWithdrawCurrency?.shortName
-                                                    }
-                                                    )
-                                                </span>
-                                                <span>
-                                                    {amountFiat.toFixed(2)}{' '}
-                                                    {
-                                                        selectedWithdrawCurrency?.shortName
-                                                    }
+                                                <span>Amount to Withdraw</span>
+                                                <span className="font-semibold">
+                                                    {amountFiat.toFixed(2)} {selectedWithdrawCurrency?.shortName}
                                                 </span>
                                             </div>
 
-                                            {/* Fee */}
-                                            <div className="flex justify-between">
-                                                <span>
-                                                    Fee (
-                                                    {
-                                                        selectedWithdrawCurrency?.shortName
-                                                    }
-                                                    ) ({feePercent}%)
-                                                </span>
-                                                <span>
-                                                    {feeFiat.toFixed(2)}{' '}
-                                                    {
-                                                        selectedWithdrawCurrency?.shortName
-                                                    }
+                                            <div className="flex justify-between text-red-600">
+                                                <span>Fee ({feePercent}%)</span>
+                                                <span>-{feeFiat.toFixed(2)} {selectedWithdrawCurrency?.shortName}</span>
+                                            </div>
+
+                                            <div className="flex justify-between bg-green-50 dark:bg-green-900/20 p-2 rounded">
+                                                <span className="font-semibold">You Receive</span>
+                                                <span className="font-semibold text-green-600 dark:text-green-400">
+                                                    {netAmountFiat.toFixed(2)} {selectedWithdrawCurrency?.shortName}
                                                 </span>
                                             </div>
 
-                                            {/* Total Deducted */}
-                                            <div className="flex justify-between font-semibold">
-                                                <span>
-                                                    Total Deducted from
-                                                    Available Balance
-                                                </span>
-                                                <span>
-                                                    {totalFiat.toFixed(2)}{' '}
-                                                    {
-                                                        selectedWithdrawCurrency?.shortName
-                                                    }
-                                                </span>
-                                            </div>
-
-                                            {/* Remaining Balance */}
                                             <div className="flex justify-between text-sm text-gray-600">
+                                                <span>Remaining Balance</span>
                                                 <span>
-                                                    Remaining Available Balance
-                                                </span>
-                                                <span>
-                                                    {(
-                                                        availableFiat -
-                                                        totalFiat
-                                                    ).toFixed(2)}{' '}
-                                                    {
-                                                        selectedWithdrawCurrency?.shortName
-                                                    }
+                                                    {remainingAfterSubmit.toFixed(2)} {selectedWithdrawCurrency?.shortName}
                                                 </span>
                                             </div>
                                         </div>
@@ -1161,16 +898,7 @@ if (feeFiat > balance) {
                                             className="bg-primary rounded-lg text-white py-3 mt-8"
                                             icon={<ChevronRight size={20} />}
                                             iconAlignment="end"
-                                            disabled={
-                                                !formData.amount ||
-                                                !formData.currencyId ||
-                                                amountFiat <= 0 ||
-                                                amountFiat > availableFiat || 
-                                                totalFiat > availableFiat ||
-                                                (shouldShowBundleForWithdraw && !selectedFeeBundle) ||
-                                                feeFiat > availableFiat
-
-                                            }
+                                            disabled={!isCurrencyStepValid}
                                         >
                                             NEXT
                                         </Button>
@@ -1182,161 +910,97 @@ if (feeFiat > balance) {
                                     <div className="space-y-3">
                                         <div>
                                             <label className="block text-sm font-medium mb-1">
-                                                Country{' '}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                                Country <span className="text-red-500">*</span>
                                             </label>
                                             <Select
                                                 options={countriesOption}
-                                                value={countriesOption.find(
-                                                    (option) =>
-                                                        option.value ===
-                                                        formData.country,
-                                                )}
+                                                value={countriesOption.find((option) => option.value === formData.country)}
                                                 onChange={(option) => {
-                                                    updateFormData(
-                                                        'country',
-                                                        option?.value || '',
-                                                    )
+                                                    updateFormData('country', option?.value || '')
                                                 }}
                                                 placeholder="Select Country"
                                                 isClearable
                                             />
                                             {errors.country && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {errors.country}
-                                                </p>
+                                                <p className="text-red-500 text-sm mt-1">{errors.country}</p>
                                             )}
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium mb-1">
-                                                Canton{' '}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                                Canton <span className="text-red-500">*</span>
                                             </label>
                                             <Input
                                                 placeholder="Canton"
                                                 value={formData.canton}
-                                                onChange={(e: any) =>
-                                                    updateFormData(
-                                                        'canton',
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e: any) => updateFormData('canton', e.target.value)}
                                                 className="w-full text-gray-300"
                                             />
                                             {errors.canton && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {errors.canton}
-                                                </p>
+                                                <p className="text-red-500 text-sm mt-1">{errors.canton}</p>
                                             )}
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium mb-1">
-                                                Address{' '}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                                Address <span className="text-red-500">*</span>
                                             </label>
                                             <Input
                                                 placeholder="Address"
                                                 value={formData.address}
-                                                onChange={(e: any) =>
-                                                    updateFormData(
-                                                        'address',
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e: any) => updateFormData('address', e.target.value)}
                                                 className="w-full text-gray-300"
                                             />
                                             {errors.address && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {errors.address}
-                                                </p>
+                                                <p className="text-red-500 text-sm mt-1">{errors.address}</p>
                                             )}
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-sm font-medium mb-1">
-                                                    Postal/ZIP code{' '}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
+                                                    Postal/ZIP code <span className="text-red-500">*</span>
                                                 </label>
                                                 <Input
                                                     placeholder="Postal/ZIP code"
                                                     value={formData.postalCode}
-                                                    onChange={(e: any) =>
-                                                        updateFormData(
-                                                            'postalCode',
-                                                            e.target.value,
-                                                        )
-                                                    }
+                                                    onChange={(e: any) => updateFormData('postalCode', e.target.value)}
                                                     className="w-full text-gray-300"
                                                 />
                                                 {errors.postalCode && (
-                                                    <p className="text-red-500 text-sm mt-1">
-                                                        {errors.postalCode}
-                                                    </p>
+                                                    <p className="text-red-500 text-sm mt-1">{errors.postalCode}</p>
                                                 )}
                                             </div>
                                             <div>
                                                 <label className="block text-sm font-medium mb-1">
-                                                    City{' '}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
+                                                    City <span className="text-red-500">*</span>
                                                 </label>
                                                 <Input
                                                     placeholder="City"
                                                     value={formData.city}
-                                                    onChange={(e: any) =>
-                                                        updateFormData(
-                                                            'city',
-                                                            e.target.value,
-                                                        )
-                                                    }
+                                                    onChange={(e: any) => updateFormData('city', e.target.value)}
                                                     className="w-full text-gray-300"
                                                 />
                                                 {errors.city && (
-                                                    <p className="text-red-500 text-sm mt-1">
-                                                        {errors.city}
-                                                    </p>
+                                                    <p className="text-red-500 text-sm mt-1">{errors.city}</p>
                                                 )}
                                             </div>
                                         </div>
 
                                         <div className="pt-4">
-                                            <h3 className="text-lg font-medium mb-2">
-                                                Contact
-                                            </h3>
+                                            <h3 className="text-lg font-medium mb-2">Contact</h3>
                                             <div>
                                                 <label className="block text-sm font-medium mb-1">
-                                                    Phone{' '}
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
+                                                    Phone <span className="text-red-500">*</span>
                                                 </label>
                                                 <Input
                                                     placeholder="Enter phone with country code"
                                                     value={formData.phone}
-                                                    onChange={(e: any) =>
-                                                        updateFormData(
-                                                            'phone',
-                                                            e.target.value,
-                                                        )
-                                                    }
+                                                    onChange={(e: any) => updateFormData('phone', e.target.value)}
                                                     className="w-full text-gray-300"
                                                 />
                                                 {errors.phone && (
-                                                    <p className="text-red-500 text-sm mt-1">
-                                                        {errors.phone}
-                                                    </p>
+                                                    <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
                                                 )}
                                             </div>
                                         </div>
@@ -1355,9 +1019,7 @@ if (feeFiat > balance) {
                                                 variant="solid"
                                                 onClick={handleNext}
                                                 className="flex-1 bg-primary rounded-lg text-white py-3"
-                                                icon={
-                                                    <ChevronRight size={20} />
-                                                }
+                                                icon={<ChevronRight size={20} />}
                                                 iconAlignment="end"
                                             >
                                                 NEXT
@@ -1371,180 +1033,106 @@ if (feeFiat > balance) {
                                     <div className="space-y-3">
                                         <div>
                                             <label className="block text-sm font-medium mb-1">
-                                                Account holder{' '}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                                Account holder <span className="text-red-500">*</span>
                                             </label>
                                             <Input
                                                 placeholder="Account holder"
                                                 value={formData.accountHolder}
-                                                onChange={(e: any) =>
-                                                    updateFormData(
-                                                        'accountHolder',
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e: any) => updateFormData('accountHolder', e.target.value)}
                                                 className="w-full text-gray-300"
                                             />
                                             {errors.accountHolder && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {errors.accountHolder}
-                                                </p>
+                                                <p className="text-red-500 text-sm mt-1">{errors.accountHolder}</p>
                                             )}
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium mb-1">
-                                                Bank{' '}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                                Bank <span className="text-red-500">*</span>
                                             </label>
                                             <Input
                                                 placeholder="Bank"
                                                 value={formData.bank}
-                                                onChange={(e: any) =>
-                                                    updateFormData(
-                                                        'bank',
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e: any) => updateFormData('bank', e.target.value)}
                                                 className="w-full text-gray-300"
                                             />
                                             {errors.bank && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {errors.bank}
-                                                </p>
+                                                <p className="text-red-500 text-sm mt-1">{errors.bank}</p>
                                             )}
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium mb-1">
-                                                City{' '}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                                City <span className="text-red-500">*</span>
                                             </label>
                                             <Input
                                                 placeholder="City"
                                                 value={formData.billingCity}
-                                                onChange={(e: any) =>
-                                                    updateFormData(
-                                                        'billingCity',
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e: any) => updateFormData('billingCity', e.target.value)}
                                                 className="w-full text-gray-300"
                                             />
                                             {errors.billingCity && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {errors.billingCity}
-                                                </p>
+                                                <p className="text-red-500 text-sm mt-1">{errors.billingCity}</p>
                                             )}
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium mb-1">
-                                                Account number{' '}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                                Account number <span className="text-red-500">*</span>
                                             </label>
                                             <Input
                                                 placeholder="Account number"
                                                 value={formData.accountNumber}
-                                                onChange={(e: any) =>
-                                                    updateFormData(
-                                                        'accountNumber',
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e: any) => updateFormData('accountNumber', e.target.value)}
                                                 className="w-full text-gray-300"
                                             />
                                             {errors.accountNumber && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {errors.accountNumber}
-                                                </p>
+                                                <p className="text-red-500 text-sm mt-1">{errors.accountNumber}</p>
                                             )}
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium mb-1">
-                                                IBAN{' '}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                                IBAN <span className="text-red-500">*</span>
                                             </label>
                                             <Input
                                                 placeholder="IBAN"
                                                 value={formData.iban}
-                                                onChange={(e: any) =>
-                                                    updateFormData(
-                                                        'iban',
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e: any) => updateFormData('iban', e.target.value)}
                                                 className="w-full text-gray-300"
                                             />
                                             {errors.iban && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {errors.iban}
-                                                </p>
+                                                <p className="text-red-500 text-sm mt-1">{errors.iban}</p>
                                             )}
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium mb-1">
-                                                Swift code{' '}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                                Swift code <span className="text-red-500">*</span>
                                             </label>
                                             <Input
                                                 placeholder="Swift code"
                                                 value={formData.swiftCode}
-                                                onChange={(e: any) =>
-                                                    updateFormData(
-                                                        'swiftCode',
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                onChange={(e: any) => updateFormData('swiftCode', e.target.value)}
                                                 className="w-full text-gray-300"
                                             />
                                             {errors.swiftCode && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {errors.swiftCode}
-                                                </p>
+                                                <p className="text-red-500 text-sm mt-1">{errors.swiftCode}</p>
                                             )}
                                         </div>
 
                                         <div>
                                             <label className="block text-sm font-medium mb-1">
-                                                Payment reference number{' '}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
+                                                Payment reference number <span className="text-red-500">*</span>
                                             </label>
                                             <Input
                                                 placeholder="Payment reference number"
-                                                value={
-                                                    formData.paymentReferenceNumber
-                                                }
-                                                onChange={(e: any) =>
-                                                    updateFormData(
-                                                        'paymentReferenceNumber',
-                                                        e.target.value,
-                                                    )
-                                                }
+                                                value={formData.paymentReferenceNumber}
+                                                onChange={(e: any) => updateFormData('paymentReferenceNumber', e.target.value)}
                                                 className="w-full text-gray-300"
                                             />
                                             {errors.paymentReferenceNumber && (
-                                                <p className="text-red-500 text-sm mt-1">
-                                                    {
-                                                        errors.paymentReferenceNumber
-                                                    }
-                                                </p>
+                                                <p className="text-red-500 text-sm mt-1">{errors.paymentReferenceNumber}</p>
                                             )}
                                         </div>
 
@@ -1564,9 +1152,7 @@ if (feeFiat > balance) {
                                                 disabled={isSubmitting}
                                                 className="flex-1 bg-primary rounded-lg text-white py-3 disabled:opacity-50"
                                             >
-                                                {isSubmitting
-                                                    ? 'SUBMITTING...'
-                                                    : 'SUBMIT'}
+                                                {isSubmitting ? 'SUBMITTING...' : 'SUBMIT'}
                                             </Button>
                                         </div>
                                     </div>
@@ -1584,9 +1170,7 @@ if (feeFiat > balance) {
             )}
 
             <div className="p-6 mt-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
-                <div className="text-xl font-semibold mb-4">
-                    Withdrawal History
-                </div>
+                <div className="text-xl font-semibold mb-4">Withdrawal History</div>
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
                         <Spinner size={40} />
