@@ -763,7 +763,7 @@ const maxBalance = useMemo(() => {
         },
 
          {
-    header: 'Balance',
+    header: 'Balance Type',
     accessorKey: 'balancetype',
     cell: ({ row }) => {
         const balanceType = row.original.balancetype;

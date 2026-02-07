@@ -131,7 +131,7 @@ const columns: ColumnDef<Transaction>[] = [
        
     },
     {
-            header: 'Type',
+            header: 'Balance Type',
             accessorKey: 'IsRealTransaction',
             cell: ({ row }) => {
                 const isReal = row.original.IsRealTransaction

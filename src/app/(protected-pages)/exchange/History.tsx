@@ -18,6 +18,7 @@ type Transaction = {
   buyAmount: string;
   fee: string;
   status: string;
+  exchangeBalanceType:string
 };
 
 const statusColorMap: Record<string, string> = {
@@ -63,6 +64,29 @@ const columns: ColumnDef<Transaction>[] = [
   },
   { header: 'Fee', accessorKey: 'fee', cell: ({ row }) => <span>{row.original.fee}</span> },
   {
+  header: 'Balance Type',
+  accessorKey: 'exchangeBalanceType',
+  cell: ({ row }) => {
+    const value = row.getValue('exchangeBalanceType') as string
+
+    const color =
+      value === 'Available'
+        ? 'bg-green-100 text-green-800'
+        : value === 'Locked'
+        ? 'bg-yellow-100 text-yellow-800'
+        : 'bg-gray-100 text-gray-800'
+
+    return (
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full ${color}`}
+      >
+        {value}
+      </span>
+    )
+  },
+},
+
+  {
     header: 'Status',
     accessorKey: 'status',
     cell: ({ row }) => {
@@ -80,11 +104,11 @@ const columns: ColumnDef<Transaction>[] = [
 
 const ExchangeHistory = () => {
   const [exchangeData, setExchangeData] = useState<any[]>([]);
-
- 
-  
   const [processedData, setProcessedData] = useState<Transaction[]>([]);
   
+  
+  
+
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [totalCount, setTotalCount] = useState(0);
@@ -114,7 +138,9 @@ const ExchangeHistory = () => {
       sellAmount: item.sellAmount,
       buyAmount: item.buyAmount,
       fee: item.fees,
-      status: 'Completed' // You can add status field in your API or determine based on logic
+      status: 'Completed',
+      exchangeBalanceType:item.exchangeBalanceType
+      
     }));
   };
 
@@ -126,6 +152,8 @@ const ExchangeHistory = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+
+
 
       setExchangeData(res.data.data);
       const processed = processExchangeData(res.data.data);

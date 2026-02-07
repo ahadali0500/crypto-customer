@@ -624,13 +624,29 @@ const Page = () => {
         <span className="">{parseFloat(row.getValue('fees')).toFixed(6)}</span>
       ),
     },
-    {
-      accessorKey: 'exchangeBalanceType',
-      header: 'Balance Type',
-      cell: ({ row }) => (
-        <span className="">{(row.getValue('exchangeBalanceType'))}</span>
-      ),
-    },
+   {
+  accessorKey: 'exchangeBalanceType',
+  header: 'Balance Type',
+  cell: ({ row }) => {
+    const value = row.getValue('exchangeBalanceType') as string
+
+    const color =
+      value === 'Available'
+        ? 'bg-green-100 text-green-800'
+        : value === 'Locked'
+        ? 'bg-yellow-100 text-yellow-800'
+        : 'bg-gray-100 text-gray-800'
+
+    return (
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full ${color}`}
+      >
+        {value}
+      </span>
+    )
+  },
+},
+
     
     {
       header: 'Status',
@@ -773,13 +789,30 @@ const Page = () => {
         </span>
       ),
     },
-    {
-      accessorKey: 'balancetype',
-      header: 'Balance Type',
-      cell: ({ row }) => (
-        <span className="">{row.getValue('balancetype')}</span>
-      ),
-    },
+   {
+  accessorKey: 'balancetype',
+  header: 'Balance Type',
+  cell: ({ row }) => {
+    const value = row.getValue('balancetype') as string
+
+    const color =
+      value === 'Available'
+        ? 'bg-green-100 text-green-800'
+        : value === 'Locked'
+        ? 'bg-yellow-100 text-yellow-800'
+        : 'bg-gray-100 text-gray-800'
+
+    return (
+      <span
+        className="px-2 py-1 p-4 text-xs font-medium rounded-full"
+        style={{ whiteSpace: 'nowrap' }}
+      >
+        <span className={color}>{value}</span>
+      </span>
+    )
+  },
+},
+
     {
       accessorKey: 'amount',
       header: 'Amount',
