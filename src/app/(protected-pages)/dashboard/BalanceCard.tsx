@@ -218,7 +218,7 @@ const BalanceCard = ({
                                             }}
                                         ></div>
                                         <img
-                                            src={`https://server.bexchange.io/uploads/currency/${item.currency.icon}`}
+                                            src={item.currency.icon}
                                             alt={item.currency.shortName}
                                             className="w-4 h-4 rounded-full"
                                         />

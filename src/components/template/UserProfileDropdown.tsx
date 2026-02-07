@@ -11,6 +11,7 @@ import type { JSX } from 'react'
 import { useSessionContext } from '../auth/AuthProvider/SessionContext'
 import { toast } from 'react-toastify'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 type DropdownList = {
     label: string
@@ -38,9 +39,10 @@ const _UserDropdown = () => {
         }
     }
 
+
     const avatarProps = {
-        ...(session?.user?.image
-            ? { src: session?.user?.image }
+        ...(session?.user?.profileImageUrl
+            ? { src: session?.user?.profileImageUrl }
             : { icon: <PiUserDuotone /> }),
     }
 
@@ -61,6 +63,7 @@ const _UserDropdown = () => {
                 renderTitle={
                     <div className="cursor-pointer flex items-center">
                         <Avatar size={32} {...avatarProps} />
+                       
                     </div>
                 }
                 placement="bottom-end"

@@ -96,10 +96,13 @@ const SignInForm = (props: SignInFormProps) => {
             // ✅ Store token separately
             localStorage.setItem('authToken', loginData.token)
 
+
             // ✅ Store all other user info in an object
             const userInfo = {
                 name: loginData.name,   // from backend
-                email: loginData.email, // from backend
+                email: loginData.email, 
+                profileImageUrl:loginData.profileImageUrl
+                // from backend
                 // add more fields if needed
             }
             localStorage.setItem('userInfo', JSON.stringify(userInfo))

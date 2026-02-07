@@ -146,7 +146,7 @@ const _Currency = ({ className }: { className?: string }) => {
                 >
                   <div className="flex items-center space-x-2">
                     <img
-                      src={`https://server.bexchange.io/uploads/currency/${item.currency.icon}`}
+                      src={item.currency.icon}
                       alt={item.currency.shortName || 'Currency'}
                       className="rounded-full w-[24px] h-[24px]"
                     />

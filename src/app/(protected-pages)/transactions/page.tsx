@@ -789,7 +789,7 @@ const Page = () => {
         </span>
       ),
     },
-   {
+ {
   accessorKey: 'balancetype',
   header: 'Balance Type',
   cell: ({ row }) => {
@@ -804,14 +804,14 @@ const Page = () => {
 
     return (
       <span
-        className="px-2 py-1 p-4 text-xs font-medium rounded-full"
-        style={{ whiteSpace: 'nowrap' }}
+        className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${color}`}
       >
-        <span className={color}>{value}</span>
+        {value}
       </span>
     )
   },
 },
+
 
     {
       accessorKey: 'amount',

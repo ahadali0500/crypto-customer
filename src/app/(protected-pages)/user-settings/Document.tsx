@@ -133,7 +133,7 @@ const DocumentComponent = () => {
                 const fileName = row.original.document;
                 return (
                     <a
-                        href={`${BASE_URL}/uploads/document/${fileName}`}
+                        href={fileName}
                         className="text-blue-700 underline"
                         target="_blank"
                         rel="noopener noreferrer"
