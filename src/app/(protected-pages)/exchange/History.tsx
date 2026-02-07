@@ -142,8 +142,8 @@ const ExchangeHistory = () => {
     }
   };
 
-  console.log('exchangeData:', exchangeData);
-  console.log('processedData:', processedData);
+
+  
 
   useEffect(() => {
     fetchHistory();
