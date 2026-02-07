@@ -118,6 +118,9 @@ const BankTransferForm = () => {
     const [fiatCurrencies, setFiatCurrencies] = useState<Currency[]>([])
     const [selectedWithdrawCurrency, setSelectedWithdrawCurrency] = useState<Currency | null>(null)
     const [userDetails, setUserDetails] = useState<UserDetails | null>(null)
+
+    console.log("userDetails",userDetails);
+    
     const [bundleDetails, setBundleDetails] = useState<FeeBundle[]>([])
     const [selectedFeeBundle, setSelectedFeeBundle] = useState<FeeBundle | null>(null)
 
@@ -200,6 +203,8 @@ const BankTransferForm = () => {
                     headers: { Authorization: `Bearer ${token}` },
                 },
             )
+            
+            
             setUserDetails(res.data.data)
         } catch (error) {
             console.log('Error fetching user details:', error)

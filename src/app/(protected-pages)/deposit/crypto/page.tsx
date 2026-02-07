@@ -41,6 +41,7 @@ type Transaction = {
     subject?: string
     createdAt?: string
     currency: Currency
+    IsRealTransaction?:Boolean
 }
 type DepositData = {
     deposit: {
@@ -126,7 +127,27 @@ const columns: ColumnDef<Transaction>[] = [
                 </span>
             )
         },
+    
+       
     },
+    {
+            header: 'Type',
+            accessorKey: 'IsRealTransaction',
+            cell: ({ row }) => {
+                const isReal = row.original.IsRealTransaction
+                const bgColor = isReal ? 'bg-green-100' : 'bg-yellow-100'
+                const textColor = isReal ? 'text-green-800' : 'text-yellow-800'
+                const statusText = isReal ? 'Available' : 'Locked'
+                
+                return (
+                    <span
+                        className={`px-3 py-1 text-xs font-semibold rounded-full ${bgColor} ${textColor}`}
+                    >
+                        {statusText}
+                    </span>
+                )
+            },
+        },
 ]
 
 const Page = () => {

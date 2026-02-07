@@ -46,6 +46,7 @@ interface ExchangeData {
   sellAsset?: any;
   buyAsset?: any;
   customer?: any;
+  exchangeBalanceType?:string
 }
 
 interface DepositData {
@@ -455,6 +456,7 @@ const Page = () => {
     }
   };
 
+
   const [cardData, setCardData] = useState<CardData>();
 
   const fetchDasboard = async () => {
@@ -521,6 +523,7 @@ const Page = () => {
       case 'exchanges':
         rawData = exchangeData || [];
         break;
+        
       case 'deposits':
         rawData = data?.deposit || [];
         break;
@@ -528,6 +531,7 @@ const Page = () => {
         rawData = data?.withdraw || [];
         break;
     }
+
 
     const { sortBy, sortOrder, pageIndex, pageSize } = pagination[tabKey];
 
@@ -621,6 +625,14 @@ const Page = () => {
       ),
     },
     {
+      accessorKey: 'exchangeBalanceType',
+      header: 'Balance Type',
+      cell: ({ row }) => (
+        <span className="">{(row.getValue('exchangeBalanceType'))}</span>
+      ),
+    },
+    
+    {
       header: 'Status',
       accessorKey: 'status',
       cell: () => (
@@ -679,6 +691,28 @@ const Page = () => {
       ),
     },
     {
+  header: 'Balance Type',
+  accessorKey: 'IsRealTransaction',
+  cell: ({ getValue }) => {
+    const isReal = getValue() as boolean
+
+    const value = isReal ? 'Available' : 'Locked'
+    const color =
+      value === 'Available'
+        ? 'bg-green-100 text-green-800'
+        : 'bg-yellow-100 text-yellow-800'
+
+    return (
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full cursor-pointer hover:opacity-80 ${color}`}
+      >
+        {value}
+      </span>
+    )
+  },
+},
+
+    {
       accessorKey: 'amount',
       header: 'Amount',
       cell: ({ row }) => (
@@ -687,6 +721,9 @@ const Page = () => {
         </span>
       ),
     },
+    
+
+     
     {
       accessorKey: 'createdAt',
       header: 'Date',
