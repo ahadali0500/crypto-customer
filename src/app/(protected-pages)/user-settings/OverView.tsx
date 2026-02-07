@@ -397,7 +397,7 @@ export const Overview = () => {
                         {profileImagePreview || userData.profileImageUrl ? (
                           <img
                             // src={profileImagePreview || userData.profileImageUrl!}
-                            src={`https://server.bexchange.io/uploads/user/${profileImagePreview}`}
+                            src={profileImagePreview}
                             alt="Profile"
                             className="w-24 h-24 rounded-full object-cover border"
                           />

@@ -52,6 +52,7 @@ const User = () => {
         }
     }
 
+   
     const fetchBalance = async () => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/auth/balance`, {
@@ -97,7 +98,7 @@ const User = () => {
                             {user.profileImageUrl && !imageError ? (
                                 <Image 
                                     // src={user.profileImageUrl} 
-                                    src={`https://server.bexchange.io/uploads/user/${user.profileImageUrl}`}
+                                    src={user.profileImageUrl}
                                     width={80} 
                                     height={80} 
                                     className='rounded-full object-cover' 
