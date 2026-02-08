@@ -38,6 +38,14 @@ interface FeeBundle {
   rangeMin?: number | null
   rangeMax?: number | null
 }
+
+interface AdminSetting {
+  exchangeFees?: string | number | null
+  withdrawFees?: string | number | null
+}
+
+
+
 const Page = () => {
   const [selectedSellCurrency, setSelectedSellCurrency] = useState<Currency | null>(null);
   const [selectedBuyCurrency, setSelectedBuyCurrency] = useState<Currency | null>(null);
@@ -56,7 +64,23 @@ const Page = () => {
   const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
  
   
+const [adminSetting, setAdminSetting] = useState<AdminSetting | null>(null)
 
+const fetchAdminSetting = async () => {
+  try {
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/system/fetch/settings`,
+      { headers: { Authorization: `Bearer ${token}` } } 
+    )
+
+    const settingRow = Array.isArray(res.data?.data) ? res.data.data[0] : null
+    setAdminSetting(settingRow || null)
+  } catch (err) {
+    console.log('Error fetching settings:', err)
+    setAdminSetting(null)
+  }
+}
+console.log("adminSetting",adminSetting);
 
   function getCurrencyType(symbol:any) {
     const data = allCurrency.filter(n => n?.shortName == symbol);
@@ -181,18 +205,21 @@ const fetchExchangeFeeBundles = async () => {
     }
   }
 
-  // useEffect(() => {
-  //   fetchUserDetails();
-  //   fetchExchangeFeeBundles()
-  // }, []);
-const shouldShowBundleForExchange = userDetails?.exchangeFees === null || userDetails?.exchangeFees === undefined
+
+const shouldShowBundleForExchange =
+  userDetails?.exchangeFees === null || userDetails?.exchangeFees === undefined
 
 const feePercent = React.useMemo(() => {
-  if (shouldShowBundleForExchange) {
-    return selectedFeeBundle ? parseFloat(selectedFeeBundle.value || '0') : 0
+
+  if (!shouldShowBundleForExchange) {
+    return parseFloat(String(userDetails?.exchangeFees ?? '0')) || 0
   }
-  return parseFloat(String(userDetails?.exchangeFees ?? '0')) || 0
-}, [shouldShowBundleForExchange, selectedFeeBundle, userDetails])
+  if (selectedFeeBundle) {
+    return parseFloat(selectedFeeBundle.value || '0') || 0
+  }
+  return parseFloat(String(adminSetting?.exchangeFees ?? '0')) || 0
+}, [shouldShowBundleForExchange, userDetails, selectedFeeBundle, adminSetting])
+
 
   const fetchCrypto = async () => {
     try {
@@ -228,6 +255,7 @@ const feePercent = React.useMemo(() => {
     fetchUserDetails()
     fetchCrypto()
     fetchExchangeFeeBundles()
+    fetchAdminSetting()
   }
   }, [token]);
 
@@ -755,7 +783,7 @@ const feePercent = React.useMemo(() => {
                           !sellAmount ||
                           !buyAmount ||
                           !validateSellAmount(sellAmount) ||
-                          !!errorMessage || (shouldShowBundleForExchange && !selectedFeeBundle)
+                          !!errorMessage
 
                         }
                       >
