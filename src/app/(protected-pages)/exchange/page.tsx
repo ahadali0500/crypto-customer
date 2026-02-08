@@ -25,7 +25,19 @@ interface Currency {
   lockedBalance?: string;
   icon?: string;
 }
+interface UserDetails {
+  exchangeFees?: string | number | null
+}
 
+interface FeeBundle {
+  id?: string
+  category: string
+  description: string
+  value: string
+  name: string
+  rangeMin?: number | null
+  rangeMax?: number | null
+}
 const Page = () => {
   const [selectedSellCurrency, setSelectedSellCurrency] = useState<Currency | null>(null);
   const [selectedBuyCurrency, setSelectedBuyCurrency] = useState<Currency | null>(null);
@@ -42,7 +54,8 @@ const Page = () => {
   const conversionSeqRef = useRef(0);
 
   const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
-  const feePercentage = 4;
+ 
+  
 
 
   function getCurrencyType(symbol:any) {
@@ -137,7 +150,23 @@ const Page = () => {
     [allCurrency]
   );
 
-  const [userDetails, setUserDetails] = useState(false);
+ const [userDetails, setUserDetails] = useState<UserDetails | null>(null)
+const [feeBundles, setFeeBundles] = useState<FeeBundle[]>([])
+const [selectedFeeBundle, setSelectedFeeBundle] = useState<FeeBundle | null>(null)
+const [feeBundleError, setFeeBundleError] = useState('')
+const fetchExchangeFeeBundles = async () => {
+  try {
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/fees/bundle/fetch?category=Exchange`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    const data = res.data.data
+    setFeeBundles(Array.isArray(data) ? data : data ? [data] : [])
+  } catch (err) {
+    console.log('Error fetching exchange fee bundles:', err)
+    setFeeBundles([])
+  }
+}
 
   const fetchUserDetails = async () => {
     try {
@@ -152,9 +181,18 @@ const Page = () => {
     }
   }
 
-  useEffect(() => {
-    fetchUserDetails();
-  }, []);
+  // useEffect(() => {
+  //   fetchUserDetails();
+  //   fetchExchangeFeeBundles()
+  // }, []);
+const shouldShowBundleForExchange = userDetails?.exchangeFees === null || userDetails?.exchangeFees === undefined
+
+const feePercent = React.useMemo(() => {
+  if (shouldShowBundleForExchange) {
+    return selectedFeeBundle ? parseFloat(selectedFeeBundle.value || '0') : 0
+  }
+  return parseFloat(String(userDetails?.exchangeFees ?? '0')) || 0
+}, [shouldShowBundleForExchange, selectedFeeBundle, userDetails])
 
   const fetchCrypto = async () => {
     try {
@@ -187,8 +225,10 @@ const Page = () => {
 
   useEffect(() => {
     if (token) {
-      fetchCrypto();
-    }
+    fetchUserDetails()
+    fetchCrypto()
+    fetchExchangeFeeBundles()
+  }
   }, [token]);
 
   const handleSellSelect = (key: string) => {
@@ -228,33 +268,38 @@ const Page = () => {
   };
 
   // FIXED: Validation now correctly accounts for fee being deducted FROM amount (not added)
-  const validateSellAmount = (amount: string): boolean => {
-    if (!selectedSellCurrency || !amount) return false;
+ const validateSellAmount = (amount: string): boolean => {
+  if (!selectedSellCurrency || !amount) return false
 
-    const numAmount = parseFloat(amount);
-    if (isNaN(numAmount) || numAmount <= 0) return false;
+  const sell = parseFloat(amount)
+  if (!isFinite(sell) || sell <= 0) return false
 
-    // Fee is deducted FROM the amount, not added on top
-    // So we just need to check if amount <= available balance
-    const availableBalance = parseFloat(
-      activeTab === 'locked'
-        ? selectedSellCurrency.lockedBalance || "0"
-        : selectedSellCurrency.availableBalance || "0"
-    );
+  const available = parseFloat(selectedSellCurrency.availableBalance || '0') || 0
+  const locked = parseFloat(selectedSellCurrency.lockedBalance || '0') || 0
+  const fee = (sell * feePercent) / 100
 
-    return numAmount <= availableBalance;
-  };
+  // Backend rule: fee always deducted from AVAILABLE
+  if (activeTab === 'locked') {
+    // must have sell in locked + fee in available
+    return sell <= locked && fee <= available
+  }
 
-  const getAvailableBalance = (): number => {
-    if (!selectedSellCurrency) return 0;
+  // activeTab === 'available'
+  // backend decrements available by (sell + fee)
+  return sell + fee <= available
+}
 
-    const balance = activeTab === 'locked'
-      ? selectedSellCurrency.lockedBalance || "0"
-      : selectedSellCurrency.availableBalance || "0";
 
-    const numericBalance = typeof balance === 'string' ? parseFloat(balance) : Number(balance);
-    return isNaN(numericBalance) ? 0 : numericBalance;
-  };
+ const getSelectedTabBalance = (): number => {
+  if (!selectedSellCurrency) return 0
+  const raw =
+    activeTab === 'locked'
+      ? selectedSellCurrency.lockedBalance || '0'
+      : selectedSellCurrency.availableBalance || '0'
+  const n = parseFloat(raw)
+  return isNaN(n) ? 0 : n
+}
+
 
   const getCurrentBalanceForDisplay = (): number => {
     if (!selectedSellCurrency) return 0;
@@ -322,10 +367,13 @@ const Page = () => {
     debouncedCalculateConversion(seq, amount, selectedSellCurrency, selectedBuyCurrency);
   };
 
+
+
   const calculateFees = (amount: string): number => {
-    const numAmount = parseFloat(amount) || 0;
-    return (numAmount * feePercentage) / 100;
-  };
+  const numAmount = parseFloat(amount) || 0
+  return (numAmount * feePercent) / 100
+}
+
 
   // FIXED: Total sell amount is the full amount entered (fee is deducted from this)
   const calculateTotalSellAmount = (amount: string): number => {
@@ -334,11 +382,28 @@ const Page = () => {
   };
 
   // FIXED: Max allowable is simply the available balance (no division needed)
-  const getMaxAllowableAmount = (): number => {
-    const availableBalance = getAvailableBalance();
-    // Since fee is deducted FROM amount, max is simply the available balance
-    return availableBalance;
-  };
+ const getMaxAllowableAmount = (): number => {
+  if (!selectedSellCurrency) return 0
+
+  const available = parseFloat(selectedSellCurrency.availableBalance || '0') || 0
+  const locked = parseFloat(selectedSellCurrency.lockedBalance || '0') || 0
+  const r = feePercent / 100
+
+  if (feePercent <= 0) {
+    return activeTab === 'locked' ? locked : available
+  }
+
+  if (activeTab === 'locked') {
+    // sell limited by locked, but also must have enough available to cover fee
+    const maxByLocked = locked
+    const maxByFee = available / r
+    return Math.max(0, Math.min(maxByLocked, maxByFee))
+  }
+
+  // available: sell + fee <= available => sell <= available / (1+r)
+  return Math.max(0, available / (1 + r))
+}
+
 
   const handleSellAmountChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -358,16 +423,28 @@ const Page = () => {
     }
 
     // FIXED: Better validation message
-    if (!validateSellAmount(value)) {
-      const maxAllowable = getMaxAllowableAmount();
-      const availableBalance = getAvailableBalance();
+   if (!validateSellAmount(value)) {
+  const maxAllowable = getMaxAllowableAmount()
+  const available = parseFloat(selectedSellCurrency?.availableBalance || '0') || 0
+  const locked = parseFloat(selectedSellCurrency?.lockedBalance || '0') || 0
 
-      setErrorMessage(
-        `Amount (${numValue.toFixed(6)}) exceeds available balance (${availableBalance.toFixed(6)}). Max amount you can enter: ${maxAllowable.toFixed(6)} ${selectedSellCurrency?.shortName}`
-      );
-      setBuyAmount('');
-      return;
-    }
+  if (activeTab === 'locked') {
+    setErrorMessage(
+      `Insufficient balance. Locked: ${locked.toFixed(6)} ${selectedSellCurrency?.shortName}, ` +
+      `Available for fee: ${available.toFixed(6)} ${selectedSellCurrency?.shortName}. ` +
+      `Max allowed: ${maxAllowable.toFixed(6)} ${selectedSellCurrency?.shortName}`
+    )
+  } else {
+    setErrorMessage(
+      `Insufficient balance. Available: ${available.toFixed(6)} ${selectedSellCurrency?.shortName}. ` +
+      `Max allowed (after fee): ${maxAllowable.toFixed(6)} ${selectedSellCurrency?.shortName}`
+    )
+  }
+
+  setBuyAmount('')
+  return
+}
+
 
     await calculateConversion(value);
   };
@@ -406,7 +483,7 @@ const Page = () => {
       formData.append('buyAssetId', buyAssetId);
       formData.append('sellAmount', sellAmount);
       formData.append('buyAmount', buyAmount);
-      formData.append('fees', `${feePercentage}`);
+      formData.append('fees', `${feePercent}`);
 
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/exchange`,
@@ -528,7 +605,7 @@ const Page = () => {
                     {/* Balance Display */}
                     {selectedSellCurrency && (
                       <div className='text-sm text-primary dark:text-primary mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg'>
-                        {tab === 'locked' ? 'Locked' : 'Available'} Balance: {getAvailableBalance().toFixed(6)} {selectedSellCurrency.shortName}
+                        {tab === 'locked' ? 'Locked' : 'Available'} Balance: {getSelectedTabBalance().toFixed(6)} {selectedSellCurrency.shortName}
                       </div>
                     )}
 
@@ -580,6 +657,57 @@ const Page = () => {
                         </div>
                       </div>
                     )}
+{shouldShowBundleForExchange && (
+  <div className="w-full mt-4">
+    <label className="text-sm mb-2 block">
+      Fee Options: <span className="text-red-500">*</span>
+    </label>
+
+    <div className="grid grid-cols-2 gap-2">
+      {feeBundles.map((bundle) => {
+        const isSelected = selectedFeeBundle?.id === bundle.id
+        return (
+          <button
+            key={bundle.id}
+            type="button"
+            onClick={() => {
+              setFeeBundleError('')
+              setSelectedFeeBundle(bundle)
+            }}
+            className={`p-3 rounded-lg text-left text-sm transition-all border-2 ${
+              isSelected
+                ? 'bg-blue-500 text-white border-blue-600'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600'
+            }`}
+          >
+            <div className="font-medium">
+              {bundle.name} ({bundle.value}%)
+            </div>
+            <div className="text-xs mt-1 opacity-80">
+              {bundle.description}
+            </div>
+          </button>
+        )
+      })}
+    </div>
+
+    {feeBundles.length === 0 && (
+      <div className="mt-2 text-sm text-gray-500">
+        No exchange fee bundles available
+      </div>
+    )}
+
+    {feeBundleError && (
+      <div className="mt-2 text-sm text-red-500">{feeBundleError}</div>
+    )}
+  </div>
+)}
+
+{!shouldShowBundleForExchange && (
+  <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-700 dark:text-blue-200">
+    Fixed exchange fee: {feePercent}% (Admin setting)
+  </div>
+)}
 
                     <hr className='text-primary bg-primary my-8' />
 
@@ -590,7 +718,7 @@ const Page = () => {
                       </div>
 
                       <div className='flex flex-row items-center justify-between gap-4 p-2'>
-                        <div>Transaction Fees ({feePercentage}%)</div>
+                        <div>Transaction Fees ({feePercent}%)</div>
                         <div className='text-red-600'>{calculateFees(sellAmount).toFixed(6)} {selectedSellCurrency?.shortName}</div>
                       </div>
 
@@ -627,7 +755,8 @@ const Page = () => {
                           !sellAmount ||
                           !buyAmount ||
                           !validateSellAmount(sellAmount) ||
-                          !!errorMessage
+                          !!errorMessage || (shouldShowBundleForExchange && !selectedFeeBundle)
+
                         }
                       >
                         {loading ? 'Processing...' : 'Exchange'}
