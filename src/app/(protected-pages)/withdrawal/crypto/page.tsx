@@ -211,6 +211,8 @@ const maxBalance = useMemo(() => {
         }
     }, [token]);
 
+
+    
     const fetchFeeBundles = useCallback(async () => {
         if (!token) return;
         try {
