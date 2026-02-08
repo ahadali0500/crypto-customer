@@ -62,6 +62,15 @@ export const SYMBOL_TO_ID_MAP: Record<string, string> = {
     // etc
 }
 */
+type WalletResolved = {
+  id: string
+  address: string
+  qrImage: string
+  name: string
+  visibility?: string
+}
+
+
 
 const statusColorMap: Record<string, string> = {
     Pending: 'bg-gray-200 text-gray-800',
@@ -181,6 +190,10 @@ const Page = () => {
         key: '',
         order: '',
     })
+const [walletResolved, setWalletResolved] = useState<WalletResolved | null>(null)
+const [walletSource, setWalletSource] = useState<'ASSIGNED' | 'GLOBAL' | ''>('')
+
+
 
     // Hooks
     const searchParams = useSearchParams()
@@ -254,7 +267,26 @@ const Page = () => {
         const end = start + pageSize
         return sortedData?.slice(start, end)
     }, [sortedData, pageIndex, pageSize])
+const fetchWalletForCurrency = useCallback(async (currencyId: number) => {
+  if (!token) return
 
+  try {
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/deposit/wallet/deposit/resolve`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { currencyId },
+      }
+    )
+
+    setWalletResolved(res.data.data || null)
+    setWalletSource(res.data.source || '')
+  } catch (err: any) {
+    setWalletResolved(null)
+    setWalletSource('')
+    toast.error(err?.response?.data?.message || 'No wallet available for this currency')
+  }
+}, [token])
     // ✅ ONLY dynamic symbol mapping (no static object)
     const [symbolToIdMap, setSymbolToIdMap] = useState({})
 
@@ -347,67 +379,63 @@ const Page = () => {
     }, [token])
 
     // Fetch cryptocurrencies with rates
-    const fetchCryptocurrencies = useCallback(async () => {
-        if (!token) return
 
-        setIsLoadingRates(true)
-        try {
-            const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/currency/fetch?type=Crypto`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                },
-            )
+const fetchCryptocurrencies = useCallback(async () => {
+  if (!token) return
 
-            const currencyData = response.data.data || []
+  setIsLoadingRates(true)
+  try {
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/currency/fetch?type=Crypto`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    )
 
-            // Sequential processing with delay to avoid rate limiting
-            const currenciesWithRates: Currency[] = []
+    const currencyData = response.data.data || []
 
-            for (let i = 0; i < currencyData.length; i++) {
-                const currency = currencyData[i]
+    const currenciesWithRates: Currency[] = []
 
-                try {
-                    console.log(
-                        `Fetching rate for ${currency.shortName} (${i + 1}/${currencyData.length})`,
-                    )
-                    const rate = await fetchConversionRate(currency.shortName)
+    for (let i = 0; i < currencyData.length; i++) {
+      const currency = currencyData[i]
 
-                    currenciesWithRates.push({
-                        ...currency,
-                        rate: rate || 0,
-                    })
+      try {
+        const rate = await fetchConversionRate(currency.shortName)
 
-                    // Add delay between requests (except for last one)
-                    if (i < currencyData.length - 1) {
-                        await new Promise((resolve) => setTimeout(resolve, 200))
-                    }
-                } catch (error) {
-                    console.error(
-                        `Error fetching rate for ${currency.shortName}:`,
-                        error,
-                    )
-                    currenciesWithRates.push({
-                        ...currency,
-                        rate: 0,
-                    })
-                }
-            }
+        currenciesWithRates.push({
+          ...currency,
+          rate: rate || 0,
+        })
 
-            setCurrencies(currenciesWithRates)
-
-            if (currenciesWithRates.length > 0) {
-                setSelectedCurrency(currenciesWithRates[0])
-            }
-        } catch (error) {
-            console.error('Error fetching currencies:', error)
-            setError('Failed to fetch currencies')
-        } finally {
-            setIsLoadingRates(false)
+        if (i < currencyData.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 200))
         }
-    }, [token, fetchConversionRate])
+      } catch {
+        currenciesWithRates.push({
+          ...currency,
+          rate: 0,
+        })
+      }
+    }
+
+   
+    setCurrencies(currenciesWithRates)
+
+    if (currenciesWithRates.length > 0) {
+      const first = currenciesWithRates[0]
+      setSelectedCurrency(first)
+      fetchWalletForCurrency(first.id)
+    }
+
+  } catch (error) {
+    console.error('Error fetching currencies:', error)
+    setError('Failed to fetch currencies')
+  } finally {
+    setIsLoadingRates(false)
+  }
+}, [token, fetchConversionRate, fetchWalletForCurrency])
 
     // Currency conversion effect
     useEffect(() => {
@@ -494,7 +522,11 @@ const Page = () => {
                 setSelectedCurrency(currency)
                 setUsdAmount('')
                 setCryptoAmount('')
+                fetchWalletForCurrency(currency.id)
             }
+
+
+    
         },
         [currencies],
     )
@@ -606,7 +638,7 @@ const Page = () => {
         return currency.wallet[0]
     }, [])
 
-    const walletData = getWalletData(selectedCurrency)
+    const walletData = walletResolved
 
     const handleCopy = async (walletId: string, address: string) => {
         try {
@@ -753,6 +785,7 @@ const Page = () => {
                                 <div className="grid grid-cols-[150px_1fr] gap-y-3 text-sm">
                                     <div className="text-xs font-semibold">
                                         {walletData?.name}:
+
                                     </div>
                                     <code
                                         onClick={() =>
