@@ -408,6 +408,14 @@ const feePercent = React.useMemo(() => {
     const numAmount = parseFloat(amount) || 0;
     return numAmount;
   };
+const getMaxDisplayAmount = (): number => {
+  if (!selectedSellCurrency) return 0
+
+  const available = parseFloat(selectedSellCurrency.availableBalance || '0') || 0
+  const locked = parseFloat(selectedSellCurrency.lockedBalance || '0') || 0
+
+  return activeTab === 'locked' ? locked : available
+}
 
   // FIXED: Max allowable is simply the available balance (no division needed)
  const getMaxAllowableAmount = (): number => {
@@ -765,7 +773,8 @@ const feePercent = React.useMemo(() => {
                           calculateConversion(maxAmount);
                         }}
                       >
-                        Max amount: {getMaxAllowableAmount().toFixed(6)} {selectedSellCurrency?.shortName}
+                        Max amount: {getMaxDisplayAmount().toFixed(6)} {selectedSellCurrency?.shortName}
+
                       </div>
                     </div>
 
