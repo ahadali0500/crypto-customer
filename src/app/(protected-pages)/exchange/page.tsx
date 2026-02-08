@@ -705,7 +705,7 @@ const feePercent = React.useMemo(() => {
 
 {!shouldShowBundleForExchange && (
   <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm text-blue-700 dark:text-blue-200">
-    Fixed exchange fee: {feePercent}% (Admin setting)
+    Fixed exchange fee: {feePercent}% 
   </div>
 )}
 
