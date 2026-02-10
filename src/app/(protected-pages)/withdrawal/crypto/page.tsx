@@ -80,6 +80,9 @@ const WithdrawalPage = () => {
     const [tableLoading, setTableLoading] = useState(false);
     const [pageIndex, setPageIndex] = useState(1);
     const [pageSize, setPageSize] = useState(10);
+
+    
+
     const [sortConfig, setSortConfig] = useState<{ key: string; order: 'asc' | 'desc' | '' }>({
         key: '',
         order: '',
@@ -481,6 +484,17 @@ const maxBalance = useMemo(() => {
         },
         [cryptoCurrencies, debouncedCalculateConversion]
     );
+const clampToMaxAllowed = useCallback((value: string) => {
+  const n = parseFloat(value || "0")
+  if (!isFinite(n) || n <= 0) return value
+
+  const max = maxAllowed
+  if (n <= max) return value
+
+
+  const floored = Math.floor(max * 1e8) / 1e8
+  return floored.toFixed(8)
+}, [maxAllowed])
 
     const handleFeeBundleSelect = useCallback(
         (bundle: FeeBundle) => {
@@ -499,6 +513,7 @@ const maxBalance = useMemo(() => {
             }
 
             setSelectedFeeBundle(bundle);
+            setWithdrawAmount(prev => clampToMaxAllowed(prev))
         },
         [withdrawAmount, getFeeEligibility, getDisabledReason]
     );
@@ -508,7 +523,14 @@ const maxBalance = useMemo(() => {
             const value = e.target.value;
             setWithdrawAmount(value);
             setFeeBundleError('');
-            setErrorMessage('');
+            setErrorMessage('');<Input
+  type="number"
+  step="0.00000001"
+  min="0"
+  value={withdrawAmount}
+  onChange={handleAmountChange}
+/>
+
 
             if (!value) {
                 setExchangeRate(null);
@@ -580,10 +602,13 @@ const maxBalance = useMemo(() => {
         [debouncedCalculateConversion]
     );
 
+
     const handleMaxClick = useCallback(() => {
-        const floored = Math.floor(maxAllowed * 1e6) / 1e6;
-        setWithdrawAmount(floored.toFixed(6));
-    }, [maxAllowed]);
+  const floored = Math.floor(maxAllowed * 1e8) / 1e8
+  setWithdrawAmount(floored.toFixed(8))
+}, [maxAllowed])
+
+
 
     const handleWithdrawSubmit = useCallback(
         async (e: React.MouseEvent) => {
@@ -886,7 +911,7 @@ const maxBalance = useMemo(() => {
                                                 className="border border-gray-200 focus:ring-0 bg-gray-100 dark:bg-gray-800 rounded-lg"
                                                 placeholder="0.000000"
                                                 type="number"
-                                                step="0.000001"
+                                                step="0.00000001"
                                                 min="0"
                                                 value={withdrawAmount}
                                                 onChange={handleAmountChange}
@@ -985,7 +1010,7 @@ const maxBalance = useMemo(() => {
                                                 <div>Withdrawal Amount:</div>
                                                 <div className="space-y-1 text-right">
                                                     <div>
-                                                        {computed.amount.toFixed(6)} {selectedCurrency?.shortName}
+                                                        {computed.amount.toFixed(8)} {selectedCurrency?.shortName}
                                                     </div>
                                                     {exchangeRate && withdrawAmount && (
                                                         <div className="text-sm text-gray-500">
@@ -1067,7 +1092,8 @@ const maxBalance = useMemo(() => {
                                                 className="text-primary my-2 cursor-pointer hover:underline text-sm"
                                                 onClick={handleMaxClick}
                                             >
-                                                 Max balance: {maxBalance.toFixed(6)} {selectedCurrency?.shortName}
+                                           Max withdraw: {maxAllowed.toFixed(8)} {selectedCurrency?.shortName}
+
                                             </div>
 
                                             {exceedsMaxAllowed && (
