@@ -113,11 +113,38 @@ const WithdrawalPage = () => {
         return 0;
     }, [shouldShowBundleForWithdraw, selectedFeeBundle, userDetails]);
 
+    // Adjusted locked balance based on withdrawal status:
+    // - Locked balance is only deducted on the client side
+    //   when a locked-withdrawal status is Execute / Completed / Approved.
+    const adjustedLockedBalance = useMemo(() => {
+        if (!selectedCurrency) return 0;
+
+        const rawLocked = parseFloat(selectedCurrency.lockedBalance || '0') || 0;
+
+        // Only consider withdrawals for the currently selected currency
+        const relatedLockedWithdrawals = withdrawals.filter((w) => {
+            const sameCurrency = w.currency?.shortName === selectedCurrency.shortName;
+            return sameCurrency && w.balancetype === 'Locked';
+        });
+
+        const executedStatuses = new Set(['Execute', 'Completed', 'Approved']);
+
+        // Sum only amounts that should actually reduce locked balance
+        const executedLockedTotal = relatedLockedWithdrawals.reduce((sum, w) => {
+            if (!executedStatuses.has(w.withdrawStatus)) return sum;
+            const amt = parseFloat(w.amount || '0') || 0;
+            return sum + amt;
+        }, 0);
+
+        const adjusted = rawLocked - executedLockedTotal;
+        return adjusted > 0 ? adjusted : 0;
+    }, [selectedCurrency, withdrawals]);
+
     const balances = useMemo(() => {
         const available = parseFloat(selectedCurrency?.availableBalance || '0') || 0;
-        const locked = parseFloat(selectedCurrency?.lockedBalance || '0') || 0;
+        const locked = adjustedLockedBalance;
         return { available, locked };
-    }, [selectedCurrency]);
+    }, [selectedCurrency, adjustedLockedBalance]);
 
 const maxBalance = useMemo(() => {
     if (!selectedCurrency) return 0;
@@ -869,11 +896,7 @@ useEffect(() => {
                                         {selectedCurrency && (
                                             <div className="text-sm text-primary dark:text-primary mb-4">
                                                 {tab === 'available' ? 'Available' : 'Locked'} Balance:{' '}
-                                                {parseFloat(
-                                                    tab === 'locked'
-                                                        ? selectedCurrency.lockedBalance || '0'
-                                                        : selectedCurrency.availableBalance || '0'
-                                                ).toFixed(8)}{' '}
+                                                {(tab === 'locked' ? balances.locked : balances.available).toFixed(6)}{' '}
                                                 {selectedCurrency.shortName}
                                             </div>
                                         )}
