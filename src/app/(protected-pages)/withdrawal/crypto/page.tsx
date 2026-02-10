@@ -132,6 +132,8 @@ const maxBalance = useMemo(() => {
     if (!selectedCurrency) return 0;
 
     const { available, locked } = balances;
+   
+    
     const feeRate = feePercent / 100;
 
     if (feePercent <= 0) {
@@ -140,6 +142,7 @@ const maxBalance = useMemo(() => {
 
     if (activeTab === 'locked') {
         const maxByLocked = locked;
+      
         const maxByFee = available / feeRate;
         return Math.max(0, Math.min(maxByLocked, maxByFee));
     }
@@ -473,11 +476,7 @@ const clampToMaxAllowed = useCallback((value: string) => {
         (bundle: FeeBundle) => {
             setFeeBundleError('');
 
-            if (!withdrawAmount) {
-                setFeeBundleError('Please enter withdraw amount first');
-                setSelectedFeeBundle(bundle);
-                return;
-            }
+           
 
             const isEligible = getFeeEligibility(withdrawAmount, bundle);
             if (!isEligible) {
@@ -487,9 +486,18 @@ const clampToMaxAllowed = useCallback((value: string) => {
 
             setSelectedFeeBundle(bundle);
             setWithdrawAmount(prev => clampToMaxAllowed(prev))
+            
         },
-        [withdrawAmount, getFeeEligibility, getDisabledReason]
+        [withdrawAmount, getFeeEligibility, getDisabledReason,clampToMaxAllowed]
     );
+useEffect(() => {
+  if (!withdrawAmount) return;
+  setWithdrawAmount(prev => clampToMaxAllowed(prev));
+}, [maxAllowed]);
+useEffect(() => {
+  setErrorMessage('');
+  setFeeBundleError('');
+}, [feePercent, activeTab, selectedCurrency?.shortName]);
 
     const handleAmountChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -539,7 +547,7 @@ const clampToMaxAllowed = useCallback((value: string) => {
             } else {
                 if (numValue - maxAllowed > 1e-9) {
                     setErrorMessage(
-                        `Amount exceeds max allowed. Max: ${maxAllowed.toFixed(6)} ${selectedCurrency.shortName}`
+                        `Amount exceeds max allowed. Max: ${maxAllowed.toFixed(8)} ${selectedCurrency.shortName}`
                     );
                     return;
                 }
@@ -869,6 +877,7 @@ const clampToMaxAllowed = useCallback((value: string) => {
                                                 {selectedCurrency.shortName}
                                             </div>
                                         )}
+                                     
 
                                         {/* Wallet Address */}
                                         <div className="flex items-center gap-2 mb-4 bg-gray-200 dark:bg-gray-700 pl-3 rounded-lg">
