@@ -28,7 +28,7 @@ type Item = {
 type Invoice = {
   id: number
   customerId: number
-  FromType: string
+  fromType: string
   payoutId: number
   currencyId: number
   amount: string
@@ -63,7 +63,7 @@ const InvoiceTable = () => {
     order: '',
   })
 
-  console.log('session',session);
+ 
 
   // Table ref for Print
   const tableRef = useRef<HTMLDivElement>(null)
@@ -74,7 +74,7 @@ const InvoiceTable = () => {
     const q = search.toLowerCase()
     return invoiceData?.filter(item => {
       const matchesId = item.id.toString().includes(q)
-      const matchesFromType = item.FromType.toLowerCase().includes(q)
+      const matchesFromType = item.fromType.toLowerCase().includes(q)
       const matchesCurrency = item.currency?.shortName.toLowerCase().includes(q)
       const matchesPayout = item.payout?.shortName.toLowerCase().includes(q)
       const matchesStatus = item.status.toLowerCase().includes(q)
@@ -212,7 +212,7 @@ const InvoiceTable = () => {
     const headers = ['Invoice No', 'From Type', 'Amount', 'Currency', 'Payout', 'Invoice Date', 'Due Date', 'Status']
     const rows = items.map((item) => [
       item.id.toString(),
-      `"${item.FromType.replace(/"/g, '""')}"`,
+      `"${item.fromType.replace(/"/g, '""')}"`,
       item.amount,
       item.currency?.shortName || '',
       item.payout?.shortName || '',
@@ -365,7 +365,7 @@ const InvoiceTable = () => {
     },
     {
       header: 'From Type',
-      accessorKey: 'FromType',
+      accessorKey: 'fromType',
     },
     {
       header: 'Amount',
