@@ -8,6 +8,7 @@ import type { ReactNode } from 'react'
 import '@/assets/styles/app.css'
 import { ToastContainer } from 'react-toastify'
 import HolyLoader from 'holy-loader'
+import { ChatSocketProvider } from '@/contexts/ChatSocketContext'
 
 export const metadata = {
     ...pageMetaConfig,
@@ -33,7 +34,10 @@ export default async function RootLayout({
                     <body suppressHydrationWarning>
                         <ThemeProvider theme={theme}>
                             <NavigationProvider navigationTree={navigationTree}>
+                                <ChatSocketProvider>
+
                                 {children}
+                                </ChatSocketProvider>
                             </NavigationProvider>
                         </ThemeProvider>
                     </body>

@@ -8,8 +8,10 @@ import {
   CheckCheck, Check, AlertCircle, Loader
 } from "lucide-react";
 import { useSessionContext } from "@/components/auth/AuthProvider/SessionContext";
-import { initchatSocket } from '@/configs/chat.socket'
 import { Socket } from "socket.io-client";
+import { useChatSocket } from "@/contexts/ChatSocketContext";
+
+
 
 // --------------------------------------------------
 // Helper Types
@@ -203,7 +205,7 @@ export default function ChatApp() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+const { socket, onlineAdminIds } = useChatSocket();
   // Show toast notification
   const showToast = useCallback((message: string, type: "success" | "error" | "info" = "info") => {
     setToast({ message, type });
@@ -224,18 +226,26 @@ export default function ChatApp() {
       setIsLoadingUsers(true);
       try {
         const { data } = await api.get("/user/chat/list");
-        const mapped: User[] = data.admins.map((u: any) => ({
-          id: u.id,
-          name: u.name,
-          email: u.email,
-          avatar: u.profileImageUrl ?? u.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2),
-          status: "online",
-          unreadCount: u._count?.sentChats || 0,
-          lastMessage: u.lastChat?.message ?? (u.lastChat?.file ? "📎 File attachment" : "No messages yet"),
-          lastMessageTime: new Date(u.lastChat?.createdAt || Date.now()),
-          messages: [],
-          isTyping: false,
-        }));
+        
+        
+       const mapped: User[] = data.admins.map((u: any) => ({
+  id: u.id,
+  name: u.name,
+  email: u.email,
+  avatar: u.profileImageUrl ?? u.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2),
+
+
+  status: onlineAdminIds.has(u.id) ? "online" : "offline",
+
+  unreadCount: u._count?.sentChats || 0,
+  lastMessage: u.lastChat?.message ?? (u.lastChat?.file ? "📎 File attachment" : "No messages yet"),
+  lastMessageTime: new Date(u.lastChat?.createdAt || Date.now()),
+  messages: [],
+  isTyping: false,
+}));
+
+setUsers(mapped);
+
 
         setUsers(mapped);
         showToast("Conversations loaded", "success");
@@ -248,7 +258,7 @@ export default function ChatApp() {
     };
 
     fetchUsers();
-  }, [showToast]);
+  }, [showToast,onlineAdminIds]);
 
   // Fetch messages when user selected
   useEffect(() => {
@@ -373,9 +383,11 @@ export default function ChatApp() {
       setNewFile(null);
       showToast("Message sent", "success");
 
+
+
       // Stop typing indicator
-      if (socketRef.current?.connected) {
-        socketRef.current.emit("user_typing", {
+      if (socket.connected) {
+        socket.emit("user_typing", {
           room: `chat-room-customer-${session!.user!.id}-to-${selectedUser.id}`,
           typingStatus: false,
         });
@@ -413,7 +425,7 @@ export default function ChatApp() {
   const handleTyping = useCallback((value: string) => {
     setNewMessage(value);
 
-    if (!selectedUser || !socketRef.current?.connected) return;
+    if (!selectedUser || !socket?.connected) return;
 
     // Clear previous timeout
     if (typingTimeoutRef.current) {
@@ -421,15 +433,15 @@ export default function ChatApp() {
     }
 
     // Emit typing indicator
-    socketRef.current.emit("user_typing", {
+    socket.emit("user_typing", {
       room: `chat-room-customer-${session!.user!.id}-to-${selectedUser.id}`,
       typingStatus: value.length > 0,
     });
 
     // Stop typing after 2 seconds of inactivity
     typingTimeoutRef.current = setTimeout(() => {
-      if (socketRef.current?.connected) {
-        socketRef.current.emit("user_typing", {
+      if (socket?.connected) {
+        socket.emit("user_typing", {
           room: `chat-room-customer-${session!.user!.id}-to-${selectedUser.id}`,
           typingStatus: false,
         });
@@ -446,125 +458,32 @@ export default function ChatApp() {
   const showEmptySearch = searchQuery.trim() && filteredUsers.length === 0;
 
   // Socket setup
-  useEffect(() => {
-    if (!session?.user?.id) return;
+  
+useEffect(() => {
+  if (!socket || !session?.user?.id) return;
 
-    socketRef.current = initchatSocket(session.user.id);
+  
+  socket.emit("user_online", { userId: session.user.id, userType: "customer" });
 
-    const handleNewMessage = (msg: any) => {
-      const mapped: Message = {
-        id: Number(msg.id),
-        text: msg.message ?? "",
-        file: msg.file,
-        sender: msg.fromAdminId ? "user" : "admin",
-        timestamp: new Date(msg.createdAt),
-        status: "delivered",
-        deliveredAt: new Date(),
-      };
+  const handleStatus = (data: any) => {
+    if (data.userType !== "admin") return;
 
-      setUsers((prevUsers) =>
-        prevUsers.map((u) => {
-          const isForThisUser = msg.fromAdminId === u.id || msg.toAdminId === u.id;
-          if (isForThisUser) {
-            return {
-              ...u,
-              messages: [...u.messages, mapped],
-              lastMessage: mapped.text || "📎 File",
-              lastMessageTime: mapped.timestamp,
-              isTyping: false,
-            };
-          }
-          return u;
-        }),
-      );
+    setUsers((prev) =>
+      prev.map((u) => (u.id === data.userId ? { ...u, status: data.status } : u))
+    );
 
-      setSelectedUser((prev) => {
-        if (!prev) return null;
-        const isForSelected = msg.fromAdminId === prev.id || msg.toAdminId === prev.id;
-        if (isForSelected) {
-          return { ...prev, messages: [...prev.messages, mapped], isTyping: false };
-        }
-        return prev;
-      });
-    };
+    setSelectedUser((prev) => {
+      if (!prev || prev.id !== data.userId) return prev;
+      return { ...prev, status: data.status };
+    });
+  };
 
-    const handleInactiveMessage = (msg: any) => {
-      const mapped: Message = {
-        id: Number(msg.id),
-        text: msg.message ?? "",
-        file: msg.file,
-        sender: msg.fromAdminId ? "user" : "admin",
-        timestamp: new Date(msg.createdAt),
-        status: "pending",
-      };
+  socket.on("user_status_change", handleStatus);
 
-      setUsers((prevUsers) =>
-        prevUsers.map((u) => {
-          const isForThisUser = msg.fromAdminId === u.id || msg.toAdminId === u.id;
-          if (isForThisUser) {
-            return {
-              ...u,
-              messages: [...u.messages, mapped],
-              lastMessage: mapped.text || "📎 File",
-              unreadCount: u.unreadCount + 1,
-            };
-          }
-          return u;
-        }),
-      );
-    };
-
-    const handleTypingStatus = (data: any) => {
-      const { userId, isTyping } = data;
-
-      setTypingUsers((prev) => {
-        const newSet = new Set(prev);
-        if (isTyping) {
-          newSet.add(userId);
-        } else {
-          newSet.delete(userId);
-        }
-        return newSet;
-      });
-
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === userId ? { ...u, isTyping } : u
-        ),
-      );
-    };
-
-    const handleUserOnline = (data: any) => {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === data.userId ? { ...u, status: "online" } : u
-        ),
-      );
-    };
-
-    const handleUserOffline = (data: any) => {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === data.userId ? { ...u, status: "offline" } : u
-        ),
-      );
-    };
-
-    socketRef.current.on("message", handleNewMessage);
-    socketRef.current.on("inactiveMessage", handleInactiveMessage);
-    socketRef.current.on("user_typing_status", handleTypingStatus);
-    socketRef.current.on("user_online", handleUserOnline);
-    socketRef.current.on("user_offline", handleUserOffline);
-
-    return () => {
-      socketRef.current?.off("message", handleNewMessage);
-      socketRef.current?.off("inactiveMessage", handleInactiveMessage);
-      socketRef.current?.off("user_typing_status", handleTypingStatus);
-      socketRef.current?.off("user_online", handleUserOnline);
-      socketRef.current?.off("user_offline", handleUserOffline);
-      socketRef.current?.disconnect();
-    };
-  }, [session?.user?.id]);
+  return () => {
+    socket.off("user_status_change", handleStatus);
+  };
+}, [socket, session?.user?.id]);
 
   // --------------------------------------------------
   // Render
@@ -602,13 +521,13 @@ export default function ChatApp() {
                 onClick={() => {
                   setSelectedUser(user);
                   if (selectedUser?.id) {
-                    socketRef.current?.emit(
+                    socket?.emit(
                       "leave_room",
                       `chat-room-customer-${session!.user!.id}-to-${selectedUser.id}`
                     );
                   }
                   const room = `chat-room-customer-${session!.user!.id}-to-${user.id}`;
-                  socketRef.current?.emit("join_room", {
+                  socket?.emit("join_room", {
                     room,
                     adminId: session!.user!.id,
                     CustomerId: user.id,

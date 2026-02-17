@@ -2,11 +2,11 @@ import { io, Socket } from "socket.io-client";
 
 let chatSocket: Socket | null = null;
 
-export const initchatSocket = (userId: string): Socket => {
+type UserType = "admin" | "customer";
+
+export const initchatSocket = (userId: string, type: UserType = "customer"): Socket => {
   // If socket already exists and is connected, return it
-  if (chatSocket && chatSocket.connected) {
-    return chatSocket;
-  }
+  if (chatSocket && chatSocket.connected) return chatSocket;
 
   // If socket exists but is disconnected, clean it up
   if (chatSocket) {
@@ -14,51 +14,69 @@ export const initchatSocket = (userId: string): Socket => {
     chatSocket = null;
   }
 
-  // Create new socket connection
-  if (userId) {
-    chatSocket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}/chat`, {
-      query: { 
-        userId, 
-        type: "customer" 
-      },
-      transports: ["websocket"],
-      withCredentials: true,
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      timeout: 20000,
-    });
-
-    // Add connection event handlers
-    chatSocket.on('connect', () => {
-      console.log('💬 Chat socket connected for user:', userId);
-      // Join user's personal notification room
-    });
-
-    chatSocket.on('connect_error', (error) => {
-      console.error('❌ Chat socket connection error:', error);
-    });
-
-    chatSocket.on('disconnect', (reason) => {
-      console.log('🔌 Chat socket disconnected:', reason);
-    });
-
-    chatSocket.on('reconnect', (attemptNumber) => {
-      console.log(`🔄 Chat socket reconnected after ${attemptNumber} attempts`);
-    });
-
-    chatSocket.on('reconnect_error', (error) => {
-      console.error('🔄❌ Chat socket reconnection error:', error);
-    });
-
-    console.log("💬 Chat socket initialized for user:", userId);
+  if (!userId) {
+    throw new Error("initchatSocket: userId is required");
   }
 
-  return chatSocket as Socket;
+  chatSocket = io(`${process.env.NEXT_PUBLIC_BACKEND_URL}/chat`, {
+    query: { userId, type },
+    transports: ["websocket","polling"],
+    withCredentials: true,
+    autoConnect: true,
+    reconnection: true,
+    reconnectionAttempts: 20,
+    reconnectionDelay: 1000,
+    timeout: 20000,
+  });
+
+  chatSocket.on("connect", () => console.log("✅ connected", chatSocket?.id));
+chatSocket.on("connect_error", (e) => console.log("❌ connect_error", e.message));
+chatSocket.io.on("reconnect_attempt", (n) => console.log("🔄 reconnect_attempt", n));
+chatSocket.io.on("reconnect_failed", () => console.log("🛑 reconnect_failed"));
+
+  // ✅ Helpers (important for refresh/reconnect)
+  const announceOnlineAndSync = () => {
+    chatSocket?.emit("user_online", { userId: Number(userId), userType: type });
+
+    // customer should know which admins are online after refresh
+    if (type === "customer") {
+      chatSocket?.emit("get_online_users", { userType: "admin" });
+    }
+
+    // admin can request online customers for dashboard
+    if (type === "admin") {
+      chatSocket?.emit("get_online_users", { userType: "customer" });
+    }
+  };
+
+  chatSocket.on("connect", () => {
+    console.log("💬 Chat socket connected:", { userId, type });
+    announceOnlineAndSync();
+  });
+
+  // ✅ When socket reconnects, we must re-announce + re-sync
+  chatSocket.on("reconnect", (attempt) => {
+    console.log(`🔄 Chat socket reconnected after ${attempt} attempts`);
+    announceOnlineAndSync();
+  });
+
+  chatSocket.on("connect_error", (error) => {
+    console.error("❌ Chat socket connection error:", error);
+  });
+
+  chatSocket.on("disconnect", (reason) => {
+    console.log("🔌 Chat socket disconnected:", reason);
+  });
+
+  chatSocket.on("reconnect_error", (error) => {
+    console.error("🔄❌ Chat socket reconnection error:", error);
+  });
+
+  console.log("💬 Chat socket initialized:", { userId, type });
+
+  return chatSocket;
 };
 
-// Function to disconnect socket
 export const disconnectChatSocket = (): void => {
   if (chatSocket) {
     chatSocket.disconnect();
@@ -67,16 +85,12 @@ export const disconnectChatSocket = (): void => {
   }
 };
 
-// Function to get current socket instance
-export const getChatSocket = (): Socket | null => {
-  return chatSocket;
-};
+export const getChatSocket = (): Socket | null => chatSocket;
 
-// Function to emit notification events
 export const emitNotificationEvent = (event: string, data: any): void => {
   if (chatSocket && chatSocket.connected) {
     chatSocket.emit(event, data);
   } else {
-    console.warn('⚠️ Socket not connected, cannot emit event:', event);
+    console.warn("⚠️ Socket not connected, cannot emit event:", event);
   }
 };
