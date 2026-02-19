@@ -1,6 +1,6 @@
 @layer components {
   .header {
-    @apply bg-white flex z-30 sticky top-0 w-full dark:bg-gray-800 print:hidden;
+    @apply bg-white flex z-30 sticky top-0 w-full dark:bg-[#111827] print:hidden;
   }
   
   .header-wrapper {

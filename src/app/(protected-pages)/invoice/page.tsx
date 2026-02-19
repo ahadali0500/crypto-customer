@@ -430,7 +430,7 @@ const InvoiceTable = () => {
 
   return (
     <>
-   <div className=" p-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
+   <div className=" p-6 shadow-sm bg-white dark:bg-[#18212F] border border-gray-600 border-1 rounded-lg">
   {/* Header */}
   <div className="flex flex-col xs:flex-row  xs:items-center justify-between gap-4">
     <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Invoices</h2>

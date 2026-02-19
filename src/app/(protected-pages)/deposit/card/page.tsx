@@ -133,16 +133,16 @@ export default function CardPaymentPage() {
       <div className="max-w-2xl mx-auto p-6">
 
         {/* Main Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-4">
+        <div className="bg-white dark:bg-[#18212F] rounded-xl shadow-lg border border-slate-100 dark:border-gray-700 p-4">
           {/* Header */}
           <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-8">Enter payment information</h1>
 
           {/* Step Indicators */}
           <div className="flex items-center justify-center space-x-8 mb-12">
             <StepIndicator step={1} active={currentStep === 1} />
-            <div className="w-16 h-px bg-gray-300 dark:bg-gray-600"></div>
+            <div className="w-16 h-px bg-gray-300 dark:bg-[#374151]"></div>
             <StepIndicator step={2} active={currentStep === 2} />
-            <div className="w-16 h-px bg-gray-300 dark:bg-gray-600"></div>
+            <div className="w-16 h-px bg-gray-300 dark:bg-[#374151]"></div>
             <StepIndicator step={3} active={currentStep === 3} />
           </div>
 
@@ -159,7 +159,9 @@ export default function CardPaymentPage() {
                   value={formData.amount}
                   onChange={(e) => handleInputChange("amount", e.target.value)}
                   invalid={!!errors.amount}
+                 
                   prefix="$"
+                   className="text-white"
                 />
                 {errors.amount && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.amount}</p>}
               </div>
@@ -179,6 +181,7 @@ export default function CardPaymentPage() {
                   value={formData.cardholderName}
                   onChange={(e) => handleInputChange("cardholderName", e.target.value)}
                   invalid={!!errors.cardholderName}
+                  className="text-white"
                 />
                 {errors.cardholderName && (
                   <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.cardholderName}</p>
@@ -193,7 +196,7 @@ export default function CardPaymentPage() {
                   value={formData.cardNumber}
                   onChange={(e) => handleInputChange("cardNumber", formatCardNumber(e.target.value))}
                   invalid={!!errors.cardNumber}
-                  maxLength={19}
+                  maxLength={19}  className="text-white"
                 />
                 {errors.cardNumber && (
                   <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.cardNumber}</p>
@@ -212,6 +215,7 @@ export default function CardPaymentPage() {
                     onChange={(e) => handleInputChange("expiryDate", formatExpiryDate(e.target.value))}
                     invalid={!!errors.expiryDate}
                     maxLength={5}
+                     className="text-white"
                   />
                   {errors.expiryDate && (
                     <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.expiryDate}</p>
@@ -226,6 +230,7 @@ export default function CardPaymentPage() {
                     onChange={(e) => handleInputChange("cvc", e.target.value.replace(/\D/g, ""))}
                     invalid={!!errors.cvc}
                     maxLength={4}
+                     className="text-white"
                   />
                   {errors.cvc && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.cvc}</p>}
                 </div>
@@ -241,7 +246,7 @@ export default function CardPaymentPage() {
               </div>
 
               {/* Payment Summary */}
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 space-y-4">
+              <div className="bg-gray-50 dark:bg-[#18212F] rounded-lg p-6 space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600 dark:text-gray-400">Amount:</span>
                   <span className="text-lg font-semibold text-gray-800 dark:text-gray-200">${formData.amount}</span>
@@ -318,7 +323,7 @@ export default function CardPaymentPage() {
             <div className="flex justify-start mt-8">
               <button
                 onClick={handlePrevious}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="px-4 py-2 bg-gray-100 dark:bg-[#18212F] text-gray-700  border border-white dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
                 ← Back to Card Details
               </button>

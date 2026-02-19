@@ -660,7 +660,7 @@ const BankTransferForm = () => {
 
     return (
         <>
-            <div className="min-h-screen p-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
+            <div className="min-h-screen p-6 shadow-sm bg-white dark:bg-[#18212F] rounded-lg border border-1 border-gray-600">
                 <Tabs defaultValue="Available" onChange={handleBalanceTypeChange}>
                     <TabList>
                         <TabNav value="Available" className={balanceType === 'Available' ? 'active' : ''}>
@@ -820,7 +820,7 @@ const BankTransferForm = () => {
 
                                                         setErrors((prev) => ({ ...prev, amount: undefined }))
                                                     }}
-                                                    className="border border-gray-300 focus:ring-0 dark:bg-gray-800 rounded-lg flex-1"
+                                                    className="border border-gray-300 focus:ring-0 dark:bg-[#18212F] text-white rounded-lg flex-1"
                                                 />
                                                 <button
                                                     type="button"

@@ -319,7 +319,7 @@ const ExchangeHistory = () => {
         <Graph />
       </div> */}
 
-      <div className='p-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg'>
+      <div className='p-6 shadow-sm bg-white dark:bg-[#18212F] border border-1 border-gray-600 rounded-lg'>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Exchange History</h2>
           <div className="flex gap-2">

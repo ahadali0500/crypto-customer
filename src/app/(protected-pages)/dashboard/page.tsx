@@ -727,7 +727,7 @@ const Page = () => {
                 </h1>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     {/* Weekly Deposit Card */}
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-green-500">
+                    <div className="bg-white dark:bg-[#1B2539] p-4 rounded-lg shadow border-l-4 border-green-500">
                         <div className="flex justify-between items-center">
                             <div>
                                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -756,7 +756,7 @@ const Page = () => {
                         </div>
                     </div>
                     {/* Today's Deposit Card */}
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-blue-500">
+                    <div className="bg-white dark:bg-[#1B2539] p-4 rounded-lg shadow border-l-4 border-blue-500">
                         <div className="flex justify-between items-center">
                             <div>
                                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -786,7 +786,7 @@ const Page = () => {
                     </div>
 
                     {/* Monthly Deposit Card */}
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-purple-500">
+                    <div className="bg-white dark:bg-[#1B2539] p-4 rounded-lg shadow border-l-4 border-purple-500">
                         <div className="flex justify-between items-center">
                             <div>
                                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -878,7 +878,7 @@ const Page = () => {
                 </div>
 
                 {/* Tabs Section */}
-                <div className="p-6 mt-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
+                <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#1B2539] rounded-lg">
                     <Tabs
                         value={activeTab}
                         onChange={setActiveTab}
@@ -909,7 +909,7 @@ const Page = () => {
             </div>
 
             {loading && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-gray-900/80">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-[#1B2539]">
                     <Spinner size={40} />
                 </div>
             )}

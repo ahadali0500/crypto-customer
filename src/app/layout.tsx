@@ -27,6 +27,7 @@ export default async function RootLayout({
             <AuthProvider>
                 <html
                     className={theme.mode === 'dark' ? 'dark' : 'light'}
+                   
                     dir={theme.direction}
                     suppressHydrationWarning
                 >

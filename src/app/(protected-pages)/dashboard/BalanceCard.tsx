@@ -119,7 +119,7 @@ const BalanceCard = ({ cardData }: { cardData: CardData }) => {
   }
 
   return (
-    <div className="p-4 rounded-lg shadow bg-white dark:bg-gray-800">
+    <div className="p-4 rounded-lg shadow bg-white dark:bg-[#1B2539]">
       <div className="mb-4">
         <h3 className="text-lg font-semibold mb-3">Balance</h3>
 
@@ -186,7 +186,7 @@ const BalanceCard = ({ cardData }: { cardData: CardData }) => {
               return (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between py-1 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
+                  className="flex items-center justify-between py-1 px-2 hover:bg-gray-50 dark:hover:bg-[#2D3748] rounded dark:bg-[#1B2539]"
                 >
                   <div className="flex items-center space-x-2">
                     <div

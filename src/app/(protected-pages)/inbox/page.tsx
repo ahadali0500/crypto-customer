@@ -489,11 +489,11 @@ useEffect(() => {
   // Render
   // --------------------------------------------------
   return (
-    <div className="flex h-[82vh] max-h-[82vh] bg-white dark:bg-gray-950">
+    <div className="flex h-[82vh] max-h-[82vh] bg-white dark:bg-[#18212F]">
       {toast && <Toast {...toast} />}
 
       {/* Sidebar */}
-      <div className={`${showChat ? "hidden" : "flex"} md:flex bg-white dark:bg-gray-900 w-full md:w-80 border-r border-gray-200 dark:border-gray-800 flex-col h-full`}>
+      <div className={`${showChat ? "hidden" : "flex"} md:flex bg-white dark:bg-[#18212F] w-full md:w-80 border-r border-gray-200 dark:border-gray-800 flex-col h-full`}>
         <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
           <h1 className="text-xl font-bold mb-4 dark:text-white">Messages</h1>
           <div className="relative">
@@ -502,7 +502,7 @@ useEffect(() => {
               placeholder="Search conversations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 dark:bg-gray-800 dark:text-white"
+              className="pl-10 dark:bg-[#18212F] dark:text-white"
             />
           </div>
         </div>
@@ -544,7 +544,7 @@ useEffect(() => {
                     setShowChat(true);
                   }
                 }}
-                className={`p-4 border-b border-gray-200 dark:border-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${selectedUser?.id === user.id ? "bg-blue-50 dark:bg-gray-800" : ""
+                className={`p-4 border-b border-gray-200 dark:border-gray-800 cursor-pointer hover:bg-gray-50 dark:bg-[#18212F] transition-colors ${selectedUser?.id === user.id ? "bg-blue-50 dark:bg-[#18212F]" : ""
                   }`}
               >
                 <div className="flex items-center space-x-3">
@@ -591,7 +591,7 @@ useEffect(() => {
         {selectedUser ? (
           <>
             {/* Header */}
-            <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-4 flex items-center justify-between flex-shrink-0">
+            <div className="bg-white dark:bg-[#18212F] border-b border-gray-200 dark:border-gray-600 px-4 py-4 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center space-x-3">
                 <Button
                   className="md:hidden"
@@ -620,7 +620,7 @@ useEffect(() => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-900">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-[#18212F]">
               {isLoadingMessages ? (
                 <div className="space-y-3">
                   {[...Array(3)].map((_, i) => (
@@ -636,7 +636,7 @@ useEffect(() => {
                       <div
                         className={`max-w-xs sm:max-w-md rounded-lg px-4 py-2 flex items-end space-x-2 ${m.sender === "admin"
                             ? "bg-blue-500 text-white rounded-br-none"
-                            : "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-bl-none"
+                            : "bg-white dark:bg-[#18212F] text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-bl-none"
                           }`}
                       >
                         <div className="flex-1">
@@ -677,7 +677,7 @@ useEffect(() => {
             </div>
 
             {/* Input */}
-            <div className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 p-3 flex flex-col gap-2 flex-shrink-0">
+            <div className="bg-white dark:bg-[#18212F] border-t border-gray-200 dark:border-gray-600 p-3 flex flex-col gap-2 flex-shrink-0">
               {newFile && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2 text-sm flex items-center justify-between">
                   <span>📎 {newFile.name}</span>
@@ -705,7 +705,7 @@ useEffect(() => {
                   onChange={(e) => handleTyping(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
                   placeholder="Type a message..."
-                  className="flex-1 dark:bg-gray-800 dark:text-white"
+                  className="flex-1 dark:bg-[#18212F] text-white"
                   disabled={isSendingMessage}
                 />
                 <Button

@@ -909,7 +909,7 @@ const Page = () => {
     <>
       <div className="">
         {/* Tabs Section */}
-        <div className="p-6 mt-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
+        <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#18212F] border border-1 border-gray-600 rounded-lg">
           <Tabs
             value={activeTab}
             onChange={setActiveTab}

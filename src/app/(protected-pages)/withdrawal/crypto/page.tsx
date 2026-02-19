@@ -853,11 +853,11 @@ useEffect(() => {
             {/* Withdrawal Form */}
             <div className="p-5">
                 <div className="flex items-center justify-center">
-                    <div className="w-full md:w-[60%] p-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
+                    <div className="w-full md:w-[40%] p-6 shadow-sm bg-white dark:bg-[#18212F] rounded-lg border border-1 border-gray-600">
                         <h1 className="text-xl font-semibold mb-4">Crypto Withdrawal</h1>
 
                         <Tabs defaultValue="available" onChange={handleTabChange}>
-                            <TabList>
+                            <TabList className="tab-buttons">
                                 <TabNav value="locked">Locked</TabNav>
                                 <TabNav value="available">Available</TabNav>
                             </TabList>
@@ -1151,7 +1151,7 @@ useEffect(() => {
             </Dialog>
 
             {/* Withdrawal History Table */}
-            <div className="p-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg m-5">
+            <div className="p-6 shadow-sm bg-white dark:bg-[#18212F] rounded-lg m-5 border border-1 border-gray-600">
                 <div className="text-xl mb-4 font-semibold">Withdrawal History</div>
                 {tableLoading ? (
                     <div className="flex justify-center items-center h-64">

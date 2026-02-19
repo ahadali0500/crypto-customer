@@ -64,7 +64,7 @@ const chartOptions: ApexOptions = {
 
 
   return (
-    <div className="  dark:bg-gray-800  p-4 rounded-xl shadow w-full  mt-6">
+    <div className="  dark:bg-[#1B2539]  p-4 rounded-xl shadow w-full  mt-6">
       <div className="flex items-center space-x-2 mb-3">
         <img src={icon} alt={name} className="w-5 h-5" />
         <span className=" text-sm">{name}</span>

@@ -1,4 +1,4 @@
-import { log } from "console";
+
 import { jwtDecode } from "jwt-decode";
 
 export function getUserIdFromToken(): number | null {

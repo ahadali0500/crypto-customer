@@ -280,12 +280,12 @@ const TicketTablePage = () => {
   return (
     <div className="relative">
       {loading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-gray-900/80">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-[#18212F]">
           <Spinner size={40} />
         </div>
       )}
 
-      <div className="p-6 mt-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
+      <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#18212F] border border-1 border-gray-600 rounded-lg">
         <div className="rounded-lg">
           <div className='flex flex-row items-center justify-between mb-4'>
 

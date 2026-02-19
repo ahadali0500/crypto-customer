@@ -654,7 +654,7 @@ const fetchCryptocurrencies = useCallback(async () => {
 
     return (
         <>
-            <div className="lg:w-[70%] mx-auto space-y-4 font-inter p-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
+            <div className="w-full lg:w-[520px] mx-auto p-6 rounded-2xl dark:bg-[#18212F] border border-[#2A3648] space-y-5 font-inter">
                 {!showStatus ? (
                     <>
                         <h2 className="text-lg font-bold mb-4">Deposit Form</h2>
@@ -665,101 +665,93 @@ const fetchCryptocurrencies = useCallback(async () => {
                             </div>
                         )}
 
-                        <div className="grid grid-cols-2 items-center gap-2">
-                            <label className="col-span-1 text-base font-semibold">
-                                Currency
-                                {isLoadingRates && (
-                                    <span className="text-xs text-blue-500 ml-2">
-                                        (Loading rates...)
-                                    </span>
-                                )}
-                            </label>
-                            <Dropdown
-                                title={
-                                    selectedCurrency
-                                        ? `${selectedCurrency.fullName} (${selectedCurrency.shortName})`
-                                        : 'Select Currency'
-                                }
-                                trigger="click"
-                                placement="bottom-start"
-                                toggleClassName="border border-gray-400 rounded-lg w-full"
-                                disabled={isLoadingRates}
-                            >
-                                {currencies.map((currency) => (
-                                    <DropdownItem
-                                        key={currency.id}
-                                        className="text-center w-full"
-                                        eventKey={currency.id.toString()}
-                                        onSelect={handleCurrencySelect}
-                                    >
-                                        {currency.fullName} (
-                                        {currency.shortName})
-                                        {currency.rate > 0 && (
-                                            <span className="text-xs text-gray-500">
-                                                - $
-                                                {currency.rate.toLocaleString()}
-                                            </span>
-                                        )}
-                                    </DropdownItem>
-                                ))}
-                            </Dropdown>
-                        </div>
+                       <div className="space-y-2">
+  <label className="dark:text-white/80 text-sm font-semibold">
+    Currency
+    {isLoadingRates && (
+      <span className="text-xs text-blue-400 ml-2">(Loading rates...)</span>
+    )}
+  </label>
 
-                        <div className="grid grid-cols-2 items-center gap-2">
-                            <label className="col-span-1 text-base font-semibold">
-                                Amount (USD)
-                            </label>
-                            <Input
-                                placeholder="0.00"
-                                className="w-full"
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={usdAmount}
-                                onChange={handleUsdAmountChange}
-                            />
-                        </div>
+  <div className="rounded-xl border border-[#2A3648] bg-[#121A26]">
+    <Dropdown
+      title={
+        selectedCurrency
+          ? `${selectedCurrency.fullName} (${selectedCurrency.shortName})`
+          : "Select Currency"
+      }
+      trigger="click"
+      placement="bottom-start"
+      toggleClassName="w-full !bg-transparent !border-0 !shadow-none !text-white px-4 py-3"
+      disabled={isLoadingRates}
+    >
+      {currencies.map((currency) => (
+        <DropdownItem
+          key={currency.id}
+          className="text-center w-full"
+          eventKey={currency.id.toString()}
+          onSelect={handleCurrencySelect}
+        >
+          {currency.fullName} ({currency.shortName})
+          {currency.rate > 0 && (
+            <span className="text-xs text-gray-400"> - ${currency.rate.toLocaleString()}</span>
+          )}
+        </DropdownItem>
+      ))}
+    </Dropdown>
+  </div>
+</div>
+<div className="space-y-2">
+  <label className="dark:text-white/80 text-sm font-semibold">Amount (USD)</label>
 
-                        <div className="grid grid-cols-2 items-center gap-2">
-                            <label className="col-span-1 text-base font-semibold">
-                                Amount Crypto
-                                {conversionLoading && (
-                                    <span className="text-xs text-blue-500 ml-2">
-                                        (Converting...)
-                                    </span>
-                                )}
-                            </label>
-                            <Input
-                                placeholder="0.00000000"
-                                className="w-full"
-                                value={cryptoAmount}
-                                readOnly
-                            />
-                        </div>
+  <Input
+    placeholder="0.00"
+    type="number"
+    min="0"
+    step="0.01"
+    value={usdAmount}
+    onChange={handleUsdAmountChange}
+    className="w-full h-12 rounded-xl bg-[#121A26] text-white border border-[#2A3648] px-4"
+  />
+</div>
 
-                        {selectedCurrency &&
-                            selectedCurrency.rate &&
-                            selectedCurrency.rate > 0 && (
-                                <div className="text-sm text-gray-600 dark:text-gray-400">
-                                    Rate: 1 {selectedCurrency.shortName} = $
-                                    {selectedCurrency.rate.toLocaleString()}
-                                </div>
-                            )}
 
-                        <Button
-                            size="sm"
-                            onClick={handleDeposit}
-                            variant="solid"
-                            className="rounded-lg w-full"
-                            disabled={
-                                loading ||
-                                !selectedCurrency ||
-                                !usdAmount ||
-                                conversionLoading
-                            }
-                        >
-                            {loading ? 'Processing...' : 'Deposit'}
-                        </Button>
+                      
+<div className="space-y-2">
+  <label className="dark:text-white/80 text-sm font-semibold">
+    Amount Crypto
+    {conversionLoading && (
+      <span className="text-xs text-blue-400 ml-2">(Converting...)</span>
+    )}
+  </label>
+
+  <Input
+    placeholder="0.00000000"
+    value={cryptoAmount}
+    readOnly
+    className="w-full h-12 rounded-xl bg-[#121A26] text-white border border-[#2A3648] px-4"
+  />
+</div>
+
+                      
+
+                       {selectedCurrency && selectedCurrency.rate > 0 && (
+  <div className="text-sm dark:text-white/60">
+    Rate: 1 {selectedCurrency.shortName} = ${selectedCurrency.rate.toLocaleString()}
+  </div>
+)}
+
+
+                       <Button
+  size="sm"
+  onClick={handleDeposit}
+  variant="solid"
+  className="w-full h-12 rounded-xl"
+  disabled={loading || !selectedCurrency || !usdAmount || conversionLoading}
+>
+  {loading ? "Processing..." : "Deposit"}
+</Button>
+
                     </>
                 ) : (
                     <>
@@ -787,36 +779,27 @@ const fetchCryptocurrencies = useCallback(async () => {
                                         {walletData?.name}:
 
                                     </div>
-                                    <code
-                                        onClick={() =>
-                                            handleCopy(
-                                                walletData?.id,
-                                                walletData?.address,
-                                            )
-                                        }
-                                        className="dark:bg-lime-700/30 flex justify-between items-center p-1 rounded-lg text-xs text-gray-600 break-words dark:text-white cursor-pointer hover:text-blue-600 transition"
-                                        title="Click to copy"
-                                    >
-                                        <span>{walletData?.address}</span>
+                                 <code
+  onClick={() => handleCopy(walletData?.id, walletData?.address)}
+  className="
+    w-full flex justify-between items-center
+    h-12 px-4 rounded-xl
+    bg-[#121A26] border border-[#2A3648]
+    text-xs text-white/80
+    cursor-pointer
+  "
+  title="Click to copy"
+>
+  <span className="truncate">{walletData?.address}</span>
+  <span className="ml-3">
+    {copiedMap[walletData?.id] ? (
+      <span className="text-green-400 text-xs font-semibold">Copied!</span>
+    ) : (
+      <IoCopyOutline className="text-lg text-white/60 hover:text-white transition" />
+    )}
+  </span>
+</code>
 
-                                        <div
-                                            onClick={() =>
-                                                handleCopy(
-                                                    walletData?.id,
-                                                    walletData?.address,
-                                                )
-                                            }
-                                            className="ml-2 flex items-center text-lg"
-                                        >
-                                            {copiedMap[walletData?.id] ? (
-                                                <span className="text-green-500 text-xs font-semibold animate-pulse">
-                                                    Copied!
-                                                </span>
-                                            ) : (
-                                                <IoCopyOutline className="hover:text-green-600 transition" />
-                                            )}
-                                        </div>
-                                    </code>
 
                                     <div className="text-xs font-semibold">
                                         AMOUNT IN ASSET:
@@ -861,7 +844,7 @@ const fetchCryptocurrencies = useCallback(async () => {
                 )}
             </div>
 
-            <div className=" p-6 mt-10 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
+            <div className=" p-6 mt-10 shadow-sm bg-white dark:bg-[#18212F] rounded-lg">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-bold">Recent Transactions</h2>
                     <div className="w-64">
