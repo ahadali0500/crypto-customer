@@ -104,14 +104,14 @@ export default function BankDepositForm() {
               </label>
               <Input size="sm" id="amount-swift" type="number" step="0.01" placeholder="0.00" required  className="text-white"/>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2  dark:bg-[#18212F] ">
               <label htmlFor="currency-swift" className="text-sm font-medium ">
                 Currency *
               </label>
               <Select
                 options={currencyOptions}
                 placeholder="Select currency"
-                className="w-full"
+                className="w-full dark:bg-[#18212F]"
                 isSearchable={false}
                 required
               />
@@ -237,7 +237,7 @@ export default function BankDepositForm() {
                 options={priorityOptions}
                 placeholder="Standard"
                 defaultValue={priorityOptions[0]}
-                className="w-full"
+                className="w-full dark:bg-[#18212F]"
                 isSearchable={false}
               />
             </div>

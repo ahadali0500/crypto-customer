@@ -652,10 +652,10 @@ const Page = () => {
                       </div>
                     )}
 
-                    <div className='flex items-center gap-2 mt-4 bg-gray-200 dark:bg-gray-700 pl-3 rounded-lg'>
+                    <div className='flex items-center gap-2 mt-4 bg-gray-200 dark:bg-[#18212F] pl-3 rounded-lg'>
                       <span className='whitespace-nowrap text-sm'>Sell amount</span>
                       <Input
-                        className='border border-gray-200 focus:ring-0 bg-gray-100 dark:bg-gray-800 rounded-lg'
+                        className='border border-gray-200 focus:ring-0 bg-gray-100 dark:bg-[#18212F] rounded-lg'
                         placeholder='0.000000'
                         type='number'
                         step='0.000001'
@@ -670,10 +670,10 @@ const Page = () => {
                       />
                     </div>
 
-                    <div className='flex items-center gap-2 mt-4 bg-gray-200 dark:bg-gray-700 pl-3 rounded-lg'>
+                    <div className='flex items-center gap-2 mt-4 bg-gray-200 dark:bg-[#18212F] pl-3 rounded-lg'>
                       <span className='whitespace-nowrap text-sm'>Buy amount</span>
                       <Input
-                        className='border border-gray-200 focus:ring-0 bg-gray-100 dark:bg-gray-800 rounded-lg'
+                        className='border border-gray-200 focus:ring-0 bg-gray-100 dark:bg-[#18212F] rounded-lg'
                         placeholder='0.000000'
                         type='number'
                         step='0.000001'

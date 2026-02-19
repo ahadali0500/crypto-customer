@@ -12,10 +12,10 @@
   }
 
   .side-nav-dark {
-    @apply bg-[#111827] border-r border-gray-600;
+    @apply bg-[#111827] border-r border-gray-600 hover:bg-[#111827] hover:border-gray-700;
   }
 
   .side-nav-bg {
-    @apply border-r bg-white  border-gray-200 dark:bg-[#111827] dark:border-gray-700;
+    @apply border-r bg-white  border-gray-200 dark:bg-[#111827] dark:border-[#111827]  hover:bg-[#111827] hover:border-gray-700;;
   }
 }

@@ -121,7 +121,7 @@ export default function CardPaymentPage() {
     <div
       className={classNames(
         "w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
-        active ? "bg-blue-600 text-white" : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400",
+        active ? "bg-blue-600 text-white" : "bg-gray-200 dark:bg-[#18212F] text-gray-600 dark:text-gray-400 border border-1 border-gray-600",
       )}
     >
       {step}
