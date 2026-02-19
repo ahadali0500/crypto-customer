@@ -585,7 +585,7 @@ const Page = () => {
     <>
       <div className=' '>
         <div className='flex items-center justify-center'>
-          <div className='w-full md:w-[40%] p-6  shadow-sm bg-white dark:bg-[#18212F] border border-1 border-gray-600 rounded-lg'>
+          <div className='w-full md:w-[60%] p-6  shadow-sm bg-white dark:bg-[#18212F] border border-1 border-gray-600 rounded-lg'>
             <Tabs defaultValue='available' onChange={handleTabChange}>
               <TabList>
                 <TabNav value='locked'>Locked</TabNav>
