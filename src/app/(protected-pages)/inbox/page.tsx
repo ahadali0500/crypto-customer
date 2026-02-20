@@ -494,7 +494,7 @@ useEffect(() => {
 
       {/* Sidebar */}
       <div className={`${showChat ? "hidden" : "flex"} md:flex bg-white dark:bg-[#18212F] w-full md:w-80 border-r border-gray-200 dark:border-gray-800 flex-col h-full`}>
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-600 flex-shrink-0">
           <h1 className="text-xl font-bold mb-4 dark:text-white">Messages</h1>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -587,7 +587,8 @@ useEffect(() => {
       </div>
 
       {/* Chat Pane */}
-      <div className={`${showChat ? "flex" : "hidden"} md:flex flex-1 flex-col h-full`}>
+      <div className={`${showChat ? "flex" : "hidden"} md:flex flex-1 flex-col h-full
+  dark:border-l dark:border-gray-600`}>
         {selectedUser ? (
           <>
             {/* Header */}
