@@ -57,11 +57,11 @@ input[type="number"] {
     --color-neutral-200: #e5e5e5;
     --color-neutral-300: #d4d4d4;
     --color-neutral-400: #a3a3a3;
-    --color-neutral-500: #737373;
-    --color-neutral-600: #525252;
-    --color-neutral-700: #404040;
-    --color-neutral-800: #262626;
-    --color-neutral-900: #171717;
+    --color-neutral-500: #1F2937;
+    --color-neutral-600: #1F2937;
+    --color-neutral-700: #1F2937;
+    --color-neutral-800: #1F2937;
+    --color-neutral-900: #1F2937;
     
     /* Gradients */
     /* --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #7dd3fc 100%); */
@@ -76,10 +76,10 @@ input[type="number"] {
     /* Dark mode adjustments */
     --color-neutral-50: #0a0a0a;
     --color-neutral-100: #171717;
-    --color-neutral-200: #262626;
-    --color-neutral-300: #404040;
-    --color-neutral-400: #525252;
-    --color-neutral-500: #737373;
+    --color-neutral-200: #111827;
+    --color-neutral-300: #111827;
+    --color-neutral-400: #111827;
+    --color-neutral-500: #111827;
     --color-neutral-600: #a3a3a3;
     --color-neutral-700: #d4d4d4;
     --color-neutral-800: #e5e5e5;
