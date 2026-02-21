@@ -20,7 +20,7 @@
   }
   
   .menu-dark {
-    @apply bg-gray-800;
+    @apply bg-[#111826];
   }
   
   .menu-transparent {

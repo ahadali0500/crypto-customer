@@ -54,7 +54,7 @@ const _UserDropdown = () => {
                 menuClass={`
                     min-w-[220px] 
                     text-left 
-                    bg-white dark:bg-gray-800 
+                    bg-white dark:[#111826]
                     rounded-md shadow-lg py-1
                     absolute right-0
                     transform -translate-x-0

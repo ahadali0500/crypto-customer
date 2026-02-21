@@ -161,7 +161,7 @@ const DocumentComponent = () => {
     ];
 
     return (
-        <div className=" mt-5 p-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
+        <div className=" mt-5 p-6 shadow-sm bg-white dark:bg-[#111826] rounded-lg">
             <div className="flex justify-between items-center mb-4">
                 <Button onClick={openDialog} size='sm' className="rounded-md"  variant='solid' disabled={uploading}>
                     {uploading ? 'Uploading...' : 'Upload Document'}

@@ -227,7 +227,7 @@ export const Overview = () => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-gray-900/80">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-[#111826]">
         <Spinner size={40} />
       </div>
     );
@@ -249,7 +249,7 @@ export const Overview = () => {
         {/* Profile and Settings Container */}
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Profile Info */}
-          <div className="flex-1 p-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
+          <div className="flex-1 p-6 shadow-sm bg-white dark:bg-[#111826] rounded-lg">
             <div className="flex justify-between items-center mb-5">
               <h2 className="text-xl md:text-2xl font-bold">Profile Info</h2>
               <div className="flex ">

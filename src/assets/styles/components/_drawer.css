@@ -1,6 +1,6 @@
 @layer components {
   .drawer-content {
-    @apply bg-white dark:bg-gray-800 shadow-xl absolute flex flex-col;
+    @apply bg-white dark:bg-[#111826] shadow-xl absolute flex flex-col;
   
     &.vertical {
       @apply h-full;

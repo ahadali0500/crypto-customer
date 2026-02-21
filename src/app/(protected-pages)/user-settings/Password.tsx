@@ -67,7 +67,7 @@ const Password = () => {
 
     return (
         <>
-            <div className="p-6  mt-5 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
+            <div className="p-6  mt-5 shadow-sm bg-white dark:bg-[#111826]  rounded-lg">
                 <div className="text-xl font-semibold ">
                     Change Password
                 </div>
@@ -87,7 +87,7 @@ const Password = () => {
                                 ...passwordData,
                                 oldPassword: e.target.value
                             })}
-                            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-0 dark:bg-gray-700 dark:text-white"
+                            className="w-full border border-gray-300 dark:border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-0 dark:bg-gray-700 dark:text-white"
                         />
                     </div>
                     <div>
@@ -100,7 +100,7 @@ const Password = () => {
                                 ...passwordData,
                                 newPassword: e.target.value
                             })}
-                            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-0 dark:bg-gray-700 dark:text-white"
+                            className="w-full border border-gray-300 dark:border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-0 dark:bg-gray-700 dark:text-white"
                         />
                     </div>
                     <div>
@@ -113,7 +113,7 @@ const Password = () => {
                                 ...passwordData,
                                 confirmPassword: e.target.value
                             })}
-                            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-0 dark:bg-gray-700 dark:text-white"
+                            className="w-full border border-gray-300 dark:border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-0 dark:bg-gray-700 dark:text-white"
                         />
                     </div>
                     <div className="flex justify-end gap-2 pt-4">
