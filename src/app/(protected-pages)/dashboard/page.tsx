@@ -1,26 +1,20 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import DataTable from '@/components/shared/DataTable'
-import Tabs from '@/components/ui/Tabs'
-import TabList from '@/components/ui/Tabs/TabList'
-import TabNav from '@/components/ui/Tabs/TabNav'
-import TabContent from '@/components/ui/Tabs/TabContent'
 import { Spinner } from '@/components/ui'
 import axios from 'axios'
 import dynamic from 'next/dynamic'
 import { ApexOptions } from 'apexcharts'
 import Graph from '../exchange/Graph'
 import CryptoCard from './_component/CryptoCards'
-import { motion } from 'framer-motion'
 import BalanceCard from './_component/BalanceCard'
 import StatCards from './_component/stat-cards'
 import MarketTrend from './_component/market-trend'
 import AccountStatus from './_component/account-status'
+
 import TransactionHistory from './_component/transaction-history'
-
-
 import UserBalanceList from './UserBalanceList'
-import { Bell } from 'lucide-react'
+
 import MarketTrends from './MarketTrends'
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
@@ -858,8 +852,8 @@ const Page = () => {
                             ))}
                         </div>
                     </Tabs>
-                </div> */}
-            </div>
+                </div>
+         */}
 
             {loading && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-[#1B2539]">
@@ -867,7 +861,7 @@ const Page = () => {
                 </div>
             )}
            
-      
+      </div>
         </>
     )
 }
