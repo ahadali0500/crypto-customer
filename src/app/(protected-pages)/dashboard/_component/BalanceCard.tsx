@@ -121,7 +121,7 @@ const BalanceCard = ({ cardData }: { cardData: CardData }) => {
   return (
     <div className="p-4 rounded-lg shadow bg-white dark:bg-[#1B2539]">
       <div className="mb-4">
-        <h3 className="text-lg font-semibold mb-3">Balance</h3>
+        <h3 className="text-lg font-semibold mb-3">Your portfolio balance</h3>
 
         <div className="flex space-x-2">
           <button
