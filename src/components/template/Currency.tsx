@@ -125,7 +125,7 @@ const _Currency = ({ className }: { className?: string }) => {
           </div>
         </Dropdown.Item>
 
-        <ScrollBar className={classNames('overflow-y-auto dark:bg-gray-800 rounded-lg p-1', dropdownHeight)}>
+        <ScrollBar className={classNames('overflow-y-auto dark:bg-[#111827] rounded-lg p-1', dropdownHeight)}>
           {loading ? (
             <div className={classNames('flex items-center justify-center', dropdownHeight)}>
               <Spinner size={40} />

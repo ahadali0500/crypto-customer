@@ -1194,7 +1194,7 @@ const BankTransferForm = () => {
                 </div>
             )}
 
-            <div className="p-6 mt-6 shadow-sm bg-white dark:bg-gray-800 rounded-lg">
+            <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#111827] rounded-lg">
                 <div className="text-xl font-semibold mb-4">Withdrawal History</div>
                 {loading ? (
                     <div className="flex justify-center items-center h-64">

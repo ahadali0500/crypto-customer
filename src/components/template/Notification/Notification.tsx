@@ -210,7 +210,7 @@ const _Notification = ({ className }: { className?: string }) => {
                     absolute right-0
                     transform -translate-x-0
                     max-w-[calc(100vw-2rem)]
-                    bg-white dark:bg-gray-800
+                    bg-white dark:bg-[#111827]
                     rounded-md shadow-lg
                     p-2
                 `}
