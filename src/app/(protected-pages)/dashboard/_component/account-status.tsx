@@ -10,10 +10,11 @@ import {
 } from "lucide-react";
 import { SystemButton } from "@/components/shared/system-button";
 import Link from "next/link";
+import { SystemCard } from "@/components/shared/system-card";
 
 export default function AccountStatus() {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
+    <SystemCard className="rounded-2xl border border-border bg-card p-5 space-y-4">
 
       {/* HEADER */}
       <div className="flex items-center gap-2 text-lg font-semibold">
@@ -125,6 +126,6 @@ export default function AccountStatus() {
           Enable 2FA Now
         </SystemButton>
       </div>
-    </div>
+    </SystemCard>
   );
 }

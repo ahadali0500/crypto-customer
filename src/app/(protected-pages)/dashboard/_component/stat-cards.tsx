@@ -1,6 +1,6 @@
 import React from "react";
 import { BarChart2, DollarSign, CreditCard, Activity, Eye } from "lucide-react";
-
+import { useRouter } from "next/navigation";
 interface CardData {
   totalBalanceUSD: number;
   lockedBalanceUSD: number;
@@ -17,6 +17,7 @@ interface StatCardsProps {
 }
 
 export default function StatCards({ cardData }: StatCardsProps) {
+  const router = useRouter()
   // Card 1: sum of locked + available (API returns strings, so coerce to Number)
   const totalBalance =
     (Number(cardData?.lockedBalanceUSD ?? 0) + Number(cardData?.availableBalanceUSD ?? 0)).toFixed(2);
@@ -71,6 +72,7 @@ export default function StatCards({ cardData }: StatCardsProps) {
       glowHover: "rgba(100,116,139,0.5)",
       glowBase: "rgba(100,116,139,0.25)",
       icon: <Activity className="h-4 w-4" />,
+      onClick: () => router.push("/kyc-verification"),
     },
   ];
 
@@ -144,6 +146,7 @@ export default function StatCards({ cardData }: StatCardsProps) {
               (e.currentTarget as HTMLDivElement).style.boxShadow =
                 `0 6px 28px ${card.glowBase}`;
             }}
+            onClick={card.onClick}
           >
             <div className="bal-orb" />
 

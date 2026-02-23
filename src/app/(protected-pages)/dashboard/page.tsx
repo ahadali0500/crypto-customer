@@ -20,6 +20,7 @@ import AccountStatus from './_component/account-status'
 import UserBalanceList from './UserBalanceList'
 import { Bell } from 'lucide-react'
 import MarketTrends from './MarketTrends'
+import TransactionHistory from './_component/transaction-history'
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 // Type definitions
@@ -351,11 +352,10 @@ const Page = () => {
             header: 'Status',
             cell: ({ row }) => (
                 <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        row.getValue('type') === 'Pending'
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${row.getValue('type') === 'Pending'
                             ? 'bg-yellow-100 text-yellow-800'
                             : 'bg-green-100 text-green-800'
-                    }`}
+                        }`}
                 >
                     {row.getValue('type')}
                 </span>
@@ -391,27 +391,27 @@ const Page = () => {
             ),
         },
 
-          {
-  header: 'Balance Type',
-  accessorKey: 'IsRealTransaction',
-  cell: ({ getValue }) => {
-    const isReal = getValue() as boolean
+        {
+            header: 'Balance Type',
+            accessorKey: 'IsRealTransaction',
+            cell: ({ getValue }) => {
+                const isReal = getValue() as boolean
 
-    const value = isReal ? 'Available' : 'Locked'
-    const color =
-      value === 'Available'
-        ? 'bg-green-100 text-green-800'
-        : 'bg-yellow-100 text-yellow-800'
+                const value = isReal ? 'Available' : 'Locked'
+                const color =
+                    value === 'Available'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
 
-    return (
-      <span
-        className={`px-2 py-1 text-xs font-medium rounded-full cursor-pointer hover:opacity-80 ${color}`}
-      >
-        {value}
-      </span>
-    )
-  },
-},
+                return (
+                    <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full cursor-pointer hover:opacity-80 ${color}`}
+                    >
+                        {value}
+                    </span>
+                )
+            },
+        },
         {
             accessorKey: 'amount',
             header: 'Amount',
@@ -732,14 +732,14 @@ const Page = () => {
                 <h1 className="text-2xl sm:text-3xl font-bold mb-3">
                     Dashboard
                 </h1>
-              <StatCards cardData={cardData} />
+                <StatCards cardData={cardData} />
 
                 {/* Balance Cards */}
                 <div className="grid grid-cols-12 md:grid-cols-12 gap-4 sm:gap-6 mb-6 sm:mb-8">
                     {/* Balance Chart */}
                     <div className="col-span-12 md:col-span-5 rounded-lg shadow">
                         {/* <BalanceCard cardData={cardData} /> */}
-                        <MarketTrend/>
+                        <MarketTrend />
                     </div>
 
                     {/* Deposits Chart */}
@@ -755,7 +755,7 @@ const Page = () => {
 
                     <div className="col-span-12 md:col-span-7   rounded-lg shadow">
                         <div className="md:h-full ">
-                           <BalanceCard cardData={cardData} />
+                            <BalanceCard cardData={cardData} />
                         </div>
                     </div>
                 </div>
@@ -826,7 +826,7 @@ const Page = () => {
 
 
                 {/* Tabs Section */}
-                <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#1B2539] rounded-lg">
+                {/* <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#1B2539] rounded-lg">
                     <Tabs
                         value={activeTab}
                         onChange={setActiveTab}
