@@ -58,6 +58,7 @@ export default function StatCards({ cardData }: StatCardsProps) {
       glowHover: "rgba(249,115,22,0.45)",
       glowBase: "rgba(249,115,22,0.2)",
       icon: <CreditCard className="h-4 w-4" />,
+      onClick: () => router.push("/kyc-verification"),
     },
     {
       id: 3,
@@ -71,8 +72,7 @@ export default function StatCards({ cardData }: StatCardsProps) {
       bg: "from-slate-700 to-slate-800",
       glowHover: "rgba(100,116,139,0.5)",
       glowBase: "rgba(100,116,139,0.25)",
-      icon: <Activity className="h-4 w-4" />,
-      onClick: () => router.push("/kyc-verification"),
+      icon: <Activity className="h-4 w-4" />
     },
   ];
 
