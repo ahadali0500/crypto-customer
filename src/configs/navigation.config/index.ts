@@ -142,6 +142,16 @@ const navigationConfig: NavigationTree[] = [
         authority: [],
         subMenu: [],
     },
+    {
+        key: 'kyc',
+        path: '/kyc-verification',
+        title: 'KYC',
+        translateKey: 'nav.Viewticket',
+        icon: 'kyc',
+        type: NAV_ITEM_TYPE_ITEM,
+        authority: [],
+        subMenu: [],
+    },
 ]
 
 export default navigationConfig

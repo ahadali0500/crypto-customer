@@ -10,12 +10,19 @@ import axios from 'axios'
 import dynamic from 'next/dynamic'
 import { ApexOptions } from 'apexcharts'
 import Graph from '../exchange/Graph'
-import CryptoCard from './CryptoCards'
-import BalanceCard from './BalanceCard'
+import CryptoCard from './_component/CryptoCards'
+import { motion } from 'framer-motion'
+import BalanceCard from './_component/BalanceCard'
+import StatCards from './_component/stat-cards'
+import MarketTrend from './_component/market-trend'
+import AccountStatus from './_component/account-status'
+import TransactionHistory from './_component/transaction-history'
+
+
 import UserBalanceList from './UserBalanceList'
 import { Bell } from 'lucide-react'
 import MarketTrends from './MarketTrends'
-import CreatePriceAlertModal from './CreatePriceAlertModal'
+
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 // Type definitions
 interface BalanceData {
@@ -136,7 +143,7 @@ const Page = () => {
     const [loading, setLoading] = useState(false)
     const [data, setData] = useState<DashboardData | null>(null)
     const [activeTab, setActiveTab] = useState('tickets')
-const [isAlertModalOpen, setAlertModalOpen] = useState(false)
+
     const [pagination, setPagination] = useState<PaginationState>({
         tickets: { pageIndex: 1, pageSize: 10 },
         deposits: { pageIndex: 1, pageSize: 10 },
@@ -347,11 +354,10 @@ const [isAlertModalOpen, setAlertModalOpen] = useState(false)
             header: 'Status',
             cell: ({ row }) => (
                 <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        row.getValue('type') === 'Pending'
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${row.getValue('type') === 'Pending'
                             ? 'bg-yellow-100 text-yellow-800'
                             : 'bg-green-100 text-green-800'
-                    }`}
+                        }`}
                 >
                     {row.getValue('type')}
                 </span>
@@ -387,27 +393,27 @@ const [isAlertModalOpen, setAlertModalOpen] = useState(false)
             ),
         },
 
-          {
-  header: 'Balance Type',
-  accessorKey: 'IsRealTransaction',
-  cell: ({ getValue }) => {
-    const isReal = getValue() as boolean
+        {
+            header: 'Balance Type',
+            accessorKey: 'IsRealTransaction',
+            cell: ({ getValue }) => {
+                const isReal = getValue() as boolean
 
-    const value = isReal ? 'Available' : 'Locked'
-    const color =
-      value === 'Available'
-        ? 'bg-green-100 text-green-800'
-        : 'bg-yellow-100 text-yellow-800'
+                const value = isReal ? 'Available' : 'Locked'
+                const color =
+                    value === 'Available'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
 
-    return (
-      <span
-        className={`px-2 py-1 text-xs font-medium rounded-full cursor-pointer hover:opacity-80 ${color}`}
-      >
-        {value}
-      </span>
-    )
-  },
-},
+                return (
+                    <span
+                        className={`px-2 py-1 text-xs font-medium rounded-full cursor-pointer hover:opacity-80 ${color}`}
+                    >
+                        {value}
+                    </span>
+                )
+            },
+        },
         {
             accessorKey: 'amount',
             header: 'Amount',
@@ -728,102 +734,14 @@ const [isAlertModalOpen, setAlertModalOpen] = useState(false)
                 <h1 className="text-2xl sm:text-3xl font-bold mb-3">
                     Dashboard
                 </h1>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    {/* Weekly Deposit Card */}
-                    <div className="bg-white dark:bg-[#1B2539] p-4 rounded-lg shadow border-l-4 border-green-500">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                    Total Locked Balance
-                                </p>
-                                <p className="text-xl font-bold text-gray-800 dark:text-white">
-                                    {cardData?.lockedBalanceUSD || '0.00'}$
-                                </p>
-                            </div>
-                            <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full">
-                                <svg
-                                    className="w-6 h-6 text-green-600 dark:text-green-300"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                    {/* Today's Deposit Card */}
-                    <div className="bg-white dark:bg-[#1B2539] p-4 rounded-lg shadow border-l-4 border-blue-500">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                    Total Available Balance
-                                </p>
-                                <p className="text-xl font-bold text-gray-800 dark:text-white">
-                                    {cardData?.availableBalanceUSD || '0.00'}$
-                                </p>
-                            </div>
-                            <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
-                                <svg
-                                    className="w-6 h-6 text-blue-600 dark:text-blue-300"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Monthly Deposit Card */}
-                    <div className="bg-white dark:bg-[#1B2539] p-4 rounded-lg shadow border-l-4 border-purple-500">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                    Total Balance
-                                </p>
-                                <p className="text-xl font-bold text-gray-800 dark:text-white">
-                                    {cardData?.totalBalanceUSD || '0.00'}$
-                                </p>
-                            </div>
-                            <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full">
-                                <svg
-                                    className="w-6 h-6 text-purple-600 dark:text-purple-300"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <StatCards cardData={cardData} />
 
                 {/* Balance Cards */}
                 <div className="grid grid-cols-12 md:grid-cols-12 gap-4 sm:gap-6 mb-6 sm:mb-8">
                     {/* Balance Chart */}
                     <div className="col-span-12 md:col-span-5 rounded-lg shadow">
-                        <BalanceCard cardData={cardData} />
+                        {/* <BalanceCard cardData={cardData} /> */}
+                        <MarketTrend />
                     </div>
 
                     {/* Deposits Chart */}
@@ -839,7 +757,7 @@ const [isAlertModalOpen, setAlertModalOpen] = useState(false)
 
                     <div className="col-span-12 md:col-span-7   rounded-lg shadow">
                         <div className="md:h-full ">
-                            <Graph />
+                            <BalanceCard cardData={cardData} />
                         </div>
                     </div>
                 </div>
@@ -866,7 +784,7 @@ const [isAlertModalOpen, setAlertModalOpen] = useState(false)
           </div> */}
                 {/* </div> */}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 ">
+                {/* <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 ">
                     {coins.map((coin) => (
                         <CryptoCard
                             key={coin.id}
@@ -878,8 +796,7 @@ const [isAlertModalOpen, setAlertModalOpen] = useState(false)
                             sparkline={coin.sparkline_in_7d.price.slice(-20)} // Last 20 points for visual clarity
                         />
                     ))}
-                </div>
-
+                </div> */}
 {/* Main Container for the Two-Column Layout */}
 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
     
@@ -892,25 +809,7 @@ const [isAlertModalOpen, setAlertModalOpen] = useState(false)
     {/* RIGHT COLUMN (Sidebar) */}
 <div className="lg:col-span-4 space-y-6">
     
-    {/* Price Alerts Widget */}
-    <div className="bg-white dark:bg-[#182230] rounded-xl p-5 border border-gray-200 dark:border-slate-500">
-        <div className="flex justify-between items-center mb-4">
-            <p className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <span className="text-orange-600 bg-orange-100 dark:bg-orange-500/20 rounded-md p-1.5">
-                    <Bell className="w-4 h-4"/> 
-                </span> 
-                Price Alerts
-            </p>
-            <button onClick={() => setAlertModalOpen(true)} className="bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-bold py-1.5 px-3 rounded-lg transition-colors">
-                + New Alert
-            </button>
-        </div>
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-            <Bell className="w-10 h-10 text-gray-300 dark:text-gray-400 mb-2 opacity-30"/>
-            <p className="text-sm font-semibold dark:text-gray-300">No active alerts</p>
-            <p className="text-xs text-gray-500  dark:text-gray-300">Create an alert to get notified</p>
-        </div>
-    </div>
+
 
     {/* Market Trends Widget - Cleanly wrapped */}
     <div className="bg-white dark:bg-[#1F2937] rounded-xl p-5 border border-gray-200 dark:border-slate-500">
@@ -919,10 +818,20 @@ const [isAlertModalOpen, setAlertModalOpen] = useState(false)
 
 </div>
 </div>
+                {/* Account status */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                    {/* Left column */}
+                    <AccountStatus />
+
+                    {/* Right column */}
+                    <TransactionHistory/>
+                </div>
+
+
 
 
                 {/* Tabs Section */}
-                <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#1B2539] rounded-lg">
+                {/* <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#1B2539] rounded-lg">
                     <Tabs
                         value={activeTab}
                         onChange={setActiveTab}
@@ -949,7 +858,7 @@ const [isAlertModalOpen, setAlertModalOpen] = useState(false)
                             ))}
                         </div>
                     </Tabs>
-                </div>
+                </div> */}
             </div>
 
             {loading && (
@@ -958,10 +867,7 @@ const [isAlertModalOpen, setAlertModalOpen] = useState(false)
                 </div>
             )}
            
-        <CreatePriceAlertModal 
-            isOpen={isAlertModalOpen} 
-            onClose={() => setAlertModalOpen(false)} 
-        />
+      
         </>
     )
 }
