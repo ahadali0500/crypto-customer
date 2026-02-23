@@ -32,7 +32,7 @@ export default function AccountStatus() {
             <p className="text-sm text-muted-foreground">
               Please complete KYC verification
             </p>
-          <Link href="/client-dashboard/kyc-verification">
+          <Link href="/kyc-verification">
             <p className="text-sm text-blue-500 mt-1 cursor-pointer">
               Complete Verification
               <ChevronRight className="w-4 h-4 inline-block ml-1" />
