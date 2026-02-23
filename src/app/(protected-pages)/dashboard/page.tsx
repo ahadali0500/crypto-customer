@@ -11,11 +11,12 @@ import dynamic from 'next/dynamic'
 import { ApexOptions } from 'apexcharts'
 import Graph from '../exchange/Graph'
 import CryptoCard from './CryptoCards'
-import { motion } from 'framer-motion'
 import BalanceCard from './BalanceCard'
-
+import UserBalanceList from './UserBalanceList'
+import { Bell } from 'lucide-react'
+import MarketTrends from './MarketTrends'
+import CreatePriceAlertModal from './CreatePriceAlertModal'
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
-
 // Type definitions
 interface BalanceData {
     today: number
@@ -135,7 +136,7 @@ const Page = () => {
     const [loading, setLoading] = useState(false)
     const [data, setData] = useState<DashboardData | null>(null)
     const [activeTab, setActiveTab] = useState('tickets')
-
+const [isAlertModalOpen, setAlertModalOpen] = useState(false)
     const [pagination, setPagination] = useState<PaginationState>({
         tickets: { pageIndex: 1, pageSize: 10 },
         deposits: { pageIndex: 1, pageSize: 10 },
@@ -179,6 +180,7 @@ const Page = () => {
 
     const [cardData, setCardData] = useState<CardData>()
 
+
     const fetchDasboard = async () => {
         setLoading(true)
         try {
@@ -212,6 +214,7 @@ const Page = () => {
             setLoading(false)
         }
     }
+
 
     useEffect(() => {
         fetchHistory()
@@ -877,6 +880,47 @@ const Page = () => {
                     ))}
                 </div>
 
+{/* Main Container for the Two-Column Layout */}
+<div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
+    
+    {/* LEFT COLUMN (Balances) - Occupies 8 out of 12 columns */}
+    <div className="lg:col-span-8 space-y-6">
+        {cardData && <UserBalanceList data={cardData.data} />}
+        
+    </div>
+
+    {/* RIGHT COLUMN (Sidebar) */}
+<div className="lg:col-span-4 space-y-6">
+    
+    {/* Price Alerts Widget */}
+    <div className="bg-white dark:bg-[#182230] rounded-xl p-5 border border-gray-200 dark:border-slate-500">
+        <div className="flex justify-between items-center mb-4">
+            <p className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <span className="text-orange-600 bg-orange-100 dark:bg-orange-500/20 rounded-md p-1.5">
+                    <Bell className="w-4 h-4"/> 
+                </span> 
+                Price Alerts
+            </p>
+            <button onClick={() => setAlertModalOpen(true)} className="bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-bold py-1.5 px-3 rounded-lg transition-colors">
+                + New Alert
+            </button>
+        </div>
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+            <Bell className="w-10 h-10 text-gray-300 dark:text-gray-400 mb-2 opacity-30"/>
+            <p className="text-sm font-semibold dark:text-gray-300">No active alerts</p>
+            <p className="text-xs text-gray-500  dark:text-gray-300">Create an alert to get notified</p>
+        </div>
+    </div>
+
+    {/* Market Trends Widget - Cleanly wrapped */}
+    <div className="bg-white dark:bg-[#1F2937] rounded-xl p-5 border border-gray-200 dark:border-slate-500">
+    <MarketTrends />
+    </div>
+
+</div>
+</div>
+
+
                 {/* Tabs Section */}
                 <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#1B2539] rounded-lg">
                     <Tabs
@@ -913,6 +957,11 @@ const Page = () => {
                     <Spinner size={40} />
                 </div>
             )}
+           
+        <CreatePriceAlertModal 
+            isOpen={isAlertModalOpen} 
+            onClose={() => setAlertModalOpen(false)} 
+        />
         </>
     )
 }
