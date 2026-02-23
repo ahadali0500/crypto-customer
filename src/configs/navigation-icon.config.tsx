@@ -1,11 +1,11 @@
 import { IoTicketOutline,IoTicket } from "react-icons/io5";
-import { FaFileInvoiceDollar, FaRocketchat } from "react-icons/fa6";
+import { FaFileInvoiceDollar, FaRocketchat,FaShekelSign } from "react-icons/fa6";
 import type { JSX } from 'react'
 import { RiExchangeBoxFill } from "react-icons/ri";
 import { PiHandDeposit } from "react-icons/pi";
 import { PiHandWithdrawLight } from "react-icons/pi";
 import { MdDashboardCustomize, MdWorkHistory } from "react-icons/md";
-
+import { TbShieldFilled } from "react-icons/tb";
 
 export type NavigationIcons = Record<string, JSX.Element>
 
@@ -18,7 +18,8 @@ const navigationIcon: NavigationIcons = {
     Viewticket:<IoTicket />,
     invoice: <FaFileInvoiceDollar />,
     withdrawal: <PiHandWithdrawLight />,
-    transaction: <MdWorkHistory />
+    transaction: <MdWorkHistory />,
+    kyc: <TbShieldFilled />
 
 }
 

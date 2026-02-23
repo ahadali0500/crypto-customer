@@ -8,7 +8,7 @@ import {
 import classNames from 'classnames'
 import Table from '@/components/ui/Table'
 import Pagination from '@/components/ui/Pagination'
-import Select from '@/components/ui/Select'
+import { Select } from '../ui/Select'
 import Checkbox from '@/components/ui/Checkbox'
 import TableRowSkeleton from './loaders/TableRowSkeleton'
 import Loading from './Loading'

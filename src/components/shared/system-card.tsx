@@ -1,5 +1,5 @@
 import React from "react";
-import { Card,CardHeader,CardTitle,CardContent,CardFooter,CardDescription } from "../ui/Card";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "../ui/Card";
 import { cn } from "@/lib/utils";
 
 type CardVariant = "default" | "muted" | "outlined";
@@ -21,12 +21,12 @@ function SystemCard({
     <Card
       className={cn(
         // Global system rules
-        "rounded-[12px] shadow-none",
+        "rounded-[12px] shadow-none border border-slate-200 dark:border-slate-700",
 
         // Variants
         variant === "default" && "bg-card",
         variant === "muted" && "bg-muted",
-        variant === "outlined" && "border border-border/40",
+        variant === "outlined" && "shadow",
 
         // Interaction
         clickable &&
@@ -82,10 +82,7 @@ function SystemCardDescription({
 }) {
   return (
     <CardDescription
-      className={cn(
-        "text-body text-muted-foreground",
-        className
-      )}
+      className={cn("text-body text-muted-foreground", className)}
     >
       {children}
     </CardDescription>
