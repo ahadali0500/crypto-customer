@@ -1,148 +1,139 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { Input } from "@/components/ui";
 import { SystemButton } from "@/components/shared/system-button";
-import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/Select";
+import Select from "@/components/ui/Select/Select";
 import { BodyText, PageTitle } from "@/components/typography";
+import Card from "@/components/ui/Card/Card";
 
 type PersonalInfoForm = {
-    firstName: string;
-    lastName: string;
-    dob: string;
-    country: string;
-    address: string;
-    city: string;
-    postalCode: string;
+  firstName: string;
+  lastName: string;
+  dob: string;
+  country: string;
+  address: string;
+  city: string;
+  postalCode: string;
 };
 
 interface PersonalInfoProps {
-    onNext: () => void;
+  onNext: () => void;
 }
 
 export default function PersonalInfo({ onNext }: PersonalInfoProps) {
-    const form = useForm<PersonalInfoForm>();
-    const [countries, setCountries] = useState<string[]>([]);
-    const [isLoadingCountries, setIsLoadingCountries] = useState(true);
+  const form = useForm();
+  const [countryOptions, setCountryOptions] = useState<{ value: string; label: string }[]>([]);
+  const [isLoadingCountries, setIsLoadingCountries] = useState(true);
 
-    useEffect(() => {
-        fetch("https://restcountries.com/v3.1/all?fields=name")
-            .then((res) => {
-                if (!res.ok) throw new Error("Failed to fetch countries");
-                return res.json();
-            })
-            .then((data) => {
-                const names = data
-                    .map((c: any) => c.name.common)
-                    .sort((a: string, b: string) => a.localeCompare(b));
-                setCountries(names);
-                setIsLoadingCountries(false);
-            })
-            .catch((err) => {
-                console.error("Country fetch error:", err);
-                setIsLoadingCountries(false);
-            });
-    }, []);
+  useEffect(() => {
+    fetch("https://restcountries.com/v3.1/all?fields=name")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch countries");
+        return res.json();
+      })
+      .then((data) => {
+        const options = data
+          .map((c: any) => ({
+            value: c.name.common,
+            label: c.name.common,
+          }))
+          .sort((a: { label: string }, b: { label: string }) =>
+            a.label.localeCompare(b.label)
+          );
+        setCountryOptions(options);
+        setIsLoadingCountries(false);
+      })
+      .catch((err) => {
+        console.error("Country fetch error:", err);
+        setIsLoadingCountries(false);
+      });
+  }, []);
 
-    const onSubmit = (data: PersonalInfoForm) => {
-        console.log("Personal Info:", data);
-        onNext();
-    };
+  const onSubmit = (data: PersonalInfoForm) => {
+    console.log("Personal Info:", data);
+    onNext();
+  };
 
-    return (
-        <div className="w-full max-w-3xl bg-card border rounded-lg p-8">
-            {/* Header */}
-            <div className="mb-8">
-                <PageTitle className="text-2xl font-semibold mb-2">
-                    Step 1: Personal Information
-                </PageTitle>
-                <BodyText className="text-sm">
-                    Please provide your legal information as it appears on your official documents.
-                </BodyText>
-            </div>
+  return (
+    <Card
+      header={{
+        content: (
+          <div>
+            <PageTitle>Step 1: Personal Information</PageTitle>
+            <BodyText>
+              Please provide your legal information as it appears on your official documents.
+            </BodyText>
+          </div>
+        ),
+        bordered: true,
+      }}
+      footer={{
+        content: (
+          <div className="flex justify-end">
+            <SystemButton type="submit" form="personal-info-form">
+              Continue to Email Verification
+            </SystemButton>
+          </div>
+        ),
+        bordered: true,
+      }}
+    >
+      <form id="personal-info-form" onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="grid grid-cols-2 gap-4">
+          {/* Names */}
+          <div className="flex flex-col gap-1">
+            <label>Legal First Name</label>
+            <Input {...form.register("firstName")} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label>Legal Last Name</label>
+            <Input {...form.register("lastName")} />
+          </div>
 
-            {/* Form */}
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                {/* Names */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Legal First Name</label>
-                        <Input
-                            {...form.register("firstName")}
-                            placeholder="Enter your first name"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Legal Last Name</label>
-                        <Input
-                            {...form.register("lastName")}
-                            placeholder="Enter your last name"
-                        />
-                    </div>
-                </div>
+          {/* DOB */}
+          <div className="flex flex-col gap-1 col-span-2">
+            <label>Date of Birth</label>
+            <Input type="date" {...form.register("dob")} />
+          </div>
 
-                {/* DOB */}
-                <div className="space-y-2">
-                    <label className="text-sm font-medium">Date of Birth</label>
-                    <Input type="date" {...form.register("dob")} />
-                </div>
+          {/* Country */}
+          <div className="flex flex-col gap-1 col-span-2">
+            <label>Country of Residence</label>
+            <Controller
+              name="country"
+              control={form.control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  options={countryOptions}
+                  isLoading={isLoadingCountries}
+                  placeholder={isLoadingCountries ? "Loading countries..." : "Select a country"}
+                  value={countryOptions.find((opt) => opt.value === field.value) ?? null}
+                  onChange={(opt: any) => field.onChange(opt?.value ?? "")}
+                  isClearable
+                />
+              )}
+            />
+          </div>
 
-                {/* Country */}
-                <div className="space-y-2">
-                    <label className="text-sm font-medium">Country of Residence</label>
-                    <Select
-                        onValueChange={(val) => form.setValue("country", val)}
-                        value={form.watch("country")}
-                        disabled={isLoadingCountries}
-                    >
-                        <SelectTrigger className="w-full">
-                            {isLoadingCountries ? "Loading countries..." : (form.watch("country") || "Select a country")}
-                        </SelectTrigger>
-                        <SelectContent className="max-h-60">
-                            {countries.map((country) => (
-                                <SelectItem key={country} value={country}>
-                                    {country}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+          {/* Address */}
+          <div className="flex flex-col gap-1 col-span-2">
+            <label>Street Address</label>
+            <Input {...form.register("address")} />
+          </div>
 
-                {/* Address */}
-                <div className="space-y-2">
-                    <label className="text-sm font-medium">Street Address</label>
-                    <Input
-                        {...form.register("address")}
-                        placeholder="Enter your street address"
-                    />
-                </div>
-
-                {/* City + Postal */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">City</label>
-                        <Input
-                            {...form.register("city")}
-                            placeholder="Enter your city"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Postal Code</label>
-                        <Input
-                            {...form.register("postalCode")}
-                            placeholder="Enter your postal code"
-                        />
-                    </div>
-                </div>
-
-                {/* CTA */}
-                <div className="flex justify-end pt-4">
-                    <SystemButton type="submit">
-                        Continue to Email Verification
-                    </SystemButton>
-                </div>
-            </form>
+          {/* City + Postal */}
+          <div className="flex flex-col gap-1">
+            <label>City</label>
+            <Input {...form.register("city")} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label>Postal Code</label>
+            <Input {...form.register("postalCode")} />
+          </div>
         </div>
-    );
+      </form>
+    </Card>
+  );
 }

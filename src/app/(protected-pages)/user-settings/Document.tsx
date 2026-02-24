@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import DataTable, { ColumnDef } from '@/components/shared/DataTable';
-import { Input, Select } from '@/components/ui';
+import Select from '@/components/ui/Select/Select';
 import Button from '@/components/ui/Button';
 import { Dialog } from '@/components/ui';
 import axios from 'axios';

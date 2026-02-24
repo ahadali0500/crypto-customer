@@ -1,5 +1,5 @@
 import React from "react";
-import { SystemCard,SystemCardContent } from "@/components/shared/system-card";
+import Card from "@/components/ui/Card/Card";
 import { TrendingUp } from "lucide-react";
 
 const coins = [
@@ -29,13 +29,18 @@ export default function MarketTrend() {
     .join(" ");
 
   return (
-    <SystemCard>
-      <SystemCardContent >
-        {/* Header */}
-        <div className="flex items-center gap-2 text-lg font-semibold">
-          <TrendingUp className="h-5 w-5 text-blue-400" />
-          <span>Market Trends</span>
-        </div>
+    <Card
+      header={{
+        content: (
+          <div className="flex items-center gap-2 text-lg font-semibold">
+            <TrendingUp className="h-5 w-5 text-blue-400" />
+            <span>Market Trends</span>
+          </div>
+        ),
+        bordered: true,
+      }}
+    >
+      <div className="space-y-4">
 
         {/* Line Chart */}
         <div className="w-full overflow-x-auto">
@@ -56,12 +61,7 @@ export default function MarketTrend() {
                     stroke="#1e293b"
                     strokeDasharray="4 4"
                   />
-                  <text
-                    x={0}
-                    y={y + 4}
-                    fontSize="11"
-                    fill="#94a3b8"
-                  >
+                  <text x={0} y={y + 4} fontSize="11" fill="#94a3b8">
                     ${(maxPrice * t).toLocaleString()}
                   </text>
                 </g>
@@ -81,13 +81,7 @@ export default function MarketTrend() {
               const x = paddingX + (i * (chartWidth - paddingX * 2)) / (coins.length - 1);
               const y = chartHeight - (coin.price / maxPrice) * (chartHeight - paddingY);
               return (
-                <circle
-                  key={coin.symbol}
-                  cx={x}
-                  cy={y}
-                  r="4"
-                  fill="#3b82f6"
-                />
+                <circle key={coin.symbol} cx={x} cy={y} r="4" fill="#3b82f6" />
               );
             })}
 
@@ -133,7 +127,8 @@ export default function MarketTrend() {
             </div>
           ))}
         </div>
-      </SystemCardContent>
-    </SystemCard>
+
+      </div>
+    </Card>
   );
 }
