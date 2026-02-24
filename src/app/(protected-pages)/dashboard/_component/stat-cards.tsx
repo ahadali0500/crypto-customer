@@ -1,5 +1,5 @@
-import React from "react";
-import { BarChart2, DollarSign, CreditCard, Activity, Eye } from "lucide-react";
+import React, { useState } from "react";
+import { BarChart2, DollarSign, CreditCard, Activity, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 interface CardData {
   totalBalanceUSD: number;
@@ -18,6 +18,7 @@ interface StatCardsProps {
 
 export default function StatCards({ cardData }: StatCardsProps) {
   const router = useRouter()
+  const [balanceVisible, setBalanceVisible] = useState(true);
   // Card 1: sum of locked + available (API returns strings, so coerce to Number)
   const totalBalance =
     (Number(cardData?.lockedBalanceUSD ?? 0) + Number(cardData?.availableBalanceUSD ?? 0)).toFixed(2);
@@ -35,7 +36,7 @@ export default function StatCards({ cardData }: StatCardsProps) {
     {
       id: 1,
       title: "Total Portfolio Balance",
-      value: `$${totalBalance}`,
+      value: balanceVisible ? `$${totalBalance}` : "••••••",
       subtitle: `Locked $${cardData?.lockedBalanceUSD ?? "0.00"} · Available $${cardData?.availableBalanceUSD ?? "0.00"}`,
       footer: "Live prices · USD",
       dotColor: "bg-green-400",
@@ -43,7 +44,20 @@ export default function StatCards({ cardData }: StatCardsProps) {
       glowHover: "rgba(99,102,241,0.45)",
       glowBase: "rgba(99,102,241,0.2)",
       icon: <DollarSign className="h-4 w-4" />,
-      extraIcon: <Eye className="h-4 w-4 cursor-pointer" />,
+      extraIcon: (
+        <span
+          className="opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();                              // 👈 Prevent card click
+            setBalanceVisible((prev) => !prev);
+          }}
+        >
+          {balanceVisible
+            ? <Eye className="h-4 w-4" />
+            : <EyeOff className="h-4 w-4" />                 // 👈 Toggle icon
+          }
+        </span>
+      ),
     },
     {
       id: 2,
@@ -154,11 +168,7 @@ export default function StatCards({ cardData }: StatCardsProps) {
             <div className="relative z-10 flex items-center justify-between">
               <p className="text-sm font-medium opacity-90">{card.title}</p>
               <div className="flex items-center gap-2">
-                {card.extraIcon && (
-                  <span className="opacity-80 hover:opacity-100 transition-opacity">
-                    {card.extraIcon}
-                  </span>
-                )}
+                {card.extraIcon && card.extraIcon}  
                 <div className="bal-icon rounded-md bg-white/15 p-1.5">
                   {card.icon}
                 </div>

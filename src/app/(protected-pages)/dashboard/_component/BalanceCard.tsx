@@ -4,6 +4,8 @@ import dynamic from 'next/dynamic'
 import { ApexOptions } from 'apexcharts'
 import { useState } from 'react'
 import classNames from 'classnames'
+import Card from '@/components/ui/Card/Card'
+import { LockKeyhole, Wallet } from 'lucide-react'
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
@@ -45,17 +47,20 @@ const BalanceCard = ({ cardData }: { cardData: CardData }) => {
   ]
 
   const getChartData = () => {
-    if (!cardData?.data?.length) return { series: [] as number[], labels: [] as string[], colors: [] as string[] }
+    if (!cardData?.data?.length)
+      return { series: [] as number[], labels: [] as string[], colors: [] as string[] }
 
     const filteredData = cardData.data.filter((item) => {
-      const balance = activeBalanceTab === 'available'
-        ? parseFloat(item.availableBalance || '0')
-        : parseFloat(item.lockedBalance || '0')
+      const balance =
+        activeBalanceTab === 'available'
+          ? parseFloat(item.availableBalance || '0')
+          : parseFloat(item.lockedBalance || '0')
       return balance > 0
     })
 
     const series = filteredData.map((item) => {
-      const usdStr = activeBalanceTab === 'available' ? item.availableBalanceUSD : item.lockedBalanceUSD
+      const usdStr =
+        activeBalanceTab === 'available' ? item.availableBalanceUSD : item.lockedBalanceUSD
       return Number(usdStr || '0')
     })
 
@@ -98,8 +103,6 @@ const BalanceCard = ({ cardData }: { cardData: CardData }) => {
                   activeBalanceTab === 'available'
                     ? cardData?.availableBalanceUSD || '0'
                     : cardData?.lockedBalanceUSD || '0'
-
-                // already formatted string like "12.34" -> display directly
                 return `$${totalStr}`
               },
             },
@@ -118,8 +121,40 @@ const BalanceCard = ({ cardData }: { cardData: CardData }) => {
     },
   }
 
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center h-[300px] gap-4">
+      {/* Animated icon */}
+      <div className="relative">
+        <div className="w-20 h-20 rounded-full bg-blue-500/10 flex items-center justify-center animate-pulse">
+          <div className="w-14 h-14 rounded-full bg-blue-500/20 flex items-center justify-center">
+            {activeBalanceTab === 'locked' ? (
+              <LockKeyhole className="w-7 h-7 text-blue-400 opacity-70" />
+            ) : (
+              <Wallet className="w-7 h-7 text-blue-400 opacity-70" />
+            )}
+          </div>
+        </div>
+        <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-blue-400/50 border-2 border-[#1B2539]" />
+      </div>
+
+      {/* Text */}
+      <div className="text-center space-y-1">
+        <p className="text-sm font-semibold text-gray-300">
+          No {activeBalanceTab === 'locked' ? 'Locked' : 'Available'} Balance
+        </p>
+        <p className="text-xs ">
+          {activeBalanceTab === 'locked'
+            ? 'You have no funds currently locked in orders or positions.'
+            : 'Deposit funds to see your available balance here.'}
+        </p>
+      </div>
+
+     
+    </div>
+  )
+
   return (
-    <div className="p-4 rounded-lg shadow bg-white dark:bg-[#1B2539]">
+    <Card className="h-full flex flex-col">
       <div className="mb-4">
         <h3 className="text-lg font-semibold mb-3">Your portfolio balance</h3>
 
@@ -150,72 +185,67 @@ const BalanceCard = ({ cardData }: { cardData: CardData }) => {
         </div>
       </div>
 
-      <div className="relative">
+      <div className="relative flex-1 flex flex-col justify-center">
         {series.length > 0 ? (
-          <Chart
-            key={activeBalanceTab}
-            options={currencyChartOptions}
-            series={series}
-            type="donut"
-            height={250}
-          />
-        ) : (
-          <div className="flex items-center justify-center h-[300px] text-gray-500 dark:text-gray-400">
-            <div className="text-center">
-              <p className="text-lg font-medium">No {activeBalanceTab} balance</p>
-              <p className="text-sm">No currencies have {activeBalanceTab} balance</p>
+          <>
+            <Chart
+              key={activeBalanceTab}
+              options={currencyChartOptions}
+              series={series}
+              type="donut"
+              height={250}
+            />
+
+            <div className="mt-4 space-y-2">
+              <div className="max-h-32 overflow-y-auto scrollbar-thumb-gray-500 scrollbar-track-gray-700 scrollbar-thin">
+                {cardData.data.map((item, index) => {
+                  const balance =
+                    activeBalanceTab === 'available'
+                      ? parseFloat(item.availableBalance || '0')
+                      : parseFloat(item.lockedBalance || '0')
+
+                  const balanceUSDStr =
+                    activeBalanceTab === 'available'
+                      ? item.availableBalanceUSD
+                      : item.lockedBalanceUSD
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between py-1 px-2 hover:bg-gray-50 dark:hover:bg-[#2D3748] rounded dark:bg-[#1B2539]"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: colorsBase[index] || '#888' }}
+                        />
+                        <img
+                          src={item.currency.icon}
+                          alt={item.currency.shortName}
+                          className="w-4 h-4 rounded-full"
+                        />
+                        <span className="text-sm font-medium">{item.currency.shortName}</span>
+                      </div>
+
+                      <div className="text-right">
+                        <div className={classNames('text-sm', { 'text-red-500': balance < 0 })}>
+                          {balance.toFixed(6)}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          ${balanceUSDStr || '0.00'}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             </div>
-          </div>
+          </>
+        ) : (
+          <EmptyState />
         )}
       </div>
-
-      {series.length > 0 && (
-        <div className="mt-4 space-y-2">
-          <div className="max-h-32 overflow-y-auto scrollbar-thumb-gray-500 scrollbar-track-gray-700 scrollbar-thin">
-            {cardData.data.map((item, index) => {
-              const balance =
-                activeBalanceTab === 'available'
-                  ? parseFloat(item.availableBalance || '0')
-                  : parseFloat(item.lockedBalance || '0')
-
-              const balanceUSDStr =
-                activeBalanceTab === 'available'
-                  ? item.availableBalanceUSD
-                  : item.lockedBalanceUSD
-
-              return (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between py-1 px-2 hover:bg-gray-50 dark:hover:bg-[#2D3748] rounded dark:bg-[#1B2539]"
-                >
-                  <div className="flex items-center space-x-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: colorsBase[index] || '#888' }}
-                    />
-                    <img
-                      src={item.currency.icon}
-                      alt={item.currency.shortName}
-                      className="w-4 h-4 rounded-full"
-                    />
-                    <span className="text-sm font-medium">{item.currency.shortName}</span>
-                  </div>
-
-                  <div className="text-right">
-                    <div className={classNames('text-sm', { 'text-red-500': balance < 0 })}>
-                      {balance.toFixed(6)}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      ${balanceUSDStr || '0.00'}
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-    </div>
+    </Card>
   )
 }
 

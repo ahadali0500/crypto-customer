@@ -18,7 +18,7 @@ type CardFooter = {
 
 export interface CardProps
     extends CommonProps,
-        Omit<ComponentPropsWithRef<'div'>, 'onClick'> {
+    Omit<ComponentPropsWithRef<'div'>, 'onClick'> {
     clickable?: boolean
     header?: CardHeader
     bodyClass?: string
@@ -64,6 +64,7 @@ const Card = (props: CardProps) => {
 
     const cardClass = classNames(
         'card',
+        'bg-white dark:bg-[#1B2539]',
         className,
         bordered ? `card-border` : `card-shadow`,
         clickable && 'cursor-pointer user-select-none',

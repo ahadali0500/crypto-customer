@@ -347,8 +347,8 @@ const Page = () => {
             cell: ({ row }) => (
                 <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${row.getValue('type') === 'Pending'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-green-100 text-green-800'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : 'bg-green-100 text-green-800'
                         }`}
                 >
                     {row.getValue('type')}
@@ -729,29 +729,9 @@ const Page = () => {
                 <StatCards cardData={cardData} />
 
                 {/* Balance Cards */}
-                <div className="grid grid-cols-12 md:grid-cols-12 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                    {/* Balance Chart */}
-                    <div className="col-span-12 md:col-span-5 rounded-lg shadow">
-                        {/* <BalanceCard cardData={cardData} /> */}
-                        <MarketTrend />
-                    </div>
-
-                    {/* Deposits Chart */}
-                    {/* <div className="col-span-12 md:col-span-6 rounded-lg shadow  bg-white dark:bg-gray-800 p-4">
-            <h3 className="text-lg font-semibold mb-2">Activity Overview</h3>
-            <Chart
-              options={activityChartOptions}
-              series={activityChartSeries}
-              type="donut"
-              height={300}
-            />
-          </div> */}
-
-                    <div className="col-span-12 md:col-span-7   rounded-lg shadow">
-                        <div className="md:h-full ">
-                            <BalanceCard cardData={cardData} />
-                        </div>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                    <MarketTrend />
+                    <BalanceCard cardData={cardData} />
                 </div>
 
                 {/* <div className="grid grid-cols-6 md:grid-cols-12 gap-4"> */}
@@ -789,34 +769,31 @@ const Page = () => {
                         />
                     ))}
                 </div> */}
-{/* Main Container for the Two-Column Layout */}
-<div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
-    
-    {/* LEFT COLUMN (Balances) - Occupies 8 out of 12 columns */}
-    <div className="lg:col-span-8 space-y-6">
-        {cardData && <UserBalanceList data={cardData.data} />}
-        
-    </div>
+                {/* Main Container for the Two-Column Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6">
 
-    {/* RIGHT COLUMN (Sidebar) */}
-<div className="lg:col-span-4 space-y-6">
-    
+                    {/* LEFT COLUMN (Balances) - Occupies 8 out of 12 columns */}
+                    <div className="lg:col-span-8 space-y-6">
+                        {cardData && <UserBalanceList data={cardData.data} />}
+
+                    </div>
+
+                    {/* RIGHT COLUMN (Sidebar) */}
+                    <div className="lg:col-span-4 space-y-6">
 
 
-    {/* Market Trends Widget - Cleanly wrapped */}
-    <div className="bg-white dark:bg-[#1F2937] rounded-xl p-5 border border-gray-200 dark:border-slate-500">
-    <MarketTrends />
-    </div>
 
-</div>
-</div>
+                        {/* Market Trends Widget - Cleanly wrapped */}
+                        <div className="bg-white dark:bg-[#1F2937] rounded-xl p-5 border border-gray-200 dark:border-slate-500">
+                            <MarketTrends />
+                        </div>
+
+                    </div>
+                </div>
                 {/* Account status */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                    {/* Left column */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 w-full">
                     <AccountStatus />
-
-                    {/* Right column */}
-                    <TransactionHistory/>
+                    <TransactionHistory />
                 </div>
 
 
@@ -853,13 +830,13 @@ const Page = () => {
                 </div>
          */}
 
-            {loading && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-[#1B2539]">
-                    <Spinner size={40} />
-                </div>
-            )}
-           
-      </div>
+                {loading && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-[#1B2539]">
+                        <Spinner size={40} />
+                    </div>
+                )}
+
+            </div>
         </>
     )
 }

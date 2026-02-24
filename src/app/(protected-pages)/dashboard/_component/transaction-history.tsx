@@ -201,18 +201,18 @@ export default function TransactionHistory() {
         ),
         bordered: true,
       }}
-      footer={{
-        content: (
-          <Link
-            href="/transactions"
-            className="flex items-center justify-center gap-1 w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
-          >
-            See full transaction history
-            <ChevronRight className="w-3.5 h-3.5" />
-          </Link>
-        ),
-        bordered: true,
-      }}
+      // footer={{
+      //   content: (
+      //     <Link
+      //       href="/transactions"
+      //       className="flex items-center justify-center gap-1 w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
+      //     >
+      //       See full transaction history
+      //       <ChevronRight className="w-3.5 h-3.5" />
+      //     </Link>
+      //   ),
+      //   bordered: true,
+      // }}
     >
       <div className="flex flex-col gap-3">
 
