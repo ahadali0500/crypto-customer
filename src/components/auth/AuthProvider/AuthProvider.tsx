@@ -30,7 +30,7 @@ function getStoredSession(): Session | null {
 
     if (!token || !userInfoRaw) return null
 
-    let userInfo: { name?: string; email?: string }
+    let userInfo: Record<string, unknown>
 
     try {
         userInfo = JSON.parse(userInfoRaw)
@@ -40,8 +40,7 @@ function getStoredSession(): Session | null {
 
     return {
         user: {
-            name: userInfo.name,
-            email: userInfo.email,
+            ...(userInfo as Record<string, any>),
             token,
         },
         expires: '',

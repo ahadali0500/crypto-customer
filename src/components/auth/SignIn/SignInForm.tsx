@@ -96,12 +96,19 @@ const SignInForm = (props: SignInFormProps) => {
             // ✅ Store token separately
             localStorage.setItem('authToken', loginData.token)
 
+            const lastLoginAt =
+                loginData.lastLoginAt ||
+                loginData.lastLogin ||
+                loginData.last_login ||
+                loginData.last_login_at ||
+                new Date().toISOString()
 
             // ✅ Store all other user info in an object
             const userInfo = {
                 name: loginData.name,   // from backend
                 email: loginData.email, 
-                profileImageUrl:loginData.profileImageUrl
+                profileImageUrl: loginData.profileImageUrl,
+                lastLoginAt,
                 // from backend
                 // add more fields if needed
             }
@@ -109,7 +116,10 @@ const SignInForm = (props: SignInFormProps) => {
 
             // Update session context
             setSession({
-                user: loginData,
+                user: {
+                    ...loginData,
+                    lastLoginAt,
+                },
                 expires: '',
             })
 
