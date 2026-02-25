@@ -48,7 +48,7 @@
     "marked": "^14.1.2",
     "next": "^16.1.6",
     "next-auth": "^5.0.0-beta.25",
-    "next-intl": "^3.26.2",
+    "next-intl": "^4.8.3",
     "react": "^19.2.4",
     "react-apexcharts": "^1.7.0",
     "react-csv": "^2.2.2",
