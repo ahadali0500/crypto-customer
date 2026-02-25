@@ -734,7 +734,7 @@ const Page = () => {
                         </div>
 
                         {feeBundles.length === 0 && (
-                          <div className="mt-2 text-sm text-gray-500">
+                          <div className="mt-2 text-sm">
                             No exchange fee bundles available
                           </div>
                         )}
