@@ -95,10 +95,10 @@ const User = () => {
                     <div className='flex flex-col justify-center sm:flex-row items-center gap-4'>
                         {/* Profile Image with proper error handling */}
                         <div className='w-20 h-20 rounded-full bg-amber-50 flex items-center justify-center overflow-hidden'>
-                            {user.profileImageUrl && !imageError ? (
+                            {user?.profileImageUrl && !imageError ? (
                                 <Image 
                                     // src={user.profileImageUrl} 
-                                    src={user.profileImageUrl}
+                                    src={user?.profileImageUrl}
                                     width={80} 
                                     height={80} 
                                     className='rounded-full object-cover' 
@@ -109,26 +109,26 @@ const User = () => {
                             ) : (
                                 // Fallback when no image or image fails to load
                                 <div className="w-full h-full bg-purple-200 flex items-center justify-center text-purple-700 font-bold text-2xl">
-                                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                                    {user?.name ? user?.name.charAt(0).toUpperCase() : 'U'}
                                 </div>
                             )}
                         </div>
                         <div className='text-white space-y-2 text-center sm:text-left'>
                             <div className='text-2xl sm:text-3xl font-semibold'>
-                                {user.name || 'Unknown User'}
+                                {user?.name || 'Unknown User'}
                             </div>
                             <div className='text-sm sm:text-base'>
-                                {user.email || 'No email provided'}
+                                {user?.email || 'No email provided'}
                             </div>
                             
-                            {(user.city || user.country) && (
+                            {(user?.city || user?.country) && (
                                 <div className='flex flex-col sm:flex-row items-center sm:gap-3 gap-1'>
                                     <div className='flex items-center gap-1 cursor-pointer hover:opacity-80'>
                                         <IoLocationOutline size={20} />
                                         <span>
-                                            {user.city ? user.city : ''} 
-                                            {user.city && user.country ? ', ' : ''} 
-                                            {user.country ? user.country : ''}
+                                            {user?.city ? user.city : ''} 
+                                            {user?.city && user.country ? ', ' : ''} 
+                                            {user?.country ? user.country : ''}
                                         </span>
                                     </div>
                                 </div>

@@ -71,20 +71,20 @@ export default function PersonalInfo({ onNext }: PersonalInfoProps) {
       footer={{
         content: (
           <div className="flex justify-end">
-            <SystemButton type="submit" form="personal-info-form">
+            <button type="submit" form="personal-info-form" className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-md">
               Continue to Email Verification
-            </SystemButton>
+            </button>
           </div>
         ),
         bordered: true,
       }}
     >
-      <form id="personal-info-form" onSubmit={form.handleSubmit(onSubmit)}>
+      <form id="personal-info-form" className="max-w-3xl w-full " onSubmit={form.handleSubmit(onSubmit)}>
         <div className="grid grid-cols-2 gap-4">
           {/* Names */}
           <div className="flex flex-col gap-1">
             <label>Legal First Name</label>
-            <Input {...form.register("firstName")} />
+            <Input {...form.register("firstName")} className="bg-[#374151]" />
           </div>
           <div className="flex flex-col gap-1">
             <label>Legal Last Name</label>

@@ -68,14 +68,14 @@ export default function EmailVerification({ onNext, onBack }: EmailVerificationP
                             placeholder="Enter your email address"
                             disabled={codeSent}
                         />
-                        <SystemButton
+                        <button
                             type="button"
                             onClick={sendVerificationCode}
                             disabled={codeSent || isLoading}
-                            size="sm"
+                            className="px-10 rounded-md border border-slate-500 text-xs"
                         >
                             {isLoading ? "Sending..." : codeSent ? "Code Sent" : "Send Code"}
-                        </SystemButton>
+                        </button>
                     </div>
                 </div>
 
@@ -106,12 +106,12 @@ export default function EmailVerification({ onNext, onBack }: EmailVerificationP
 
                 {/* Buttons */}
                 <div className="flex justify-between pt-4">
-                    <SystemButton type="button" onClick={onBack} variant="ghost">
+                    <button type="button" onClick={onBack} className="px-4 py-1 bg-gray-500 text-white hover:bg-gray-600 rounded-md border border-slate-500">
                         Back
-                    </SystemButton>
-                    <SystemButton type="submit">
+                    </button>
+                    <button type="submit" className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-md border border-slate-500">
                         Continue to Upload Documents
-                    </SystemButton>
+                    </button>
                 </div>
             </form>
         </div>

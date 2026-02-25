@@ -200,12 +200,13 @@ export default function UploadDocuments({ onNext, onBack }: UploadDocumentsProps
                         >
                             Back
                         </SystemButton>
-                        <SystemButton
+                        <button
                             type="submit"
+                            className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-md border border-slate-500"
                             
                         >
                             Continue to Review
-                        </SystemButton>
+                        </button>
                     </div>
                 </form>
             </Form>

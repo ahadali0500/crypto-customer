@@ -103,7 +103,7 @@ const columns: ColumnDef<Transaction>[] = [
     {
         header: 'Base Asset',
         accessorKey: 'shortName',
-        cell: ({ row }) => <span>{row.original.currency.shortName}</span>,
+        cell: ({ row }) => <span>{row?.original?.currency?.shortName}</span>,
     },
     {
         header: 'Amount',

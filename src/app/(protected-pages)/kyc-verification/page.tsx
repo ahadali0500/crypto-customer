@@ -46,7 +46,7 @@ export default function KYCVerification() {
                 </p>
             </div>
 
-            <div className="max-w-5xl mx-auto">
+            <div className="max-w-5xl  mx-auto">
                 {/* Stepper */}
                 <div className="mb-12">
                     <div className="flex items-center justify-between relative">
