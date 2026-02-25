@@ -11,8 +11,31 @@ import {
 import { SystemButton } from "@/components/shared/system-button";
 import Link from "next/link";
 import Card from "@/components/ui/Card/Card";
+import { useSessionContext } from "@/components/auth/AuthProvider/SessionContext";
 
 export default function AccountStatus() {
+  const { session } = useSessionContext();
+
+  const lastLoginRaw =
+    session?.user?.lastLoginAt ??
+    session?.user?.lastLogin ??
+    session?.user?.last_login ??
+    session?.user?.last_login_at ??
+    null;
+
+  const lastLoginText = (() => {
+    if (!lastLoginRaw) return "Not available";
+    const d = new Date(lastLoginRaw);
+    if (Number.isNaN(d.getTime())) return "Not available";
+    return d.toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  })();
+
   return (
     <Card
       header={{
@@ -26,7 +49,6 @@ export default function AccountStatus() {
       }}
     >
       <div className="space-y-4">
-
         {/* KYC */}
         <div className="rounded-xl border border-border bg-muted/40 p-4 flex items-center justify-between gap-4">
           <div className="flex items-start gap-3">
@@ -98,7 +120,7 @@ export default function AccountStatus() {
           <div>
             <p className="font-medium">Last Login</p>
             <p className="text-sm text-muted-foreground">
-              Jan 28, 2026, 04:08 PM
+              {lastLoginText}
             </p>
           </div>
         </div>
@@ -128,7 +150,6 @@ export default function AccountStatus() {
             Enable 2FA Now
           </SystemButton>
         </div>
-
       </div>
     </Card>
   );
