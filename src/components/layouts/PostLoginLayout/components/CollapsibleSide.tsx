@@ -15,6 +15,7 @@ import type { CommonProps } from '@/@types/common'
 import Status from '@/components/template/Status'
 import Currency from '@/components/template/Currency'
 import ModeSwitcher from '@/components/template/ThemeConfigurator/ModeSwitcher'
+import Cta from '@/components/template/deposit-withdraw-cta'
 
 
 const CollapsibleSide = ({ children }: CommonProps) => {
@@ -38,6 +39,7 @@ const CollapsibleSide = ({ children }: CommonProps) => {
                         headerEnd={
                             <>
                                 {/* <LanguageSelector /> */}
+                                <Cta />
                                 <Currency />
                                 <Status />
                                 <Notification />
