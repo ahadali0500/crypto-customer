@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Input, Select, Switcher, Dialog, Spinner } from '@/components/ui';
+import { Button, Input, Switcher, Dialog, Spinner } from '@/components/ui';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import User from './page';
 import { BiSolidUser } from 'react-icons/bi';
+import {LocationEdit, MailIcon, MapPinHouse, PhoneIcon, SaveIcon, User2} from "lucide-react"
 interface UserData {
   id: number;
   name: string;
@@ -245,224 +246,121 @@ export const Overview = () => {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto mt-5 space-y-6 font-sans">
-        {/* Profile and Settings Container */}
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Profile Info */}
-          <div className="flex-1 p-6 shadow-sm bg-white dark:bg-[#111826] rounded-lg">
-            <div className="flex justify-between items-center mb-5">
-              <h2 className="text-xl md:text-2xl font-bold">Profile Info</h2>
-              <div className="flex ">
+     <div className="max-w-6xl mx-auto mt-6 space-y-6 font-sans text-white">
 
-                <button
-                  className="bg-primary-subtle text-primary font-normal px-2 md:px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition"
-                  onClick={isEditing ? handleSave : handleEditToggle}
-                  disabled={loading}
+  {/* Page Header */}
+  <div className="flex items-start gap-3">
+    <div className="bg-indigo-600 p-2 rounded-lg">
+      ⚙️
+    </div>
+    <div>
+      <h1 className="text-2xl font-bold">Account Settings</h1>
+      <p className="text-sm text-gray-400">
+        Update your personal information and preferences
+      </p>
+    </div>
+  </div>
 
-                >
-                  {loading ? 'Saving...' : isEditing ? 'Save' : 'Edit'}
-                </button>
-              </div>
-            </div>
+  {/* Profile Information Card */}
+  <div className="bg-[#18212F] border border-slate-500 rounded-xl p-6 shadow-md">
 
-
-            <div className="divide-y divide-gray-200 space-y-6">
-              {/* Profile Image Section */}
-             
-
-
-              {/* Basic Info */}
-              <div className="space-y-3 pt-2">
-                {isEditing ? (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="flex flex-col gap-1">
-                        <label className="font-semibold mb-1">Profile Image:</label>
-                        <div className="relative">
-                          <input
-                            id="file-upload"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className=" w-full  opacity-0 cursor-pointer absolute"
-                          />
-                          <div className="flex items-center bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg">
-                            <label
-                              htmlFor="file-upload"
-                              className=" text-sm p-2 rounded-l-lg bg-gray-100 cursor-pointer transition"
-                            >
-                              Choose Image
-                            </label>
-                            
-                            <span className="ml-3 text-sm text-gray-500 dark:text-gray-300 truncate text-right ">
-                              {profileImage?.name || 'No file chosen'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-
-
-                      <div className="flex flex-col">
-                        <label className="font-semibold mb-1">Full Name:</label>
-                        <Input
-                          value={name}
-                          size='sm'
-                          onChange={(e) => setName(e.target.value)}
-                          placeholder="Enter full name"
-                        />
-                      </div>
-
-                      <div className="flex flex-col">
-                        <label className="font-semibold mb-1">Mobile:</label>
-                        <Input
-                          value={phone}
-                          size='sm'
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="Enter mobile number"
-                        />
-                      </div>
-
-                      <div className="flex flex-col">
-                        <label className="font-semibold mb-1">Country:</label>
-                        <Input
-                          value={country}
-                          onChange={(e) => setCountry(e.target.value)}
-                          placeholder="Enter country"
-                          size='sm'
-                        />
-                      </div>
-
-                      <div className="flex flex-col">
-                        <label className="font-semibold mb-1">City:</label>
-                        <Input
-                          size='sm'
-                          value={city}
-                          onChange={(e) => setCity(e.target.value)}
-                          placeholder="Enter city"
-                        />
-                      </div>
-
-                      <div className="flex flex-col">
-                        <label className="font-semibold mb-1">Canton:</label>
-                        <Input
-                          value={canton}
-                          size='sm'
-                          onChange={(e) => setCanton(e.target.value)}
-                          placeholder="Enter canton"
-                        />
-                      </div>
-
-                      <div className="flex flex-col">
-                        <label className="font-semibold mb-1">Address:</label>
-                        <Input
-                          size='sm'
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
-                          placeholder="Enter address"
-                        />
-                      </div>
-
-                      <div className="flex flex-col">
-                        <label className="font-semibold mb-1">Birth Date:</label>
-                        <Input
-                          size='sm'
-                          type="date"
-                          value={birthDate}
-                          onChange={(e) => setBirthDate(e.target.value)}
-                        />
-                      </div>
-
-                      {/* Details - full width */}
-                      <div className="flex flex-col md:col-span-2">
-                        <label className="font-semibold mb-1">Details:</label>
-                        <Input
-                          size='sm'
-                          textArea
-                          value={details}
-                          onChange={(e) => setDetails(e.target.value)}
-                          rows={3}
-                          placeholder="Enter additional details"
-                        />
-                      </div>
-                    </div>
-
-                  </>
-                ) : (
-                  <>
-                   <div className="pb-3 flex items-center justify-center">
-                  
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-5">
-                      <div className="flex items-center gap-4">
-                        {profileImagePreview || userData.profileImageUrl ? (
-                          <img
-                            // src={profileImagePreview || userData.profileImageUrl!}
-                            src={profileImagePreview}
-                            alt="Profile"
-                            className="w-24 h-24 rounded-full object-cover border"
-                          />
-                        ) : (
-                          <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-                            <BiSolidUser/>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Full Name:</span>
-                      <span>{userData.name || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Mobile:</span>
-                      <span>{userData.phone || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-semibold">E-mail:</span>
-                      <span>{userData.email || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Country:</span>
-                      <span>{userData.country || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-semibold">City:</span>
-                      <span>{userData.city || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Canton:</span>
-                      <span>{userData.canton || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Address:</span>
-                      <span>{userData.address || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Birth Date:</span>
-                      <span>{userData.birthDate ? new Date(userData.birthDate).toLocaleDateString() : 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Details:</span>
-                      <span>{userData.details || 'N/A'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Joining Date:</span>
-                      <span>{new Date(userData.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Last Updated:</span>
-                      <span>{new Date(userData.updatedAt).toLocaleString()}</span>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-
-        </div>
-
+    {/* Card Header */}
+    <div className="flex items-start gap-3 mb-6">
+      <div className="bg-green-600/20 p-2 rounded-lg">
+        👤
       </div>
+      <div>
+        <h2 className="text-lg font-semibold">Profile Information</h2>
+        <p className="text-sm text-gray-400">
+          Manage your basic account information
+        </p>
+      </div>
+    </div>
+
+    {/* Form */}
+    <div className="space-y-5">
+
+      {/* Email (Read Only) */}
+      <div>
+        <label className="text-sm font-medium text-gray-300 flex items-center gap-2 mb-1">
+         <MailIcon className="w-4 h-4" /> Email Address
+        </label>
+        <Input
+          value={userData.email}
+          disabled
+          className="bg-[#283140] border border-slate-500 text-gray-400"
+        />
+        <p className="text-xs text-slate-500 mt-1">
+          Email cannot be changed for security reasons
+        </p>
+      </div>
+
+      {/* Full Name */}
+      <div>
+        <label className="text-sm font-medium text-gray-300 flex items-center gap-2 mb-1">
+            <User2 className="w-4 h-4" /> Full Name
+        </label>
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter full name"
+          className="bg-[#283140] border border-slate-500"
+        />
+      </div>
+
+      {/* Phone */}
+      <div>
+        <label className="text-sm font-medium text-gray-300 flex items-center gap-2 mb-1">
+         <PhoneIcon className="w-4 h-4" />  Phone Number
+        </label>
+        <Input
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="+1234567890"
+          className="bg-[#1b2333] border border-gray-700"
+        />
+      </div>
+
+      {/* Country */}
+      <div>
+        <label className="text-sm font-medium text-gray-300 mb-1 flex gap-2">
+          <MapPinHouse className="w-4 h-4" /> Country
+        </label>
+        <Input
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+          placeholder="Enter country"
+          className="bg-[#283140] border border-slate-500"
+        />
+      </div>
+
+      {/* City */}
+      <div>
+        <label className="text-sm font-medium text-gray-300 mb-1">
+          🏙️ City
+        </label>
+        <Input
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          placeholder="Enter city"
+          className="bg-[#283140] border border-slate-500"
+        />
+      </div>
+
+      {/* Save Button */}
+      <div className="pt-4">
+        <button
+          onClick={handleSave}
+          disabled={loading}
+          className="w-full flex items-center demonstrating-center gap-2 justify-center bg-gradient-to-r from-blue-600 to-purple-600 hover:opacity-90 transition text-white py-3 rounded-lg font-medium"
+        >
+          <SaveIcon className='w-4 h-4' /> {loading ? "Saving..." : "Save Changes"}
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
 
 
 
