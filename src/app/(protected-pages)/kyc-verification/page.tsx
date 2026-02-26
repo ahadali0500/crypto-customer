@@ -10,6 +10,7 @@ import UploadDocuments from "./_components/upload-documents";
 import SubmitForReview from "./_components/submit-for-review";
 
 import { PageTitle } from "@/components/typography";
+import { useSessionContext } from "@/components/auth/AuthProvider/SessionContext";
 
 const steps = [
   { id: 1, name: "Personal Information", icon: User },
@@ -32,6 +33,7 @@ export default function KYCVerification() {
     const kycStatus = customer?.kycStatus;
     const emailVerified = Boolean(customer?.kycEmailVerified);
 
+   
     const hasIdentity = docs.some((d: any) => d.category === "KycIdentity");
     const hasAddress = docs.some((d: any) => d.category === "KycAddress");
 
@@ -61,6 +63,7 @@ export default function KYCVerification() {
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/kyc/status`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+console.log("res",res.data.data.customer);
 
       const customer = res.data?.data?.customer;
       const docs = res.data?.data?.docs || [];

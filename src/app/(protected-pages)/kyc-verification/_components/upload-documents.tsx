@@ -140,7 +140,8 @@ console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
   const existingDocs = kycData?.docs || [];
   const existingIdentity = existingDocs.find((d: any) => d.category === "KycIdentity");
   const existingAddress = existingDocs.find((d: any) => d.category === "KycAddress");
-
+const kycStatus = kycData?.customer?.kycStatus;
+const canReupload = kycStatus === "Rejected";
   return (
     <div className="w-full max-w-3xl bg-card border rounded-lg p-8">
       <div className="mb-8">
@@ -151,7 +152,7 @@ console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
   {!!error && <p className="text-sm text-red-400">{error}</p>}
 
   {/* ID Type */}
-  <div>
+  <div className="my-2">
     <label className="block font-medium mb-2">ID Document Type</label>
     <Select
       options={idTypeOptions}
@@ -162,135 +163,119 @@ console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
   </div>
 
   
-  {/* Government ID */}
-          <div>
-            <label className="block font-medium mb-3">Government-Issued ID</label>
-            <BodyText className="text-sm mb-4">
-              Upload a passport, driver's license, or national ID card
-            </BodyText>
-
-            {/* If already uploaded from backend and no new file chosen */}
-            {existingIdentity && !idDocument ? (
-              <div className="bg-slate-700/40 border border-slate-600 rounded-lg p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-8 h-8 text-blue-400" />
-                  <div>
-                    <p className="text-white font-medium">Existing identity document uploaded</p>
-                    <p className="text-sm text-slate-400">
-                      Verified: {existingIdentity.verified ? "Yes" : "No"}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeFile("id")}
-                  className="text-slate-400 hover:text-red-400 transition-colors"
-                  title="Replace by uploading a new file below"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            ) : !idDocument ? (
-              <label className="block">
-                <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-slate-700/30 transition-all">
-                  <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                  <p className="text-slate-300 mb-2">Click to upload or drag and drop</p>
-                  <p className="text-sm text-slate-500">PNG, JPG or PDF (max. 10MB)</p>
-                </div>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*,.pdf"
-                  onChange={(e) => handleFileUpload(e, "id")}
-                />
-              </label>
-            ) : (
-              <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-8 h-8 text-blue-400" />
-                  <div>
-                    <p className="text-white font-medium">{idDocument.name}</p>
-                    <p className="text-sm text-slate-400">{idDocument.size}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-400" />
-                  <button
-                    type="button"
-                    onClick={() => removeFile("id")}
-                    className="text-slate-400 hover:text-red-400 transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Proof of Address */}
-          <div>
-            <label className="block font-medium mb-3">Proof of Address</label>
-            <BodyText className="text-sm mb-4">
-              Upload a utility bill, bank statement, or rental agreement (dated within last 3 months)
-            </BodyText>
-
-            {existingAddress && !proofOfAddress ? (
-              <div className="bg-slate-700/40 border border-slate-600 rounded-lg p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-8 h-8 text-blue-400" />
-                  <div>
-                    <p className="text-white font-medium">Existing address document uploaded</p>
-                    <p className="text-sm text-slate-400">
-                      Verified: {existingAddress.verified ? "Yes" : "No"}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeFile("address")}
-                  className="text-slate-400 hover:text-red-400 transition-colors"
-                  title="Replace by uploading a new file below"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            ) : !proofOfAddress ? (
-              <label className="block">
-                <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-slate-700/30 transition-all">
-                  <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                  <p className="text-slate-300 mb-2">Click to upload or drag and drop</p>
-                  <p className="text-sm text-slate-500">PNG, JPG or PDF (max. 10MB)</p>
-                </div>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*,.pdf"
-                  onChange={(e) => handleFileUpload(e, "address")}
-                />
-              </label>
-            ) : (
-              <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-8 h-8 text-blue-400" />
-                  <div>
-                    <p className="text-white font-medium">{proofOfAddress.name}</p>
-                    <p className="text-sm text-slate-400">{proofOfAddress.size}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-green-400" />
-                  <button
-                    type="button"
-                    onClick={() => removeFile("address")}
-                    className="text-slate-400 hover:text-red-400 transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-  <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
+{/* If already uploaded from backend and no new file chosen */}
+{existingIdentity && !idDocument && !canReupload ? (
+  <div className="bg-slate-700/40 border border-slate-600 rounded-lg p-4 flex items-center justify-between">
+    <div className="flex items-center gap-3">
+      <FileText className="w-8 h-8 text-blue-400" />
+      <div>
+        <p className="text-white font-medium">Existing identity document uploaded</p>
+        <p className="text-sm text-slate-400">
+          Verified: {existingIdentity.verified ? "Yes" : "No"}
+        </p>
+      </div>
+    </div>
+    <button
+      type="button"
+      onClick={() => removeFile("id")}
+      className="text-slate-400 hover:text-red-400 transition-colors"
+      title="Replace by uploading a new file below"
+    >
+      <X className="w-5 h-5" />
+    </button>
+  </div>
+) : !idDocument ? (
+  <label className="block">
+    <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-slate-700/30 transition-all">
+      <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+      <p className="text-slate-300 mb-2">Click to upload or drag and drop</p>
+      <p className="text-sm text-slate-500">PNG, JPG or PDF (max. 10MB)</p>
+    </div>
+    <input
+      type="file"
+      className="hidden"
+      accept="image/*,.pdf"
+      onChange={(e) => handleFileUpload(e, "id")}
+    />
+  </label>
+) : (
+  <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4 flex items-center justify-between">
+    <div className="flex items-center gap-3">
+      <FileText className="w-8 h-8 text-blue-400" />
+      <div>
+        <p className="text-white font-medium">{idDocument.name}</p>
+        <p className="text-sm text-slate-400">{idDocument.size}</p>
+      </div>
+    </div>
+    <div className="flex items-center gap-2">
+      <CheckCircle2 className="w-5 h-5 text-green-400" />
+      <button
+        type="button"
+        onClick={() => removeFile("id")}
+        className="text-slate-400 hover:text-red-400 transition-colors"
+      >
+        <X className="w-5 h-5" />
+      </button>
+    </div>
+  </div>
+)}
+{existingAddress && !proofOfAddress && !canReupload ? (
+  <div className="mt-2 bg-slate-700/40 border border-slate-600 rounded-lg p-4 flex items-center justify-between">
+    <div className="flex items-center gap-3">
+      <FileText className="w-8 h-8 text-blue-400" />
+      <div>
+        <p className="text-white font-medium">Existing address document uploaded</p>
+        <p className="text-sm text-slate-400">
+          Verified: {existingAddress.verified ? "Yes" : "No"}
+        </p>
+      </div>
+    </div>
+    <button
+      type="button"
+      onClick={() => removeFile("address")}
+      className="text-slate-400 hover:text-red-400 transition-colors"
+      title="Replace by uploading a new file below"
+    >
+      <X className="w-5 h-5" />
+    </button>
+  </div>
+) : !proofOfAddress ? (
+  <label className="block">
+    <div className="border-2 border-dashed border-slate-600 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-slate-700/30 transition-all">
+      <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+      <p className="text-slate-300 mb-2">Click to upload or drag and drop</p>
+      <p className="text-sm text-slate-500">PNG, JPG or PDF (max. 10MB)</p>
+    </div>
+    <input
+      type="file"
+      className="hidden"
+      accept="image/*,.pdf"
+      onChange={(e) => handleFileUpload(e, "address")}
+    />
+  </label>
+) : (
+  <div className="my-2 bg-slate-700/50 border border-slate-600 rounded-lg p-4 flex items-center justify-between">
+    <div className="flex items-center gap-3">
+      <FileText className="w-8 h-8 text-blue-400" />
+      <div>
+        <p className="text-white font-medium">{proofOfAddress.name}</p>
+        <p className="text-sm text-slate-400">{proofOfAddress.size}</p>
+      </div>
+    </div>
+    <div className="flex items-center gap-2">
+      <CheckCircle2 className="w-5 h-5 text-green-400" />
+      <button
+        type="button"
+        onClick={() => removeFile("address")}
+        className="text-slate-400 hover:text-red-400 transition-colors"
+      >
+        <X className="w-5 h-5" />
+      </button>
+    </div>
+  </div>
+)}
+          
+  <div className="my-2 bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
     <p className="text-sm">
       <span className="font-medium">Important:</span> Ensure all documents are clear, readable,
       and show all four corners. Blurry or cropped images may delay your verification.

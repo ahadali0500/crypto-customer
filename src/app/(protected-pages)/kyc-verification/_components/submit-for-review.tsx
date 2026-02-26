@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import axios from "axios";
 import { SystemButton } from "@/components/shared/system-button";
 import { CheckCircle2, AlertCircle, Loader2, XCircle } from "lucide-react";
-
+import { useSessionContext } from "@/components/auth/AuthProvider/SessionContext";
 interface SubmitForReviewProps {
   onBack: () => void;
   onRefresh?: () => void | Promise<void>;
@@ -28,7 +28,10 @@ export default function SubmitForReview({ onBack, onRefresh, kycData }: SubmitFo
 
   const customer = kycData?.customer;
   const docs = kycData?.docs || [];
-
+ const { session } = useSessionContext();
+     
+       const userEmail =
+         session?.user?.email
   const kycStatus: string | undefined = customer?.kycStatus;
   const submittedAt = customer?.kycSubmittedAt;
   const rejectedReason = customer?.kycRejectedReason;
@@ -193,7 +196,7 @@ export default function SubmitForReview({ onBack, onRefresh, kycData }: SubmitFo
             Email Verification
           </h3>
           <p className="text-sm text-slate-400">Email Address</p>
-          <p className="text-white">{customer?.email || "-"}</p>
+          <p className="text-white">{userEmail || "-"}</p>
           <p className={`text-sm mt-2 ${customer?.kycEmailVerified ? "text-green-400" : "text-amber-400"}`}>
             {customer?.kycEmailVerified ? "✓ Verified" : "Not verified"}
           </p>
