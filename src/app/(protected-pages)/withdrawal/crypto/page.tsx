@@ -1022,7 +1022,7 @@ useEffect(() => {
                                                         {computed.amount.toFixed(8)} {selectedCurrency?.shortName}
                                                     </div>
                                                     {exchangeRate && withdrawAmount && (
-                                                        <div className="text-sm text-gray-500">
+                                                        <div className="text-sm">
                                                             ${computed.amountUSD.toFixed(2)} USD
                                                         </div>
                                                     )}
@@ -1044,7 +1044,7 @@ useEffect(() => {
                                                         -{computed.fee.toFixed(6)} {selectedCurrency?.shortName}
                                                     </div>
                                                     {exchangeRate && withdrawAmount && (
-                                                        <div className="text-sm text-gray-500">
+                                                        <div className="text-sm">
                                                             -${computed.feeUSD.toFixed(2)} USD
                                                         </div>
                                                     )}
@@ -1083,7 +1083,7 @@ useEffect(() => {
                                                             : computed.net.toFixed(6)} {selectedCurrency?.shortName}
                                                     </div>
                                                     {exchangeRate && withdrawAmount && (
-                                                        <div className="text-sm text-gray-500">
+                                                        <div className="text-sm">
                                                             ${activeTab === 'locked' 
                                                                 ? computed.amountUSD.toFixed(2)
                                                                 : computed.netUSD.toFixed(2)} USD

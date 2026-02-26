@@ -6,10 +6,11 @@ interface CardData {
   lockedBalanceUSD: number;
   availableBalanceUSD: number;
   // account/trading status fields from your API
-  accountStatus?: string;       // e.g. "Active" | "Suspended"
-  tradingStatus?: string;       // e.g. "Active" | "Restricted"
+  accountStatus?: string;      
+  tradingStatus?: string;
   hasDeposit?: boolean;
   hasWithdrawal?: boolean;
+  kycVerified?: boolean;
 }
 
 interface StatCardsProps {
@@ -32,6 +33,7 @@ export default function StatCards({ cardData }: StatCardsProps) {
   const tradingStatus = hasActivity ? "Active" : "Restricted";
   const isTradingActive = tradingStatus === "Active";
 
+  const isKycVerified = cardData?.kycVerified === true;
   const cards = [
     {
       id: 1,
@@ -48,13 +50,13 @@ export default function StatCards({ cardData }: StatCardsProps) {
         <span
           className="opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
           onClick={(e) => {
-            e.stopPropagation();                              // 👈 Prevent card click
+            e.stopPropagation();                              
             setBalanceVisible((prev) => !prev);
           }}
         >
           {balanceVisible
             ? <Eye className="h-4 w-4" />
-            : <EyeOff className="h-4 w-4" />                 // 👈 Toggle icon
+            : <EyeOff className="h-4 w-4" />              
           }
         </span>
       ),
@@ -66,7 +68,7 @@ export default function StatCards({ cardData }: StatCardsProps) {
       subtitle: isAccountActive
         ? "Your account is fully verified and active"
         : "Contact support to reactivate your account",
-      footer: isAccountActive ? "KYC · Verified" : "Action required",
+        footer: isKycVerified ? "KYC · Verified" : "KYC · Pending Verification",
       dotColor: isAccountActive ? "bg-green-400" : "bg-red-400",
       bg: "from-orange-500 to-orange-600",
       glowHover: "rgba(249,115,22,0.45)",
@@ -168,7 +170,7 @@ export default function StatCards({ cardData }: StatCardsProps) {
             <div className="relative z-10 flex items-center justify-between">
               <p className="text-sm font-medium opacity-90">{card.title}</p>
               <div className="flex items-center gap-2">
-                {card.extraIcon && card.extraIcon}  
+                {card.extraIcon && card.extraIcon}
                 <div className="bal-icon rounded-md bg-white/15 p-1.5">
                   {card.icon}
                 </div>

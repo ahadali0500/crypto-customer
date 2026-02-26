@@ -18,6 +18,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { debounce } from 'lodash';
 import ExchangeHistory from './History';
+import { Card } from '@/components/ui/card';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Currency {
@@ -92,11 +93,14 @@ const CurrencySelector = ({
 
   return (
     <div ref={ref} className="relative">
-      {label && <p className="text-xs text-[#8B95A3] mb-1">{label}</p>}
+      {label && <p className="text-xs text-slate-600 dark:text-[#8B95A3] mb-1">{label}</p>}
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#1C2536] hover:bg-[#232F44] border border-[#2A3548] transition-all duration-200 min-w-[120px] group"
+        className="flex items-center gap-2 px-3 py-2 rounded-xl 
+                   bg-white text-slate-900 border border-slate-200 hover:bg-slate-50
+                   dark:bg-[#1C2536] dark:text-white dark:border-[#2A3548] dark:hover:bg-[#232F44]
+                   transition-all duration-200 min-w-[120px] group"
       >
         {selected ? (
           <>
@@ -106,31 +110,35 @@ const CurrencySelector = ({
             >
               {getInitials(selected.shortName)}
             </span>
-            <span className="font-semibold text-white text-sm">{selected.shortName}</span>
+            <span className="font-semibold text-slate-900 dark:text-white text-sm">{selected.shortName}</span>
           </>
         ) : (
           <span className="text-[#8B95A3] text-sm">Select</span>
         )}
         <ChevronDown
           size={14}
-          className={`text-[#8B95A3] ml-auto transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`text-slate-500 dark:text-[#8B95A3] ml-auto transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
       {open && (
-        <div className="absolute z-50 top-full mt-2 right-0 w-64 bg-[#141D2B] border border-[#2A3548] rounded-2xl shadow-2xl shadow-black/50 overflow-hidden">
-          <div className="p-3 border-b border-[#2A3548]">
+        <div className="absolute z-50 top-full mt-2 right-0 w-64 
+                        bg-white border border-slate-200 rounded-2xl shadow-2xl shadow-black/10
+                        dark:bg-[#141D2B] dark:border-[#2A3548] dark:shadow-black/50 overflow-hidden">
+          <div className="p-3 border-b border-slate-100 dark:border-[#2A3548]">
             <input
               type="text"
               placeholder="Search currency..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#1C2536] text-white text-sm rounded-lg px-3 py-2 outline-none placeholder-[#4B5563] border border-[#2A3548] focus:border-[#6366f1]/50"
+              className="w-full text-sm rounded-lg px-3 py-2 outline-none 
+                         bg-slate-50 text-slate-900 placeholder-slate-400 border border-slate-200 focus:border-[#6366f1]/50
+                         dark:bg-[#1C2536] dark:text-white dark:placeholder-[#4B5563] dark:border-[#2A3548]"
             />
           </div>
           <div className="max-h-52 overflow-y-auto">
             {filtered.length === 0 ? (
-              <p className="text-[#8B95A3] text-sm text-center py-4">No results</p>
+              <p className="text-slate-500 dark:text-[#8B95A3] text-sm text-center py-4">No results</p>
             ) : (
               filtered.map((c) => (
                 <button
@@ -141,7 +149,9 @@ const CurrencySelector = ({
                     setOpen(false);
                     setSearch('');
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#1C2536] transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 
+                             hover:bg-slate-50 dark:hover:bg-[#1C2536]
+                             transition-colors text-left"
                 >
                   <span
                     className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0"
@@ -570,7 +580,7 @@ const Page = () => {
 
   // ─── Render ────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#0B1120] text-white">
+    <div className="min-h-screen text-white">
       {/* ── Page Header ─────────────────────────────────────── */}
       <div className="px-6 pt-8 pb-4 max-w-[1200px] mx-auto">
         <div className="flex items-center gap-4 mb-1">
@@ -585,7 +595,7 @@ const Page = () => {
             <ArrowUpDown size={20} className="text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white leading-tight">Convert Crypto to Fiat</h1>
+            <h1 className="text-2xl font-bold leading-tight">Convert Crypto to Fiat</h1>
             <p className="text-[#8B95A3] text-sm">Instantly exchange your cryptocurrency for traditional currencies</p>
           </div>
         </div>
@@ -604,7 +614,7 @@ const Page = () => {
         </div>
 
         {/* ── Locked / Available Toggle ───────────────────────── */}
-        <div className="flex items-center gap-1 mb-6 bg-[#141D2B] border border-[#2A3548] rounded-xl p-1 w-fit">
+        <div className="flex items-center gap-1 mb-6 border border-[#2A3548] rounded-xl p-1 w-fit">
           {['available', 'locked'].map((tab) => (
             <button
               key={tab}
@@ -613,7 +623,7 @@ const Page = () => {
               className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${
                 activeTab === tab
                   ? 'bg-[#6366f1] text-white shadow-lg shadow-[#6366f1]/20'
-                  : 'text-[#8B95A3] hover:text-white'
+                  : 'text-[#8B95A3]'
               }`}
             >
               {tab}
@@ -625,23 +635,23 @@ const Page = () => {
         <div className="flex flex-col lg:flex-row gap-5 items-start">
 
           {/* ── LEFT: Conversion Card ───────────────────────────── */}
-         <div className="w-full lg:flex-1 bg-[#111827] border border-[#1F2D40] rounded-2xl">
+         <Card className="w-full lg:flex-1 border border-slate-200 dark:border-[#1F2D40] rounded-2xl bg-white dark:bg-transparent">
             <div className="p-6">
 
               {/* You Send Block */}
               <div className="mb-1">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-[#CBD5E1]">You send</span>
+                  <h6 className="text-sm font-medium text-slate-900 dark:text-white">You send</h6>
                   {selectedSellCurrency && (
-                    <span className="text-xs text-[#8B95A3]">
+                    <span className="text-xs text-slate-500 dark:text-[#8B95A3]">
                       Balance:{' '}
-                      <span className="text-[#94A3B8]">
+                      <span className="text-slate-700 dark:text-[#94A3B8]">
                         {getSelectedTabBalance().toFixed(6)} {selectedSellCurrency.shortName}
                       </span>
                     </span>
                   )}
                 </div>
-                <div className="flex items-center bg-[#0F172A] border border-[#2A3548] rounded-xl px-4 py-3 gap-3 focus-within:border-[#6366f1]/60 transition-colors">
+                <div className="flex items-center rounded-xl px-4 py-3 gap-3 border border-slate-200 bg-slate-50 focus-within:border-[#6366f1]/60 transition-colors dark:border-[#2A3548] dark:bg-[#0F172A]">
                   <input
                     type="number"
                     placeholder="0.00"
@@ -650,7 +660,7 @@ const Page = () => {
                     value={sellAmount}
                     onChange={handleSellAmountChange}
                     onKeyDown={(e) => ['-', 'e', 'E', '+'].includes(e.key) && e.preventDefault()}
-                    className="flex-1 bg-transparent text-white text-xl font-semibold outline-none placeholder-[#374151] min-w-0"
+                    className="flex-1 bg-transparent text-xl font-semibold outline-none text-slate-900 placeholder-slate-400 min-w-0 dark:text-white dark:placeholder-[#374151]"
                   />
                   <button
                     type="button"
@@ -664,7 +674,7 @@ const Page = () => {
                   >
                     MAX
                   </button>
-                  <div className="w-px h-6 bg-[#2A3548] flex-shrink-0" />
+                  <div className="w-px h-6 bg-slate-200 dark:bg-[#2A3548] flex-shrink-0" />
                   <CurrencySelector
                     selected={selectedSellCurrency}
                     options={crypto}
@@ -691,15 +701,19 @@ const Page = () => {
               {/* You Receive Block */}
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-[#CBD5E1]">You receive (est.)</span>
+                  <h6 className="text-sm font-medium text-slate-900 dark:text-[#CBD5E1]">You receive (est.)</h6>
                   {conversionLoading && (
                     <span className="flex items-center gap-1.5 text-xs text-[#6366f1]">
                       <Loader2 size={12} className="animate-spin" /> Calculating...
                     </span>
                   )}
                 </div>
-                <div className="flex items-center bg-[#0F172A] border border-[#2A3548] rounded-xl px-4 py-3 gap-3">
-                  <span className={`flex-1 text-xl font-semibold ${buyAmount ? 'text-[#4ADE80]' : 'text-[#374151]'}`}>
+                <div className="flex items-center rounded-xl px-4 py-3 gap-3 border border-slate-200 bg-slate-50 dark:bg-[#0F172A] dark:border-[#2A3548]">
+                  <span
+                    className={`flex-1 text-xl font-semibold ${
+                      buyAmount ? 'text-emerald-500 dark:text-[#4ADE80]' : 'text-slate-400 dark:text-[#374151]'
+                    }`}
+                  >
                     {buyAmount ? parseFloat(buyAmount).toFixed(2) : '0.00'}
                   </span>
                   <CurrencySelector
@@ -767,17 +781,17 @@ const Page = () => {
                 )}
               </button>
             </div>
-          </div>
+          </Card>
 
           {/* ── RIGHT: Details + Trust Panels ──────────────────── */}
           <div className="w-full lg:w-[340px] flex flex-col gap-4">
 
             {/* Conversion Details Card */}
-            <div className="bg-[#111827] border border-[#1F2D40] rounded-2xl p-5">
+            <Card className=" border border-[#1F2D40] rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <TrendingUp size={16} className="text-[#4ADE80]" />
-                  <h3 className="font-semibold text-white text-sm">Conversion Details</h3>
+                  <h3 className="font-semibold text-sm">Conversion Details</h3>
                 </div>
                 <button
                   type="button"
@@ -795,7 +809,7 @@ const Page = () => {
                   <span className="text-xs font-mono text-[#CBD5E1]">
                     1 {selectedSellCurrency?.shortName || '—'}{' '}
                     <span className="text-[#8B95A3]">=</span>{' '}
-                    <span className="text-white font-semibold">
+                    <span className="text-[#8B95A3] font-semibold">
                       {getExchangeRate() > 0 ? getExchangeRate().toFixed(4) : '0.00'}
                     </span>{' '}
                     {selectedBuyCurrency?.shortName || '—'}
@@ -813,7 +827,7 @@ const Page = () => {
                 {/* Divider */}
                 <div className="border-t border-[#1F2D40] pt-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-white">You will receive</span>
+                    <h5 className="text-sm font-semibold">You will receive</h5>
                     <span className="text-sm font-bold text-[#4ADE80] font-mono">
                       {getReceiveAmount().toFixed(4)}{' '}
                       <span className="text-[#86EFAC]">{selectedBuyCurrency?.shortName || '—'}</span>
@@ -830,15 +844,15 @@ const Page = () => {
                   </p>
                 </div>
               )}
-            </div>
+            </Card>
 
             {/* Why Convert With Us Card */}
-            <div className="bg-[#111827] border border-[#1F2D40] rounded-2xl p-5">
+            <Card className="border border-[#1F2D40] p-5">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-lg bg-[#4ADE80]/10 flex items-center justify-center">
                   <span className="text-[#4ADE80] text-xs">$</span>
                 </div>
-                <h3 className="font-semibold text-white text-sm">Why Convert with Us?</h3>
+                <h3 className="font-semibold  text-sm">Why Convert with Us?</h3>
               </div>
 
               <div className="space-y-4">
@@ -864,13 +878,13 @@ const Page = () => {
                       {item.icon}
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-white">{item.title}</p>
+                      <h6 className="text-sm font-semibold">{item.title}</h6>
                       <p className="text-xs text-[#8B95A3] mt-0.5 leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           </div>
         </div>
 
