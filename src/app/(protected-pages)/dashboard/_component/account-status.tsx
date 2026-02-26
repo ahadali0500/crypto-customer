@@ -20,7 +20,6 @@ export default function AccountStatus() {
     session?.user?.lastLoginAt ??
     session?.user?.lastLogin ??
     session?.user?.last_login ??
-    session?.user?.last_login_at ??
     null;
 
   const lastLoginText = (() => {

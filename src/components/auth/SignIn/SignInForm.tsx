@@ -107,6 +107,7 @@ const SignInForm = (props: SignInFormProps) => {
             const userInfo = {
                 name: loginData.name,   // from backend
                 email: loginData.email, 
+              
                 profileImageUrl: loginData.profileImageUrl,
                 lastLoginAt,
                 // from backend

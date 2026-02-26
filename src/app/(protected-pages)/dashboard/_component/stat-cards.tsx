@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { BarChart2, DollarSign, CreditCard, Activity, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSessionContext } from "@/components/auth/AuthProvider/SessionContext";
+import axios from "axios";
 interface CardData {
   totalBalanceUSD: number;
   lockedBalanceUSD: number;
@@ -23,9 +25,44 @@ export default function StatCards({ cardData }: StatCardsProps) {
   // Card 1: sum of locked + available (API returns strings, so coerce to Number)
   const totalBalance =
     (Number(cardData?.lockedBalanceUSD ?? 0) + Number(cardData?.availableBalanceUSD ?? 0)).toFixed(2);
+ const { session } = useSessionContext();
+const [kycData, setKycData] = useState<any>(null);
+const [loading, setLoading] = useState(false);
 
+  const token = useMemo(() => {
+     if (typeof window !== "undefined") return localStorage.getItem("authToken");
+     return null;
+   }, []);
+
+   const fetchKycStatus = useCallback(async () => {
+  if (!token) return;
+
+  try {
+    setLoading(true);
+
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/kyc/status`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    const customer = res.data?.data?.customer;
+    const docs = res.data?.data?.docs || [];
+
+    setKycData({ customer, docs });
+  } catch (e) {
+    console.error("Failed to fetch KYC status", e);
+  } finally {
+    setLoading(false);
+  }
+}, [token]);
+
+useEffect(() => {
+  fetchKycStatus();
+}, [fetchKycStatus]);
+
+const kycStatus = kycData?.customer?.kycStatus ?? null;
   // Card 2: account status — default Active, admin can change
-  const accountStatus = cardData?.accountStatus || "Active";
+  const accountStatus = kycStatus || "NotStarted";
   const isAccountActive = accountStatus === "Active";
 
   // Card 3: trading status — Active only if user has deposit OR withdrawal history
