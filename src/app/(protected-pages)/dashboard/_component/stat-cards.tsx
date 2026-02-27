@@ -63,6 +63,8 @@ useEffect(() => {
 const kycStatus = kycData?.customer?.kycStatus ?? null;
   // Card 2: account status — default Active, admin can change
   const accountStatus = kycStatus || "NotStarted";
+const displayStatus =
+  accountStatus === "NotStarted" ? "Not Started" : accountStatus;
   const isAccountActive = accountStatus === "Active";
 
   // Card 3: trading status — Active only if user has deposit OR withdrawal history
@@ -101,11 +103,11 @@ const kycStatus = kycData?.customer?.kycStatus ?? null;
     {
       id: 2,
       title: "Account Status",
-      value: accountStatus,
+      value: displayStatus,
       subtitle: isAccountActive
         ? "Your account is fully verified and active"
         : "Contact support to reactivate your account",
-        footer: isKycVerified ? "KYC · Verified" : "KYC · Pending Verification",
+        footer:  "KYC Verification",
       dotColor: isAccountActive ? "bg-green-400" : "bg-red-400",
       bg: "from-orange-500 to-orange-600",
       glowHover: "rgba(249,115,22,0.45)",
@@ -205,7 +207,7 @@ const kycStatus = kycData?.customer?.kycStatus ?? null;
 
             {/* Header */}
             <div className="relative z-10 flex items-center justify-between">
-              <p className="text-sm font-medium opacity-90">{card.title}</p>
+              <p className="text-xs font-medium opacity-90">{card.title}</p>
               <div className="flex items-center gap-2">
                 {card.extraIcon && card.extraIcon}
                 <div className="bal-icon rounded-md bg-white/15 p-1.5">
@@ -215,7 +217,7 @@ const kycStatus = kycData?.customer?.kycStatus ?? null;
             </div>
 
             {/* Value */}
-            <div className="bal-value relative z-10 mt-4 text-3xl font-semibold">
+            <div className="bal-value relative z-10 mt-4 text-xl font-semibold">
               {card.value}
             </div>
 
