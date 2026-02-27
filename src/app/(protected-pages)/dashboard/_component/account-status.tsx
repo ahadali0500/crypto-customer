@@ -1,5 +1,9 @@
 "use client";
 
+"use client";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   User,
   AlertTriangle,
@@ -15,25 +19,58 @@ import { useSessionContext } from "@/components/auth/AuthProvider/SessionContext
 
 export default function AccountStatus() {
   const { session } = useSessionContext();
+  const token = session?.user?.token;
 
-  const lastLoginRaw =
-    session?.user?.lastLoginAt ??
-    session?.user?.lastLogin ??
-    session?.user?.last_login ??
-    null;
+  const [lastLoginText, setLastLoginText] = useState<string>("Loading...");
 
-  const lastLoginText = (() => {
-    if (!lastLoginRaw) return "Not available";
-    const d = new Date(lastLoginRaw);
-    if (Number.isNaN(d.getTime())) return "Not available";
-    return d.toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  })();
+  useEffect(() => {
+    if (!token) {
+      setLastLoginText("Not available");
+      return;
+    }
+
+    const fetchUserDetails = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/auth/fetch`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const data = res.data.data;
+
+        // Adjust the key below to match your actual API response field
+        const lastLoginRaw =
+          data?.lastLoginAt ?? data?.lastLogin ?? data?.last_login ?? null;
+
+        if (!lastLoginRaw) {
+          setLastLoginText("Not available");
+          return;
+        }
+
+        const d = new Date(lastLoginRaw);
+        if (Number.isNaN(d.getTime())) {
+          setLastLoginText("Not available");
+          return;
+        }
+
+        setLastLoginText(
+          d.toLocaleString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        );
+      } catch (error) {
+        setLastLoginText("Not available");
+      }
+    };
+
+    fetchUserDetails();
+  }, [token]);
 
   return (
     <Card
