@@ -260,7 +260,7 @@ export default function BankDepositForm() {
   return (
     <>
       <div className="p-4 flex items-center justify-center">
-        <Card className="w-full max-w-2xl shadow-xl border-0">
+        <Card className="w-full max-w-2xl border-0">
           <CardContent>
             <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#18212F]  border-1 border-gray-600 rounded-lg">
               <Tabs value={activeTab} onChange={setActiveTab}>

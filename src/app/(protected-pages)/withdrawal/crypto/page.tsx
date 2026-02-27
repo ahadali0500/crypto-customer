@@ -853,7 +853,7 @@ useEffect(() => {
             {/* Withdrawal Form */}
             <div className="p-5">
                 <div className="flex items-center justify-center">
-                    <div className="w-full md:w-[40%] p-6 shadow-sm bg-white dark:bg-[#18212F] rounded-lg border border-1 border-gray-600">
+                    <div className="w-full md:w-[60%] p-6 shadow-sm bg-white dark:bg-[#18212F] rounded-lg border border-1 border-gray-600">
                         <h1 className="text-xl font-semibold mb-4">Crypto Withdrawal</h1>
 
                         <Tabs defaultValue="available" onChange={handleTabChange}>
@@ -871,7 +871,7 @@ useEffect(() => {
                                             <Dropdown
                                                 title={
                                                     selectedCurrency
-                                                        ? `${selectedCurrency.shortName} - ${selectedCurrency.fullName}`
+                                                        ? `${selectedCurrency.fullName}`
                                                         : 'Select Currency'
                                                 }
                                                 trigger="click"
@@ -886,7 +886,7 @@ useEffect(() => {
                                                         eventKey={getCurrencyKey(currency)}
                                                         onSelect={handleCurrencySelect}
                                                     >
-                                                        {currency.shortName} - {currency.fullName}
+                                                         {currency.fullName}
                                                     </DropdownItem>
                                                 ))}
                                             </Dropdown>

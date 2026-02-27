@@ -735,7 +735,7 @@ const BankTransferForm = () => {
                                             <Dropdown
                                                 title={
                                                     selectedWithdrawCurrency
-                                                        ? `${selectedWithdrawCurrency.shortName} - ${selectedWithdrawCurrency.fullName}`
+                                                        ? ` ${selectedWithdrawCurrency.fullName}`
                                                         : 'Select FIAT Currency'
                                                 }
                                                 trigger="click"
@@ -760,7 +760,7 @@ const BankTransferForm = () => {
                                                         eventKey={getCurrencyKey(currency)}
                                                         onSelect={handleWithdrawCurrencySelect}
                                                     >
-                                                        {currency.shortName} - {currency.fullName}
+                                                        {currency.fullName}
                                                     </DropdownItem>
                                                 ))}
                                             </Dropdown>
@@ -909,7 +909,7 @@ const BankTransferForm = () => {
                                                 </span>
                                             </div>
 
-                                            <div className="flex justify-between text-sm text-gray-600">
+                                            <div className="flex justify-between text-sm">
                                                 <span>Remaining Balance</span>
                                                 <span>
                                                     {remainingAfterSubmit.toFixed(2)} {selectedWithdrawCurrency?.shortName}

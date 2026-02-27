@@ -5,7 +5,8 @@ import { RiExchangeBoxFill } from "react-icons/ri";
 import { PiHandDeposit } from "react-icons/pi";
 import { PiHandWithdrawLight } from "react-icons/pi";
 import { MdDashboardCustomize, MdWorkHistory } from "react-icons/md";
-import { TbShieldFilled } from "react-icons/tb";
+import { TbShield } from "react-icons/tb";
+import { Settings } from "lucide-react";
 
 export type NavigationIcons = Record<string, JSX.Element>
 
@@ -19,7 +20,8 @@ const navigationIcon: NavigationIcons = {
     invoice: <FaFileInvoiceDollar />,
     withdrawal: <PiHandWithdrawLight />,
     transaction: <MdWorkHistory />,
-    kyc: <TbShieldFilled />
+    kyc: <TbShield />,
+    setting: <Settings />,
 
 }
 

@@ -13,7 +13,7 @@ import Image from 'next/image'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useSessionContext } from '@/components/auth/AuthProvider/SessionContext'
-import { IoCopyOutline } from 'react-icons/io5'
+import { IoCheckmarkCircle, IoCopyOutline } from 'react-icons/io5'
 
 type Currency = {
     id: number
@@ -41,7 +41,7 @@ type Transaction = {
     subject?: string
     createdAt?: string
     currency: Currency
-    IsRealTransaction?:Boolean
+    IsRealTransaction?: Boolean
 }
 type DepositData = {
     deposit: {
@@ -63,11 +63,11 @@ export const SYMBOL_TO_ID_MAP: Record<string, string> = {
 }
 */
 type WalletResolved = {
-  id: string
-  address: string
-  qrImage: string
-  name: string
-  visibility?: string
+    id: string
+    address: string
+    qrImage: string
+    name: string
+    visibility?: string
 }
 
 
@@ -136,27 +136,27 @@ const columns: ColumnDef<Transaction>[] = [
                 </span>
             )
         },
-    
-       
+
+
     },
     {
-            header: 'Balance Type',
-            accessorKey: 'IsRealTransaction',
-            cell: ({ row }) => {
-                const isReal = row.original.IsRealTransaction
-                const bgColor = isReal ? 'bg-green-100' : 'bg-yellow-100'
-                const textColor = isReal ? 'text-green-800' : 'text-yellow-800'
-                const statusText = isReal ? 'Available' : 'Locked'
-                
-                return (
-                    <span
-                        className={`px-3 py-1 text-xs font-semibold rounded-full ${bgColor} ${textColor}`}
-                    >
-                        {statusText}
-                    </span>
-                )
-            },
+        header: 'Balance Type',
+        accessorKey: 'IsRealTransaction',
+        cell: ({ row }) => {
+            const isReal = row.original.IsRealTransaction
+            const bgColor = isReal ? 'bg-green-100' : 'bg-yellow-100'
+            const textColor = isReal ? 'text-green-800' : 'text-yellow-800'
+            const statusText = isReal ? 'Available' : 'Locked'
+
+            return (
+                <span
+                    className={`px-3 py-1 text-xs font-semibold rounded-full ${bgColor} ${textColor}`}
+                >
+                    {statusText}
+                </span>
+            )
         },
+    },
 ]
 
 const Page = () => {
@@ -190,8 +190,8 @@ const Page = () => {
         key: '',
         order: '',
     })
-const [walletResolved, setWalletResolved] = useState<WalletResolved | null>(null)
-const [walletSource, setWalletSource] = useState<'ASSIGNED' | 'GLOBAL' | ''>('')
+    const [walletResolved, setWalletResolved] = useState<WalletResolved | null>(null)
+    const [walletSource, setWalletSource] = useState<'ASSIGNED' | 'GLOBAL' | ''>('')
 
 
 
@@ -267,26 +267,26 @@ const [walletSource, setWalletSource] = useState<'ASSIGNED' | 'GLOBAL' | ''>('')
         const end = start + pageSize
         return sortedData?.slice(start, end)
     }, [sortedData, pageIndex, pageSize])
-const fetchWalletForCurrency = useCallback(async (currencyId: number) => {
-  if (!token) return
+    const fetchWalletForCurrency = useCallback(async (currencyId: number) => {
+        if (!token) return
 
-  try {
-    const res = await axios.get(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/deposit/wallet/deposit/resolve`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        params: { currencyId },
-      }
-    )
+        try {
+            const res = await axios.get(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/deposit/wallet/deposit/resolve`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    params: { currencyId },
+                }
+            )
 
-    setWalletResolved(res.data.data || null)
-    setWalletSource(res.data.source || '')
-  } catch (err: any) {
-    setWalletResolved(null)
-    setWalletSource('')
-    toast.error(err?.response?.data?.message || 'No wallet available for this currency')
-  }
-}, [token])
+            setWalletResolved(res.data.data || null)
+            setWalletSource(res.data.source || '')
+        } catch (err: any) {
+            setWalletResolved(null)
+            setWalletSource('')
+            toast.error(err?.response?.data?.message || 'No wallet available for this currency')
+        }
+    }, [token])
     // ✅ ONLY dynamic symbol mapping (no static object)
     const [symbolToIdMap, setSymbolToIdMap] = useState({})
 
@@ -380,62 +380,62 @@ const fetchWalletForCurrency = useCallback(async (currencyId: number) => {
 
     // Fetch cryptocurrencies with rates
 
-const fetchCryptocurrencies = useCallback(async () => {
-  if (!token) return
+    const fetchCryptocurrencies = useCallback(async () => {
+        if (!token) return
 
-  setIsLoadingRates(true)
-  try {
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/currency/fetch?type=Crypto`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    )
+        setIsLoadingRates(true)
+        try {
+            const response = await axios.get(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/currency/fetch?type=Crypto`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            )
 
-    const currencyData = response.data.data || []
+            const currencyData = response.data.data || []
 
-    const currenciesWithRates: Currency[] = []
+            const currenciesWithRates: Currency[] = []
 
-    for (let i = 0; i < currencyData.length; i++) {
-      const currency = currencyData[i]
+            for (let i = 0; i < currencyData.length; i++) {
+                const currency = currencyData[i]
 
-      try {
-        const rate = await fetchConversionRate(currency.shortName)
+                try {
+                    const rate = await fetchConversionRate(currency.shortName)
 
-        currenciesWithRates.push({
-          ...currency,
-          rate: rate || 0,
-        })
+                    currenciesWithRates.push({
+                        ...currency,
+                        rate: rate || 0,
+                    })
 
-        if (i < currencyData.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 200))
+                    if (i < currencyData.length - 1) {
+                        await new Promise((resolve) => setTimeout(resolve, 200))
+                    }
+                } catch {
+                    currenciesWithRates.push({
+                        ...currency,
+                        rate: 0,
+                    })
+                }
+            }
+
+
+            setCurrencies(currenciesWithRates)
+
+            if (currenciesWithRates.length > 0) {
+                const first = currenciesWithRates[0]
+                setSelectedCurrency(first)
+                fetchWalletForCurrency(first.id)
+            }
+
+        } catch (error) {
+            console.error('Error fetching currencies:', error)
+            setError('Failed to fetch currencies')
+        } finally {
+            setIsLoadingRates(false)
         }
-      } catch {
-        currenciesWithRates.push({
-          ...currency,
-          rate: 0,
-        })
-      }
-    }
-
-   
-    setCurrencies(currenciesWithRates)
-
-    if (currenciesWithRates.length > 0) {
-      const first = currenciesWithRates[0]
-      setSelectedCurrency(first)
-      fetchWalletForCurrency(first.id)
-    }
-
-  } catch (error) {
-    console.error('Error fetching currencies:', error)
-    setError('Failed to fetch currencies')
-  } finally {
-    setIsLoadingRates(false)
-  }
-}, [token, fetchConversionRate, fetchWalletForCurrency])
+    }, [token, fetchConversionRate, fetchWalletForCurrency])
 
     // Currency conversion effect
     useEffect(() => {
@@ -526,7 +526,7 @@ const fetchCryptocurrencies = useCallback(async () => {
             }
 
 
-    
+
         },
         [currencies],
     )
@@ -654,194 +654,219 @@ const fetchCryptocurrencies = useCallback(async () => {
 
     return (
         <>
-            <div className="w-full lg:w-[520px] mx-auto p-6 rounded-2xl dark:bg-[#18212F] border border-[#2A3648] space-y-5 font-inter">
-                {!showStatus ? (
-                    <>
-                        <h2 className="text-lg font-bold mb-4">Deposit Form</h2>
+            <div className="flex flex-col items-center w-full px-4 py-6">
+                <div className={`mx-auto rounded-2xl dark:bg-[#18212F] border border-[#2A3648] overflow-hidden font-inter ${!showStatus ? 'w-full lg:w-[520px] p-6 space-y-5' : 'w-full lg:w-[820px]'}`}>
+                    {!showStatus ? (
+                        <>
+                            <h2 className="text-lg font-bold mb-4">Deposit Form</h2>
 
-                        {error && (
-                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                                {error}
-                            </div>
-                        )}
-
-                       <div className="space-y-2">
-  <label className="dark:text-white/80 text-sm font-semibold">
-    Currency
-    {isLoadingRates && (
-      <span className="text-xs text-blue-400 ml-2">(Loading rates...)</span>
-    )}
-  </label>
-
-  <div className="rounded-xl border border-[#2A3648] bg-[#121A26]">
-    <Dropdown
-      title={
-        selectedCurrency
-          ? `${selectedCurrency.fullName} (${selectedCurrency.shortName})`
-          : "Select Currency"
-      }
-      trigger="click"
-      placement="bottom-start"
-      toggleClassName="w-full !bg-transparent !border-0 !shadow-none !text-white px-4 py-3"
-      disabled={isLoadingRates}
-    >
-      {currencies.map((currency) => (
-        <DropdownItem
-          key={currency.id}
-          className="text-center w-full"
-          eventKey={currency.id.toString()}
-          onSelect={handleCurrencySelect}
-        >
-          {currency.fullName} ({currency.shortName})
-          {currency.rate > 0 && (
-            <span className="text-xs text-gray-400"> - ${currency.rate.toLocaleString()}</span>
-          )}
-        </DropdownItem>
-      ))}
-    </Dropdown>
-  </div>
-</div>
-<div className="space-y-2">
-  <label className="dark:text-white/80 text-sm font-semibold">Amount (USD)</label>
-
-  <Input
-    placeholder="0.00"
-    type="number"
-    min="0"
-    step="0.01"
-    value={usdAmount}
-    onChange={handleUsdAmountChange}
-    className="w-full h-12 rounded-xl bg-[#121A26] text-white border border-[#2A3648] px-4"
-  />
-</div>
-
-
-                      
-<div className="space-y-2">
-  <label className="dark:text-white/80 text-sm font-semibold">
-    Amount Crypto
-    {conversionLoading && (
-      <span className="text-xs text-blue-400 ml-2">(Converting...)</span>
-    )}
-  </label>
-
-  <Input
-    placeholder="0.00000000"
-    value={cryptoAmount}
-    readOnly
-    className="w-full h-12 rounded-xl bg-[#121A26] text-white border border-[#2A3648] px-4"
-  />
-</div>
-
-                      
-
-                       {selectedCurrency && selectedCurrency.rate > 0 && (
-  <div className="text-sm dark:text-white/60">
-    Rate: 1 {selectedCurrency.shortName} = ${selectedCurrency.rate.toLocaleString()}
-  </div>
-)}
-
-
-                       <Button
-  size="sm"
-  onClick={handleDeposit}
-  variant="solid"
-  className="w-full h-12 rounded-xl"
-  disabled={loading || !selectedCurrency || !usdAmount || conversionLoading}
->
-  {loading ? "Processing..." : "Deposit"}
-</Button>
-
-                    </>
-                ) : (
-                    <>
-                        <div className="flex flex-row gap-6">
-                            <div className="w-[30%]">
-                                <div className="text-lg font-semibold pb-2">
-                                    {selectedCurrency?.shortName || 'Crypto'}{' '}
-                                    Address
+                            {error && (
+                                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                                    {error}
                                 </div>
+                            )}
 
-                                <img
-                                    src={walletData?.qrImage}
-                                    width={300}
-                                    height={300}
-                                    alt="crypto address qr code"
+                            <div className="space-y-2">
+                                <label className="dark:text-white/80 text-sm font-semibold">
+                                    Currency
+                                    {isLoadingRates && (
+                                        <span className="text-xs text-blue-400 ml-2">(Loading rates...)</span>
+                                    )}
+                                </label>
+                                <div className="rounded-xl border border-[#2A3648] bg-[#121A26]">
+                                    <Dropdown
+                                        title={selectedCurrency ? `${selectedCurrency.fullName} ` : "Select Currency"}
+                                        trigger="click"
+                                        placement="bottom-start"
+                                        toggleClassName="w-full !bg-transparent !border-0 !shadow-none !text-white px-4 py-3"
+                                        disabled={isLoadingRates}
+                                    >
+                                        {currencies.map((currency) => (
+                                            <DropdownItem
+                                                key={currency.id}
+                                                className="text-center w-full"
+                                                eventKey={currency.id.toString()}
+                                                onSelect={handleCurrencySelect}
+                                            >
+                                                {currency.fullName} 
+                                                {currency.rate > 0 && (
+                                                    <span className="text-xs text-gray-400"> - ${currency.rate.toLocaleString()}</span>
+                                                )}
+                                            </DropdownItem>
+                                        ))}
+                                    </Dropdown>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="dark:text-white/80 text-sm font-semibold">Amount (USD)</label>
+                                <Input
+                                    placeholder="0.00"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={usdAmount}
+                                    onChange={handleUsdAmountChange}
+                                    className="w-full h-12 rounded-xl bg-[#121A26] text-white border border-[#2A3648] px-4"
                                 />
                             </div>
-                            <div className="w-full">
-                                <h2 className="text-lg font-bold">
-                                    Deposit Details
-                                </h2>
-                                <hr className="my-4 border-2 border-primary" />
-                                <div className="grid grid-cols-[150px_1fr] gap-y-3 text-sm">
-                                    <div className="text-xs font-semibold">
-                                        {walletData?.name}:
 
-                                    </div>
-                                 <code
-  onClick={() => handleCopy(walletData?.id, walletData?.address)}
-  className="
-    w-full flex justify-between items-center
-    h-12 px-4 rounded-xl
-    bg-[#121A26] border border-[#2A3648]
-    text-xs text-white/80
-    cursor-pointer
-  "
-  title="Click to copy"
->
-  <span className="truncate">{walletData?.address}</span>
-  <span className="ml-3">
-    {copiedMap[walletData?.id] ? (
-      <span className="text-green-400 text-xs font-semibold">Copied!</span>
-    ) : (
-      <IoCopyOutline className="text-lg text-white/60 hover:text-white transition" />
-    )}
-  </span>
-</code>
+                            <div className="space-y-2">
+                                <label className="dark:text-white/80 text-sm font-semibold">
+                                    Amount Crypto
+                                    {conversionLoading && (
+                                        <span className="text-xs text-blue-400 ml-2">(Converting...)</span>
+                                    )}
+                                </label>
+                                <Input
+                                    placeholder="0.00000000"
+                                    value={cryptoAmount}
+                                    readOnly
+                                    className="w-full h-12 rounded-xl bg-[#121A26] text-white border border-[#2A3648] px-4"
+                                />
+                            </div>
 
+                            {selectedCurrency && selectedCurrency.rate > 0 && (
+                                <div className="text-sm dark:text-white/60">
+                                    Rate: 1 {selectedCurrency.shortName} = ${selectedCurrency.rate.toLocaleString()}
+                                </div>
+                            )}
 
-                                    <div className="text-xs font-semibold">
-                                        AMOUNT IN ASSET:
-                                    </div>
-                                    <div>
-                                        {cryptoAmount}{' '}
-                                        {selectedCurrency?.shortName}
-                                    </div>
+                            <Button
+                                size="sm"
+                                onClick={handleDeposit}
+                                variant="solid"
+                                className="w-full h-12 rounded-xl"
+                                disabled={loading || !selectedCurrency || !usdAmount || conversionLoading}
+                            >
+                                {loading ? "Processing..." : "Deposit"}
+                            </Button>
+                        </>
+                    ) : (
+                        <div className="flex flex-row gap-0 min-h-[320px]">
+                            {/* LEFT — QR Panel */}
+                            <div
+                                className="flex flex-col items-center justify-center gap-4 px-8 py-8 min-w-[240px]"
+                                style={{
+                                    background: 'rgba(255,255,255,0.02)',
+                                    borderRight: '1px solid rgba(255,255,255,0.06)',
+                                }}
+                            >
+                                <p className="text-xs font-semibold tracking-widest text-blue-400/70 uppercase">
+                                    Scan to Deposit
+                                </p>
+                                <div
+                                    className="p-3 rounded-xl"
+                                    style={{ background: '#fff', boxShadow: '0 0 40px rgba(59,130,246,0.25)' }}
+                                >
+                                    <img
+                                        src={walletData?.qrImage}
+                                        width={160}
+                                        height={160}
+                                        alt="crypto address qr code"
+                                        className="rounded-md block"
+                                    />
+                                </div>
+                                <span className="text-sm font-bold text-white/70 tracking-wide">
+                                    {selectedCurrency?.shortName || 'ETH'} Address
+                                </span>
+                            </div>
 
-                                    <div className="text-xs font-semibold">
-                                        AMOUNT IN USD:
-                                    </div>
-                                    <div>${usdAmount}</div>
-
-                                    <div className="text-xs font-semibold">
-                                        FEE:
-                                    </div>
-                                    <div>0%</div>
-
-                                    <div className="text-xs font-semibold">
-                                        STATUS:
-                                    </div>
-                                    <div>
-                                        <span className="bg-gray-200 text-gray-800 px-2 py-1 rounded">
-                                            Pending
-                                        </span>
-                                    </div>
+                            {/* RIGHT — Details Panel */}
+                            <div className="flex flex-col flex-1 px-8 py-8 gap-6">
+                                <div>
+                                    <h2 className="text-xl font-bold text-white tracking-tight">Deposit Details</h2>
+                                    <div
+                                        className="mt-2 h-[2px] w-16 rounded-full"
+                                        style={{ background: 'linear-gradient(90deg, #3b82f6, #60a5fa)' }}
+                                    />
                                 </div>
 
-                                <Button
-                                    className="w-full mt-4 bg-primary rounded-lg"
-                                    size="sm"
-                                    variant="solid"
-                                    onClick={handleConfirmPaid}
-                                    disabled={loading}
-                                >
-                                    {loading ? 'Processing...' : 'Confirm Paid'}
-                                </Button>
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-[11px] font-semibold tracking-widest text-white/40 uppercase">
+                                        {walletData?.name || 'Ethereum'} Address
+                                    </span>
+                                    <button
+                                        onClick={() => handleCopy(walletData?.id, walletData?.address)}
+                                        className="group w-full flex justify-between items-center h-12 px-4 rounded-xl text-left transition-all duration-200"
+                                        style={{
+                                            background: 'rgba(15,23,42,0.7)',
+                                            border: '1px solid rgba(99,179,237,0.15)',
+                                        }}
+                                        title="Click to copy"
+                                    >
+                                        <span className="truncate text-xs font-mono text-blue-300/80 tracking-wide">
+                                            {walletData?.address}
+                                        </span>
+                                        <span className="ml-3 shrink-0">
+                                            {copiedMap[walletData?.id] ? (
+                                                <span className="flex items-center gap-1 text-emerald-400 text-xs font-semibold">
+                                                    <IoCheckmarkCircle className="text-base" /> Copied
+                                                </span>
+                                            ) : (
+                                                <IoCopyOutline className="text-base text-white/30 group-hover:text-blue-400 transition-colors" />
+                                            )}
+                                        </span>
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-3">
+                                    {[
+                                        { label: 'Amount (Asset)', value: `${cryptoAmount} ${selectedCurrency?.shortName}`, accent: '#34d399' },
+                                        { label: 'Amount (USD)', value: `$${usdAmount}`, accent: '#60a5fa' },
+                                        { label: 'Fee', value: '0%', accent: '#a78bfa' },
+                                    ].map(({ label, value, accent }) => (
+                                        <div
+                                            key={label}
+                                            className="flex flex-col gap-1 rounded-xl px-4 py-3"
+                                            style={{
+                                                background: 'rgba(255,255,255,0.03)',
+                                                border: '1px solid rgba(255,255,255,0.06)',
+                                            }}
+                                        >
+                                            <span className="text-[10px] font-semibold tracking-widest text-white/35 uppercase">
+                                                {label}
+                                            </span>
+                                            <span className="text-sm font-bold" style={{ color: accent }}>
+                                                {value}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="flex items-center gap-4 mt-auto">
+                                    <div
+                                        className="flex items-center gap-2 px-4 py-2 rounded-xl"
+                                        style={{
+                                            background: 'rgba(234,179,8,0.08)',
+                                            border: '1px solid rgba(234,179,8,0.2)',
+                                        }}
+                                    >
+                                        <span
+                                            className="w-2 h-2 rounded-full animate-pulse"
+                                            style={{ background: '#facc15', boxShadow: '0 0 8px #facc15' }}
+                                        />
+                                        <span className="text-xs font-semibold text-yellow-400 tracking-wide">Pending</span>
+                                    </div>
+
+                                    <Button
+                                        className="flex-1 h-11 rounded-xl text-sm font-bold text-white tracking-wide transition-all duration-200"
+                                        style={{
+                                            background: loading
+                                                ? 'rgba(59,130,246,0.4)'
+                                                : 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
+                                            boxShadow: loading ? 'none' : '0 4px 20px rgba(59,130,246,0.35)',
+                                        }}
+                                        onClick={handleConfirmPaid}
+                                        disabled={loading}
+                                    >
+                                        {loading ? 'Processing…' : 'Confirm Paid'}
+                                    </Button>
+                                </div>
                             </div>
                         </div>
-                    </>
-                )}
+                    )}
+                </div>
             </div>
 
             <div className=" p-6 mt-10 shadow-sm bg-white dark:bg-[#18212F] rounded-lg">

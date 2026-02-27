@@ -152,6 +152,16 @@ const navigationConfig: NavigationTree[] = [
         authority: [],
         subMenu: [],
     },
+    {
+        key: 'setting',
+        path: '/user-settings',
+        title: 'Settings',
+        translateKey: 'nav.setting',
+        icon: 'setting',
+        type: NAV_ITEM_TYPE_ITEM,
+        authority: [],
+        subMenu: [],
+    },
 ]
 
 export default navigationConfig
