@@ -256,7 +256,7 @@ export default function AccountStatus() {
             <p className="font-medium">Last Login</p>
             <p className="text-sm text-muted-foreground">{lastLoginText}</p>
           </div>
-        </div>
+        </div>_
 
         {/* ACTION REQUIRED (show only if not approved) */}
         {showActionRequired && (
