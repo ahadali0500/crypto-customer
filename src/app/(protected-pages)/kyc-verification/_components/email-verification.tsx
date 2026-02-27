@@ -19,6 +19,7 @@ interface EmailVerificationProps {
   onRefresh?: () => void | Promise<void>;
   kycData?: any;
 }
+
 export default function EmailVerification({
   onNext,
   onBack,
@@ -42,11 +43,10 @@ export default function EmailVerification({
     return null;
   }, []);
 
+  const { session } = useSessionContext();
+  const userEmail = session?.user?.email;
 
-   const { session } = useSessionContext();
-  
-    const userEmail =
-      session?.user?.email
+  const alreadyVerified = Boolean(kycData?.customer?.kycEmailVerified);
 
   const sendVerificationCode = async () => {
     setError(null);
@@ -58,12 +58,19 @@ export default function EmailVerification({
     try {
       setSending(true);
 
-      // backend uses customer email from DB (recommended)
-      await axios.post(
+      const res = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/kyc/email/send-code`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
+      // ✅ if backend says already verified, refresh + move on
+      const msg = res?.data?.message;
+      if (msg === "Email already verified") {
+        await onRefresh?.();
+        onNext();
+        return;
+      }
 
       setCodeSent(true);
     } catch (err: any) {
@@ -76,6 +83,12 @@ export default function EmailVerification({
 
   const onSubmit = async (data: EmailVerificationForm) => {
     setError(null);
+
+    // ✅ Safety: if already verified, just move forward (don’t validate code)
+    if (alreadyVerified) {
+      onNext();
+      return;
+    }
 
     if (!token) {
       setError("You are not logged in. Please login again.");
@@ -102,6 +115,7 @@ export default function EmailVerification({
       );
 
       await onRefresh?.();
+      onNext(); // ✅ go next after verify
     } catch (err: any) {
       console.error("Verify OTP error:", err);
       setError(err?.response?.data?.message || "Invalid or expired code");
@@ -110,16 +124,11 @@ export default function EmailVerification({
     }
   };
 
-  // Optional: if already verified from backend, allow moving forward
-  const alreadyVerified = Boolean(kycData?.customer?.kycEmailVerified);
-
   return (
     <div className="w-full max-w-3xl bg-card border rounded-lg p-8">
       <div className="mb-8">
         <SectionTitle>Step 2: Email Verification</SectionTitle>
-        <BodyText>
-          We'll send a verification code to your email address to confirm it's you.
-        </BodyText>
+        <BodyText>We'll send a verification code to your email address to confirm it's you.</BodyText>
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -132,7 +141,7 @@ export default function EmailVerification({
             <Input
               {...form.register("email")}
               type="email"
-              value={userEmail}
+              value={userEmail || ""}
               placeholder="Your account email"
               disabled
             />
@@ -142,12 +151,16 @@ export default function EmailVerification({
               disabled={alreadyVerified || sending}
               className="px-10 rounded-md border border-slate-500 text-xs disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {alreadyVerified ? "Verified" : sending ? "Sending..." : codeSent ? "Resend" : "Send Code"}
+              {alreadyVerified
+                ? "Verified"
+                : sending
+                ? "Sending..."
+                : codeSent
+                ? "Resend"
+                : "Send Code"}
             </button>
           </div>
-          <BodyText className="text-xs">
-            We’ll send the code to your registered email.
-          </BodyText>
+          <BodyText className="text-xs">We’ll send the code to your registered email.</BodyText>
         </div>
 
         {/* Verification Code */}
@@ -168,8 +181,8 @@ export default function EmailVerification({
           <div className="text-sm">
             <SectionTitle className="font-medium mb-1">Why do we need this?</SectionTitle>
             <BodyText>
-              Email verification ensures account security and allows us to send
-              important updates about your verification status.
+              Email verification ensures account security and allows us to send important updates
+              about your verification status.
             </BodyText>
           </div>
         </div>
@@ -183,19 +196,24 @@ export default function EmailVerification({
             Back
           </button>
 
-          <button
-            type="submit"
-            disabled={alreadyVerified ? false : verifying}
-            className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-md border border-slate-500 disabled:opacity-60 disabled:cursor-not-allowed"
-            onClick={(e) => {
-              if (alreadyVerified) {
-                e.preventDefault();
-                onNext();
-              }
-            }}
-          >
-            {alreadyVerified ? "Continue to Upload Documents" : verifying ? "Verifying..." : "Continue to Upload Documents"}
-          </button>
+          {/* ✅ If already verified, do NOT submit form */}
+          {alreadyVerified ? (
+            <button
+              type="button"
+              onClick={onNext}
+              className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-md border border-slate-500"
+            >
+              Continue to Upload Documents
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={verifying}
+              className="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded-md border border-slate-500 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {verifying ? "Verifying..." : "Continue to Upload Documents"}
+            </button>
+          )}
         </div>
       </form>
     </div>

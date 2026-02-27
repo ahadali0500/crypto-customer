@@ -10,7 +10,6 @@ import UploadDocuments from "./_components/upload-documents";
 import SubmitForReview from "./_components/submit-for-review";
 
 import { PageTitle } from "@/components/typography";
-import { useSessionContext } from "@/components/auth/AuthProvider/SessionContext";
 
 const steps = [
   { id: 1, name: "Personal Information", icon: User },
@@ -29,28 +28,33 @@ export default function KYCVerification() {
     return null;
   }, []);
 
+  // ✅ docs check should ignore deleted docs
+  const isActiveDoc = (d: any) => !d?.isDeleted; // if isDeleted doesn't exist yet, it's undefined => treated as active
+
   const computeStepFromCustomer = (customer: any, docs: any[]) => {
     const kycStatus = customer?.kycStatus;
     const emailVerified = Boolean(customer?.kycEmailVerified);
 
-   
-    const hasIdentity = docs.some((d: any) => d.category === "KycIdentity");
-    const hasAddress = docs.some((d: any) => d.category === "KycAddress");
+    const hasIdentity = docs.some((d: any) => isActiveDoc(d) && d.category === "KycIdentity");
+    const hasAddress = docs.some((d: any) => isActiveDoc(d) && d.category === "KycAddress");
 
-    // Final states -> always show Step 4 status screen
-    if (["Submitted", "InReview", "Approved", "Rejected"].includes(kycStatus)) return 4;
+    // ✅ Approved / InReview / Submitted => show status page (Step 4)
+    if (["Submitted", "InReview", "Approved"].includes(kycStatus)) return 4;
 
-    // Email verified -> Step 3 (upload docs)
+    // ✅ Rejected => user should re-upload (Step 3)
+    if (kycStatus === "Rejected") return 3;
+
+    // ✅ Email already verified => skip step 2
     if (emailVerified) {
-      // If docs uploaded -> Step 4
+      // If both docs exist, go to review/submit step
       if (hasIdentity && hasAddress) return 4;
       return 3;
     }
 
-    // Personal info saved -> Step 2 (email)
+    // ✅ Personal info saved => step 2
     if (kycStatus === "EmailPending") return 2;
 
-    // Default
+    // Default step 1
     return 1;
   };
 
@@ -63,7 +67,6 @@ export default function KYCVerification() {
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/kyc/status`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
-console.log("res",res.data.data.customer);
 
       const customer = res.data?.data?.customer;
       const docs = res.data?.data?.docs || [];
@@ -83,8 +86,7 @@ console.log("res",res.data.data.customer);
     fetchKycStatus();
   }, [fetchKycStatus]);
 
-  
-  const nextStep = () => setCurrentStep((s) => Math.min(s + 1, steps.length));
+  // ✅ Only allow BACK button navigation (forward should come from refresh after API calls)
   const prevStep = () => setCurrentStep((s) => Math.max(s - 1, 1));
 
   return (
@@ -109,9 +111,7 @@ console.log("res",res.data.data.customer);
             <div className="absolute top-6 left-0 right-0 h-[2px] bg-slate-700/50 -z-10">
               <div
                 className="h-full bg-blue-500 transition-all duration-500"
-                style={{
-                  width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`,
-                }}
+                style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
               />
             </div>
 
@@ -162,37 +162,19 @@ console.log("res",res.data.data.customer);
           ) : (
             <>
               {currentStep === 1 && (
-                <PersonalInfo
-                  onNext={nextStep} // optional (recommended: remove usage in child)
-                  onRefresh={fetchKycStatus}
-                  kycData={kycData}
-                />
+                <PersonalInfo onRefresh={fetchKycStatus} kycData={kycData} />
               )}
 
               {currentStep === 2 && (
-                <EmailVerification
-                  onNext={nextStep} // optional
-                  onBack={prevStep}
-                  onRefresh={fetchKycStatus}
-                  kycData={kycData}
-                />
+                <EmailVerification onNext={() => setCurrentStep(3)} onBack={prevStep} onRefresh={fetchKycStatus} kycData={kycData} />
               )}
 
               {currentStep === 3 && (
-                <UploadDocuments
-                  onNext={nextStep} // optional
-                  onBack={prevStep}
-                  onRefresh={fetchKycStatus}
-                  kycData={kycData}
-                />
+                <UploadDocuments onBack={prevStep} onRefresh={fetchKycStatus} kycData={kycData} />
               )}
 
               {currentStep === 4 && (
-                <SubmitForReview
-                  onBack={prevStep}
-                  onRefresh={fetchKycStatus}
-                  kycData={kycData}
-                />
+                <SubmitForReview onBack={prevStep} onRefresh={fetchKycStatus} kycData={kycData} />
               )}
             </>
           )}
