@@ -72,7 +72,7 @@ export default function SubmitForReview({ onBack, onRefresh, kycData }: SubmitFo
   // ✅ Status screens
   if (approved) {
     return (
-      <div className="w-full max-w-3xl bg-slate-800/30 border border-slate-700/50 rounded-lg p-8">
+      <div className="w-full max-w-xl bg-slate-800/30 border border-slate-700/50 rounded-lg p-8">
         <div className="text-center py-12">
           <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-12 h-12 text-green-400" />
@@ -91,7 +91,7 @@ export default function SubmitForReview({ onBack, onRefresh, kycData }: SubmitFo
 
   if (alreadySubmitted) {
     return (
-      <div className="w-full max-w-3xl bg-slate-800/30 border border-slate-700/50 rounded-lg p-8">
+      <div className="w-full max-w-xl bg-slate-800/30 border border-slate-700/50 rounded-lg p-8">
         <div className="text-center py-12">
           <div className="w-20 h-20 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-12 h-12 text-blue-400" />
@@ -122,7 +122,7 @@ export default function SubmitForReview({ onBack, onRefresh, kycData }: SubmitFo
 
   if (rejected) {
     return (
-      <div className="w-full max-w-3xl bg-slate-800/30 border border-slate-700/50 rounded-lg p-8">
+      <div className="w-full max-w-xl bg-slate-800/30 border border-slate-700/50 rounded-lg p-8">
         <div className="text-center py-10">
           <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <XCircle className="w-12 h-12 text-red-400" />
@@ -150,7 +150,7 @@ export default function SubmitForReview({ onBack, onRefresh, kycData }: SubmitFo
 
   // ✅ Default: Review + Submit screen
   return (
-    <div className="w-full max-w-3xl bg-slate-800/30 border border-slate-700/50 rounded-lg p-8">
+    <div className="w-full max-w-xl bg-slate-800/30 border border-slate-700/50 rounded-lg p-8">
       <div className="mb-8">
         <h2 className="text-2xl font-semibold text-white mb-2">
           Step 4: Submit for Review

@@ -141,7 +141,7 @@ export default function UploadDocuments({ onBack, onRefresh, kycData }: UploadDo
       return;
     }
 
-    const idType = data.idType?.value || "IDCard";
+    const idType =  "IDCard";
 
     try {
       setUploading(true);
@@ -230,7 +230,6 @@ export default function UploadDocuments({ onBack, onRefresh, kycData }: UploadDo
             <div>
               <p className="text-white font-medium">{doc.originalName || `Existing ${label} uploaded`}</p>
               <p className="text-sm text-slate-400">Verified: {doc.verified ? "Yes" : "No"}</p>
-              <p className="text-xs text-amber-400 mt-1">Rejected — you can remove and upload again.</p>
             </div>
           </div>
 
@@ -266,7 +265,7 @@ export default function UploadDocuments({ onBack, onRefresh, kycData }: UploadDo
   };
 
   return (
-    <div className="w-full max-w-3xl bg-card border rounded-lg p-8">
+    <div className="w-full max-w-xl bg-card border rounded-lg p-8">
       <div className="mb-8">
         <PageTitle className="mb-2">Step 3: Upload Documents</PageTitle>
         <BodyText>Please upload clear copies of your identification documents.</BodyText>
@@ -275,15 +274,6 @@ export default function UploadDocuments({ onBack, onRefresh, kycData }: UploadDo
       <Form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {!!error && <p className="text-sm text-red-400">{error}</p>}
 
-        <div className="my-2">
-          <label className="block font-medium mb-2">ID Document Type</label>
-          <Select
-            options={idTypeOptions}
-            value={form.watch("idType")}
-            onChange={(opt: any) => form.setValue("idType", opt)}
-            isSearchable={false}
-          />
-        </div>
 
         {/* Government ID */}
         <div>

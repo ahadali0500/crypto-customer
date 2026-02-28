@@ -91,8 +91,11 @@ const [is2FAEnabled, setIs2FAEnabled] = useState(false);
     </div>
 
     <div className="space-y-5">
-
-      {/* Current Password */}
+{passwordError && (
+  <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+    {passwordError}
+  </div>
+)}
      <div>
    <label className="text-sm font-medium text-gray-500 dark:text-gray-300 flex items-center gap-2 mb-1">
     Current Password
@@ -102,13 +105,13 @@ const [is2FAEnabled, setIs2FAEnabled] = useState(false);
       type={showOldPassword ? "text" : "password"}
       placeholder="Enter current password"
       value={passwordData.oldPassword}
-      onChange={(e) =>
-        setPasswordData({
-          ...passwordData,
-          oldPassword: e.target.value,
-        })
-      }
-      // className="w-full bg-[#283140] border border-gray-600 text-white placeholder-gray-400 rounded-lg px-4 py-2 pr-10"
+      
+
+      onChange={(e) => {
+  setPasswordError("");
+  setPasswordData({ ...passwordData, oldPassword: e.target.value });
+}}
+      className="w-full bg-[#283140] border border-gray-600 text-white placeholder-gray-400 rounded-lg px-4 py-2 pr-10"
     />
     <button
       type="button"

@@ -41,8 +41,7 @@ export default function KYCVerification() {
     // ✅ Approved / InReview / Submitted => show status page (Step 4)
     if (["Submitted", "InReview", "Approved"].includes(kycStatus)) return 4;
 
-    // ✅ Rejected => user should re-upload (Step 3)
-    if (kycStatus === "Rejected") return 3;
+    
 
     // ✅ Email already verified => skip step 2
     if (emailVerified) {
