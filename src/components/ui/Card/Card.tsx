@@ -64,7 +64,7 @@ const Card = (props: CardProps) => {
 
     const cardClass = classNames(
         'card',
-        'bg-white dark:bg-[#18212F] max-w-3xl w-full border border-slate-500',
+        'bg-white dark:bg-[#18212F] max-w-xl w-full border border-slate-500',
         className,
         bordered ? `card-border` : `card-shadow`,
         clickable && 'cursor-pointer user-select-none',
