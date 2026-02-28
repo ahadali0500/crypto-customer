@@ -13,15 +13,16 @@ import Document from './Document';
 import axios from 'axios';
 import Password from './Password';
 import Balance from './Balance';
+import Card from '@/components/ui/Card/Card';
 
 // Define a type for user
 interface UserType {
-  name: string;
-  email: string;
-  city?: string;
-  country?: string;
-  profileImageUrl?: string;
-  // Add other user properties if needed
+    name: string;
+    email: string;
+    city?: string;
+    country?: string;
+    profileImageUrl?: string;
+    // Add other user properties if needed
 }
 
 const User = () => {
@@ -29,7 +30,7 @@ const User = () => {
     const [balance, setBalance] = useState();
     const [imageError, setImageError] = useState(false);
     const [loading, setLoading] = useState(true);
-    
+
     const params = useParams();
     const slug = params?.slug || '';
     const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
@@ -52,7 +53,7 @@ const User = () => {
         }
     }
 
-   
+
     const fetchBalance = async () => {
         try {
             const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/user/auth/balance`, {
@@ -89,45 +90,42 @@ const User = () => {
 
     return (
         <div className=''>
-            <div className='flex flex-col lg:flex-row gap-6 bg-gradient-to-b from-purple-700 to-purple-900 rounded-2xl p-8'>
+            <Card className='flex max-w-full flex-col lg:flex-row items-center justify-center'>
                 {/* Left Section */}
-                <div className='w-full  flex justify-center items-center'>
+                <div className='w-full flex justify-center items-center'>
                     <div className='flex flex-col justify-center sm:flex-row items-center gap-4'>
-                        {/* Profile Image with proper error handling */}
+                        {/* Profile Image */}
                         <div className='w-20 h-20 rounded-full bg-amber-50 flex items-center justify-center overflow-hidden'>
                             {user?.profileImageUrl && !imageError ? (
-                                <Image 
-                                    // src={user.profileImageUrl} 
+                                <Image
                                     src={user?.profileImageUrl}
-                                    width={80} 
-                                    height={80} 
-                                    className='rounded-full object-cover' 
+                                    width={80}
+                                    height={80}
+                                    className='rounded-full object-cover'
                                     alt={user.name || 'User profile'}
                                     onError={() => setImageError(true)}
                                     priority
                                 />
                             ) : (
-                                // Fallback when no image or image fails to load
                                 <div className="w-full h-full bg-purple-200 flex items-center justify-center text-purple-700 font-bold text-2xl">
                                     {user?.name ? user?.name.charAt(0).toUpperCase() : 'U'}
                                 </div>
                             )}
                         </div>
-                        <div className='text-white space-y-2 text-center sm:text-left'>
+                        <div className='space-y-2 text-center sm:text-left'>
                             <div className='text-2xl sm:text-3xl font-semibold'>
                                 {user?.name || 'Unknown User'}
                             </div>
                             <div className='text-sm sm:text-base'>
                                 {user?.email || 'No email provided'}
                             </div>
-                            
                             {(user?.city || user?.country) && (
                                 <div className='flex flex-col sm:flex-row items-center sm:gap-3 gap-1'>
                                     <div className='flex items-center gap-1 cursor-pointer hover:opacity-80'>
                                         <IoLocationOutline size={20} />
                                         <span>
-                                            {user?.city ? user.city : ''} 
-                                            {user?.city && user.country ? ', ' : ''} 
+                                            {user?.city ? user.city : ''}
+                                            {user?.city && user.country ? ', ' : ''}
                                             {user?.country ? user.country : ''}
                                         </span>
                                     </div>
@@ -136,12 +134,10 @@ const User = () => {
                         </div>
                     </div>
                 </div>
-
-             
-            </div>
+            </Card>
 
             {/* Content start from here */}
-            <div className='mt-4'>
+            <Card className='mt-4 max-w-full p-0 overflow-hidden'>
                 <Tabs defaultValue="overview" className="w-full">
                     {/* Tab Headers */}
                     <TabList className=" border-b">
@@ -149,7 +145,7 @@ const User = () => {
                         <TabNav value="password" className='text-sm font-semibold'>Change Password</TabNav>
                         <TabNav value="documents" className='text-sm font-semibold'>Documents</TabNav>
                         {/* <TabNav value="balance" className='text-sm font-semibold'>Balance</TabNav> */}
-                       
+
                     </TabList>
 
                     {/* Tab Content */}
@@ -168,7 +164,7 @@ const User = () => {
                         <Balance />
                     </TabContent> */}
                 </Tabs>
-            </div>
+            </Card>
         </div>
     );
 };

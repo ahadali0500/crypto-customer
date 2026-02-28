@@ -5,6 +5,8 @@ import { toast } from 'react-toastify';
 import User from './page';
 import { BiSolidUser } from 'react-icons/bi';
 import {LocationEdit, MailIcon, MapPinHouse, PhoneIcon, SaveIcon, User2} from "lucide-react"
+import { FaCity } from 'react-icons/fa';
+import Card from '@/components/ui/Card/Card';
 interface UserData {
   id: number;
   name: string;
@@ -249,7 +251,7 @@ export const Overview = () => {
      <div className="max-w-6xl mx-auto mt-6 space-y-6 font-sans text-white">
 
   {/* Page Header */}
-  <div className="flex items-start gap-3">
+  <div className="flex items-center justify-center gap-3">
     <div className="bg-indigo-600 p-2 rounded-lg">
       ⚙️
     </div>
@@ -262,7 +264,7 @@ export const Overview = () => {
   </div>
 
   {/* Profile Information Card */}
-  <div className="bg-[#18212F] border border-slate-500 rounded-xl p-6 shadow-md">
+  <Card className="max-w-3xl mx-auto">
 
     {/* Card Header */}
     <div className="flex items-start gap-3 mb-6">
@@ -282,13 +284,13 @@ export const Overview = () => {
 
       {/* Email (Read Only) */}
       <div>
-        <label className="text-sm font-medium text-gray-300 flex items-center gap-2 mb-1">
+        <label className="text-sm font-medium text-gray-500 dark:text-gray-300 flex items-center gap-2 mb-1">
          <MailIcon className="w-4 h-4" /> Email Address
         </label>
         <Input
           value={userData.email}
           disabled
-          className="bg-[#283140] border border-slate-500 text-gray-400"
+          // className="bg-[#283140] border border-slate-500 text-gray-400"
         />
         <p className="text-xs text-slate-500 mt-1">
           Email cannot be changed for security reasons
@@ -297,53 +299,53 @@ export const Overview = () => {
 
       {/* Full Name */}
       <div>
-        <label className="text-sm font-medium text-gray-300 flex items-center gap-2 mb-1">
+       <label className="text-sm font-medium text-gray-500 dark:text-gray-300 flex items-center gap-2 mb-1">
             <User2 className="w-4 h-4" /> Full Name
         </label>
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter full name"
-          className="bg-[#283140] border border-slate-500"
+          // className="bg-[#283140] border border-slate-500"
         />
       </div>
 
       {/* Phone */}
       <div>
-        <label className="text-sm font-medium text-gray-300 flex items-center gap-2 mb-1">
+        <label className="text-sm font-medium text-gray-500 dark:text-gray-300 flex items-center gap-2 mb-1">
          <PhoneIcon className="w-4 h-4" />  Phone Number
         </label>
         <Input
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="+1234567890"
-          className="bg-[#1b2333] border border-gray-700"
+          // className="bg-[#1b2333] border border-gray-700"
         />
       </div>
 
       {/* Country */}
       <div>
-        <label className="text-sm font-medium text-gray-300 mb-1 flex gap-2">
+       <label className="text-sm font-medium text-gray-500 dark:text-gray-300 flex items-center gap-2 mb-1">
           <MapPinHouse className="w-4 h-4" /> Country
         </label>
         <Input
           value={country}
           onChange={(e) => setCountry(e.target.value)}
           placeholder="Enter country"
-          className="bg-[#283140] border border-slate-500"
+          // className="bg-[#283140] border border-slate-500"
         />
       </div>
 
       {/* City */}
       <div>
-        <label className="text-sm font-medium text-gray-300 mb-1">
-          🏙️ City
+        <label className="text-sm font-medium text-gray-500 dark:text-gray-300 flex items-center gap-2 mb-1">
+          <FaCity className="w-4 h-4" /> City
         </label>
         <Input
           value={city}
           onChange={(e) => setCity(e.target.value)}
           placeholder="Enter city"
-          className="bg-[#283140] border border-slate-500"
+          // className="bg-[#283140] border border-slate-500"
         />
       </div>
 
@@ -359,7 +361,7 @@ export const Overview = () => {
       </div>
 
     </div>
-  </div>
+  </Card>
 </div>
 
 

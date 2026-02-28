@@ -14,6 +14,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useSessionContext } from '@/components/auth/AuthProvider/SessionContext'
 import { IoCheckmarkCircle, IoCopyOutline } from 'react-icons/io5'
+import Card from '@/components/ui/Card/Card'
 
 type Currency = {
     id: number
@@ -655,13 +656,13 @@ const Page = () => {
     return (
         <>
             <div className="flex flex-col items-center w-full px-4 py-6">
-                <div className={`mx-auto rounded-2xl dark:bg-[#18212F] border border-[#2A3648] overflow-hidden font-inter ${!showStatus ? 'w-full lg:w-[520px] p-6 space-y-5' : 'w-full lg:w-[820px]'}`}>
+                <Card className={`mx-auto overflow-hidden font-inter ${!showStatus ? 'w-full lg:w-[520px]' : 'w-full lg:w-[820px]'}`}>
                     {!showStatus ? (
-                        <>
-                            <h2 className="text-lg font-bold mb-4">Deposit Form</h2>
+                        <div className="space-y-5">
+                            <h2 className="text-lg font-bold">Deposit Form</h2>
 
                             {error && (
-                                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                                     {error}
                                 </div>
                             )}
@@ -673,12 +674,12 @@ const Page = () => {
                                         <span className="text-xs text-blue-400 ml-2">(Loading rates...)</span>
                                     )}
                                 </label>
-                                <div className="rounded-xl border border-[#2A3648] bg-[#121A26]">
+                                <div className="rounded-xl border border-themed bg-gray-100 dark:bg-[#121A26]">
                                     <Dropdown
-                                        title={selectedCurrency ? `${selectedCurrency.fullName} ` : "Select Currency"}
+                                        title={selectedCurrency ? `${selectedCurrency.fullName}` : "Select Currency"}
                                         trigger="click"
                                         placement="bottom-start"
-                                        toggleClassName="w-full !bg-transparent !border-0 !shadow-none !text-white px-4 py-3"
+                                        toggleClassName="w-full !bg-transparent !border-0 !shadow-none dark:!text-white px-4 py-3"
                                         disabled={isLoadingRates}
                                     >
                                         {currencies.map((currency) => (
@@ -688,7 +689,7 @@ const Page = () => {
                                                 eventKey={currency.id.toString()}
                                                 onSelect={handleCurrencySelect}
                                             >
-                                                {currency.fullName} 
+                                                {currency.fullName}
                                                 {currency.rate > 0 && (
                                                     <span className="text-xs text-gray-400"> - ${currency.rate.toLocaleString()}</span>
                                                 )}
@@ -707,7 +708,7 @@ const Page = () => {
                                     step="0.01"
                                     value={usdAmount}
                                     onChange={handleUsdAmountChange}
-                                    className="w-full h-12 rounded-xl bg-[#121A26] text-white border border-[#2A3648] px-4"
+                                    className="w-full h-12"
                                 />
                             </div>
 
@@ -722,12 +723,12 @@ const Page = () => {
                                     placeholder="0.00000000"
                                     value={cryptoAmount}
                                     readOnly
-                                    className="w-full h-12 rounded-xl bg-[#121A26] text-white border border-[#2A3648] px-4"
+                                    className="w-full h-12"
                                 />
                             </div>
 
                             {selectedCurrency && selectedCurrency.rate > 0 && (
-                                <div className="text-sm dark:text-white/60">
+                                <div className="text-sm text-gray-500 dark:text-white/60">
                                     Rate: 1 {selectedCurrency.shortName} = ${selectedCurrency.rate.toLocaleString()}
                                 </div>
                             )}
@@ -741,7 +742,7 @@ const Page = () => {
                             >
                                 {loading ? "Processing..." : "Deposit"}
                             </Button>
-                        </>
+                        </div>
                     ) : (
                         <div className="flex flex-row gap-0 min-h-[320px]">
                             {/* LEFT — QR Panel */}
@@ -866,10 +867,10 @@ const Page = () => {
                             </div>
                         </div>
                     )}
-                </div>
+                </Card>
             </div>
 
-            <div className=" p-6 mt-10 shadow-sm bg-white dark:bg-[#18212F] rounded-lg">
+            <Card className=" p-6 mt-10 max-w-full">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-bold">Recent Transactions</h2>
                     <div className="w-64">
@@ -900,7 +901,7 @@ const Page = () => {
                         onSort={handleSort}
                     />
                 </div>
-            </div>
+            </Card>
 
             {showModal && (
                 <Dialog onClose={handleModalClose} isOpen width={400}>

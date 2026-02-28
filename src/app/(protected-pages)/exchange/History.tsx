@@ -7,7 +7,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui';
-
+import Card from "@/components/ui/Card/Card";
 type Transaction = {
   id: string;
   type: string;
@@ -345,7 +345,7 @@ const ExchangeHistory = () => {
         <Graph />
       </div> */}
 
-      <div className='p-6 shadow-sm bg-white dark:bg-[#18212F] border border-1 border-gray-600 rounded-lg'>
+     <Card className=' max-w-full'>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Exchange History</h2>
           <div className="flex gap-2">
@@ -383,7 +383,7 @@ const ExchangeHistory = () => {
             onSort={handleSort}
           />
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

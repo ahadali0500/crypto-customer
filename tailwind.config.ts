@@ -83,6 +83,9 @@ const config: Config = {
 				'gray-900': 'var(--gray-900)',
 				'gray-950': 'var(--gray-950)',
 			},
+			borderColor: {
+				themed: 'var(--border)',
+			},
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			typography: (theme: any) => ({
 				DEFAULT: {
@@ -100,8 +103,8 @@ const config: Config = {
 		},
 	},
 	plugins: [
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        require('@tailwindcss/typography'),
+		// eslint-disable-next-line @typescript-eslint/no-require-imports
+		require('@tailwindcss/typography'),
 		require('tailwind-scrollbar'),
 	],
 };

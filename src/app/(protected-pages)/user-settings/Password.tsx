@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
 import {Switcher} from "@/components/ui";
 import { Smartphone } from "lucide-react";
+import Card from "@/components/ui/Card/Card";
+import { Key } from "lucide-react";
 interface PasswordData {
     oldPassword: string;
     newPassword: string;
@@ -71,15 +73,15 @@ const [is2FAEnabled, setIs2FAEnabled] = useState(false);
 
     return (
      <>
-  <div className="mt-5 max-w-2xl mx-auto bg-[#18212F] p-6 rounded-xl border border-slate-500 shadow-md">
+  <Card className="mt-5 max-w-2xl mx-auto">
     
     {/* Header */}
-    <div className="flex items-start gap-3 mb-6">
+    <div className="flex items-center gap-3 mb-6">
       <div className="bg-blue-600/20 p-2 rounded-lg">
-        🔑
+        <Key className="text-blue-400" size={20} />
       </div>
       <div>
-        <h2 className="text-lg font-semibold text-white">
+        <h2 className="text-lg font-semibold">
           Change Password
         </h2>
         <p className="text-sm text-gray-400">
@@ -92,7 +94,7 @@ const [is2FAEnabled, setIs2FAEnabled] = useState(false);
 
       {/* Current Password */}
      <div>
-  <label className="block mb-2 text-sm font-medium text-gray-300">
+   <label className="text-sm font-medium text-gray-500 dark:text-gray-300 flex items-center gap-2 mb-1">
     Current Password
   </label>
   <div className="relative">
@@ -106,7 +108,7 @@ const [is2FAEnabled, setIs2FAEnabled] = useState(false);
           oldPassword: e.target.value,
         })
       }
-      className="w-full bg-[#283140] border border-gray-600 text-white placeholder-gray-400 rounded-lg px-4 py-2 pr-10"
+      // className="w-full bg-[#283140] border border-gray-600 text-white placeholder-gray-400 rounded-lg px-4 py-2 pr-10"
     />
     <button
       type="button"
@@ -120,7 +122,7 @@ const [is2FAEnabled, setIs2FAEnabled] = useState(false);
 
       {/* New Password */}
      <div>
-  <label className="block mb-2 text-sm font-medium text-gray-300">
+   <label className="text-sm font-medium text-gray-500 dark:text-gray-300 flex items-center gap-2 mb-1">
     New Password
   </label>
   <div className="relative">
@@ -134,7 +136,7 @@ const [is2FAEnabled, setIs2FAEnabled] = useState(false);
           newPassword: e.target.value,
         })
       }
-      className="w-full bg-[#283140] border border-gray-600 text-white placeholder-gray-400 rounded-lg px-4 py-2 pr-10"
+      // className="w-full bg-[#283140] border border-gray-600 text-white placeholder-gray-400 rounded-lg px-4 py-2 pr-10"
     />
     <button
       type="button"
@@ -148,7 +150,7 @@ const [is2FAEnabled, setIs2FAEnabled] = useState(false);
       {/* Confirm Password */}
       
 <div>
-  <label className="block mb-2 text-sm font-medium text-gray-300">
+   <label className="text-sm font-medium text-gray-500 dark:text-gray-300 flex items-center gap-2 mb-1">
     Confirm New Password
   </label>
   <div className="relative">
@@ -162,7 +164,7 @@ const [is2FAEnabled, setIs2FAEnabled] = useState(false);
           confirmPassword: e.target.value,
         })
       }
-      className="w-full bg-[#283140] border border-gray-600 text-white placeholder-gray-400 rounded-lg px-4 py-2 pr-10"
+      // className="w-full bg-[#283140] border border-gray-600 text-white placeholder-gray-400 rounded-lg px-4 py-2 pr-10"
     />
     <button
       type="button"
@@ -174,7 +176,7 @@ const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   </div>
 </div>
       {/* Tip Box */}
-      <div className="bg-[#283140] border border-gray-700 text-sm text-gray-400 p-3 rounded-lg">
+      <div className=" border border-slate-700 text-sm text-gray-400 p-3 rounded-lg">
         <span className="font-medium text-gray-300">Tip:</span> Use a strong password with a mix of letters, numbers, and symbols.
       </div>
 
@@ -194,8 +196,8 @@ const [is2FAEnabled, setIs2FAEnabled] = useState(false);
         </Button>
       </div>
     </div>
-  </div>
-  <div className="mt-6 max-w-2xl mx-auto bg-[#18212F] p-6 rounded-xl border border-slate-500 shadow-md">
+  </Card>
+  <Card className="mt-6 max-w-2xl mx-auto">
   
   {/* Header */}
   <div className="flex items-start justify-between gap-4">
@@ -204,10 +206,10 @@ const [is2FAEnabled, setIs2FAEnabled] = useState(false);
         <Smartphone className="text-blue-400" size={20} />
       </div>
       <div>
-        <h2 className="text-lg font-semibold text-white">
+        <h2 className="text-lg font-semibold">
           Two-Factor Authentication (2FA)
         </h2>
-        <p className="text-sm text-gray-400">
+        <p className="text-sm">
           Add an extra layer of security by enabling 2FA. This requires a verification
           code in addition to your password when logging in.
         </p>
@@ -237,7 +239,7 @@ const [is2FAEnabled, setIs2FAEnabled] = useState(false);
       <li>SMS Verification (if phone number is verified)</li>
     </ul>
   </div>
-</div>
+</Card>
 </>
     )
 }

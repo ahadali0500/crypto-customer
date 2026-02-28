@@ -18,7 +18,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { debounce } from 'lodash';
 import ExchangeHistory from './History';
-import { Card } from '@/components/ui/card';
+import Card from "@/components/ui/Card/Card";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface Currency {
@@ -580,17 +580,11 @@ const Page = () => {
 
   // ─── Render ────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen text-white">
+    <div className="min-h-screen">
       {/* ── Page Header ─────────────────────────────────────── */}
       <div className="px-4 sm:px-6 pt-6 sm:pt-8 pb-4 max-w-[1200px] mx-auto">
         <div className="flex items-start sm:items-center gap-3 sm:gap-4">
 
-          <button
-            type="button"
-            className="text-[#8B95A3] hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5"
-          >
-            <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
-          </button>
 
           <div
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -612,39 +606,28 @@ const Page = () => {
       </div>
 
       <div className="px-6 max-w-[1200px] mx-auto">
-        {/* ── KYC Banner ─────────────────────────────────────── */}
-        <div className="mb-6 flex items-center gap-3 px-4 py-3 rounded-xl border border-[#B45309]/40 bg-[#451A03]/30">
-          <Info size={16} className="text-[#F59E0B] flex-shrink-0" />
-          <p className="text-sm text-[#FCD34D]">
-            Complete KYC verification to enable fiat conversions.{' '}
-            <a href="#" className="underline font-medium text-[#FBBF24] hover:text-white transition-colors">
-              Verify now
-            </a>
-          </p>
-        </div>
-
         {/* ── Locked / Available Toggle ───────────────────────── */}
-        <div className="flex items-center gap-1 mb-6 border border-[#2A3548] rounded-xl p-1 w-fit">
+        <Card className="flex items-center gap-1 mb-6 max-w-fit">
           {['available', 'locked'].map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => handleTabChange(tab)}
               className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${activeTab === tab
-                  ? 'bg-[#6366f1] text-white shadow-lg shadow-[#6366f1]/20'
-                  : 'text-[#8B95A3]'
+                ? 'bg-[#6366f1] text-white shadow-lg shadow-[#6366f1]/20'
+                : 'text-[#8B95A3]'
                 }`}
             >
               {tab}
             </button>
           ))}
-        </div>
+        </Card>
 
         {/* ── Main Two-Column Layout ──────────────────────────── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
           {/* ── LEFT: Conversion Card ───────────────────────────── */}
-          <Card className="w-full lg:flex-1 border border-slate-200 dark:border-[#1F2D40] rounded-2xl bg-white dark:bg-transparent">
+          <Card className="w-full lg:flex-1">
             <div className="p-6">
 
               {/* You Send Block */}
@@ -701,11 +684,11 @@ const Page = () => {
               )}
 
               {/* Swap Icon */}
-              <div className="flex items-center justify-center my-4">
+              {/* <div className="flex items-center justify-center my-4">
                 <div className="w-10 h-10 rounded-full bg-[#1E293B] border border-[#334155] flex items-center justify-center hover:border-[#6366f1]/60 hover:bg-[#1E1B4B] transition-all cursor-pointer group shadow-lg">
                   <ArrowUpDown size={16} className="text-[#94A3B8] group-hover:text-[#818CF8] transition-colors" />
                 </div>
-              </div>
+              </div> */}
 
               {/* You Receive Block */}
               <div className="mb-6">
@@ -747,8 +730,8 @@ const Page = () => {
                           type="button"
                           onClick={() => { setFeeBundleError(''); setSelectedFeeBundle(bundle); }}
                           className={`p-3 rounded-xl text-left text-sm transition-all border-2 ${isSelected
-                              ? 'bg-[#6366f1]/20 border-[#6366f1] text-white'
-                              : 'bg-[#0F172A] border-[#2A3548] text-[#94A3B8] hover:border-[#6366f1]/40'
+                            ? 'bg-[#6366f1]/20 border-[#6366f1] text-white'
+                            : 'bg-[#0F172A] border-[#2A3548] text-[#94A3B8] hover:border-[#6366f1]/40'
                             }`}
                         >
                           <div className="font-semibold">{bundle.name} ({bundle.value}%)</div>
@@ -767,7 +750,7 @@ const Page = () => {
                 onClick={handleExchangeClick}
                 disabled={isSubmitDisabled}
                 className={`w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${isSubmitDisabled
-                    ? 'bg-[#1F2937] text-[#4B5563] cursor-not-allowed'
+                    ? 'bg-neutral-100 dark:bg-[#1F2937] text-neutral-400 dark:text-[#4B5563] cursor-not-allowed border border-neutral-200 dark:border-[#374151]'
                     : 'text-white shadow-lg shadow-[#7C3AED]/20 hover:opacity-90 active:scale-[0.99]'
                   }`}
                 style={
@@ -793,7 +776,7 @@ const Page = () => {
           <div className="w-full lg:w-[340px] flex flex-col gap-4">
 
             {/* Conversion Details Card */}
-            <Card className=" border border-[#1F2D40] rounded-2xl p-5">
+            <Card >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <TrendingUp size={16} className="text-[#4ADE80]" />
@@ -853,7 +836,7 @@ const Page = () => {
             </Card>
 
             {/* Why Convert With Us Card */}
-            <Card className="border border-[#1F2D40] p-5">
+            <Card>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-6 h-6 rounded-lg bg-[#4ADE80]/10 flex items-center justify-center">
                   <span className="text-[#4ADE80] text-xs">$</span>

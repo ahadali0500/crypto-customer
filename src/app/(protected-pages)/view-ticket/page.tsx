@@ -7,6 +7,7 @@ import DataTable, { ColumnDef, OnSortParam } from '@/components/shared/DataTable
 import { Button, Input, Spinner } from '@/components/ui'
 import { FaEye } from "react-icons/fa";
 import { FaDownload, FaPrint } from 'react-icons/fa6'
+import Card from '@/components/ui/Card/Card'
 
 // Ticket type definition
 type Ticket = {
@@ -285,13 +286,13 @@ const TicketTablePage = () => {
         </div>
       )}
 
-      <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#18212F] border border-1 border-gray-600 rounded-lg">
+      <Card className="max-w-full mt-6">
         <div className="rounded-lg">
           <div className='flex flex-row items-center justify-between mb-4'>
 
           <h2 className="text-xl font-semibold mb-4">Tickets</h2>
           <div>
-            <Button className='bg-primary rounded-lg  dark:text-white' size='sm' variant='plain' onClick={()=> router.push('/create-ticket')}>Create Ticket</Button>
+            <Button className='bg-primary rounded-lg  text-white' size='sm' variant='plain' onClick={()=> router.push('/create-ticket')}>Create Ticket</Button>
           </div>
           </div>
 
@@ -346,7 +347,7 @@ const TicketTablePage = () => {
             </div>
           )}
         </div>
-      </div>
+      </Card>
     </div>
   )
 }

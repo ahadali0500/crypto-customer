@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import classNames from "classnames"
 import { Input } from "@/components/ui"
+import Card from "@/components/ui/Card/Card"
 
 
 // Main Card Payment Component
@@ -133,7 +134,7 @@ export default function CardPaymentPage() {
       <div className="max-w-2xl mx-auto p-6">
 
         {/* Main Card */}
-        <div className="bg-white dark:bg-[#18212F] rounded-xl shadow-lg border border-slate-100 dark:border-gray-700 p-4">
+        <Card>
           {/* Header */}
           <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-8">Enter payment information</h1>
 
@@ -161,7 +162,7 @@ export default function CardPaymentPage() {
                   invalid={!!errors.amount}
                  
                   prefix="$"
-                   className="text-white"
+                  //  className="text-white"
                 />
                 {errors.amount && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.amount}</p>}
               </div>
@@ -329,7 +330,7 @@ export default function CardPaymentPage() {
               </button>
             </div>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   )

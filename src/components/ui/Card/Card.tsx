@@ -62,13 +62,13 @@ const Card = (props: CardProps) => {
         ...footer,
     }
 
-    const cardClass = classNames(
-        'card',
-        'bg-white dark:bg-[#18212F] max-w-3xl w-full border border-slate-500',
-        className,
-        bordered ? `card-border` : `card-shadow`,
-        clickable && 'cursor-pointer user-select-none',
-    )
+   const cardClass = classNames(
+    'card',
+    'bg-white dark:bg-[#18212F] max-w-3xl w-full border border-[--border]',
+    className,
+    bordered ? `card-border` : `card-shadow`,
+    clickable && 'cursor-pointer user-select-none',
+)
 
     const cardBodyClasss = classNames('card-body', bodyClass)
     const cardHeaderClass = classNames(

@@ -12,6 +12,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { debounce } from 'lodash';
 import DataTable, { ColumnDef, OnSortParam } from '@/components/shared/DataTable';
+import Card from '@/components/ui/Card/Card';
 
 // ==================== TYPES ====================
 interface Currency {
@@ -853,7 +854,7 @@ useEffect(() => {
             {/* Withdrawal Form */}
             <div className="p-5">
                 <div className="flex items-center justify-center">
-                    <div className="w-full md:w-[60%] p-6 shadow-sm bg-white dark:bg-[#18212F] rounded-lg border border-1 border-gray-600">
+                    <Card className="w-full md:w-[60%]">
                         <h1 className="text-xl font-semibold mb-4">Crypto Withdrawal</h1>
 
                         <Tabs defaultValue="available" onChange={handleTabChange}>
@@ -1136,7 +1137,7 @@ useEffect(() => {
                                 </TabContent>
                             ))}
                         </Tabs>
-                    </div>
+                    </Card>
                 </div>
             </div>
 
@@ -1151,7 +1152,7 @@ useEffect(() => {
             </Dialog>
 
             {/* Withdrawal History Table */}
-            <div className="p-6 shadow-sm bg-white dark:bg-[#18212F] rounded-lg m-5 border border-1 border-gray-600">
+            <Card className="p-6 max-w-full">
                 <div className="text-xl mb-4 font-semibold">Withdrawal History</div>
                 {tableLoading ? (
                     <div className="flex justify-center items-center h-64">
@@ -1169,7 +1170,7 @@ useEffect(() => {
                         noData={!tableLoading && withdrawals.length === 0}
                     />
                 )}
-            </div>
+            </Card>
         </>
     );
 };

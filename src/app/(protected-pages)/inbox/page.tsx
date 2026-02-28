@@ -147,7 +147,7 @@ const EmptyUsersList = () => (
   <div className="flex flex-col items-center justify-center h-64 p-8">
     <Users className="h-16 w-16 text-gray-400 mb-4" />
     <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">No conversations</h3>
-    <p className="text-sm text-gray-500 text-center">Start a conversation to begin messaging</p>
+    <p className="text-sm  text-center">Start a conversation to begin messaging</p>
   </div>
 );
 
@@ -163,7 +163,7 @@ const SelectUserPrompt = () => (
   <div className="flex flex-col items-center justify-center h-full p-8">
     <Inbox className="h-20 w-20 text-gray-400 mb-4" />
     <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">Select a conversation</h3>
-    <p className="text-sm text-gray-500 text-center">Choose a conversation to start messaging</p>
+    <p className="text-sm text-center">Choose a conversation to start messaging</p>
   </div>
 );
 

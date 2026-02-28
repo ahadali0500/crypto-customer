@@ -10,7 +10,8 @@ import axios from 'axios'
 import { FaDownload, FaPrint, FaChevronDown } from 'react-icons/fa6'
 import { toast } from 'react-toastify'
 import { useSessionContext } from '@/components/auth/AuthProvider/SessionContext'
-
+import Card from '@/components/ui/Card/Card'
+import Select from '@/components/ui/Select'
 type Currency = {
   id: number
   shortName: string
@@ -428,42 +429,34 @@ const InvoiceTable = () => {
     },
   ]
 
+  const statusOptions = [
+  { value: 'Pending', label: 'Pending' },
+  { value: 'Paid', label: 'Paid' },
+  { value: 'Failed', label: 'Failed' },
+]
+
   return (
     <>
-   <div className=" p-6 shadow-sm bg-white dark:bg-[#18212F] border border-gray-600 border-1 rounded-lg">
+   <Card className="max-w-full">
   {/* Header */}
   <div className="flex flex-col xs:flex-row  xs:items-center justify-between gap-4">
     <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Invoices</h2>
 
     {/* Status Selector + Bulk Update */}
     <div className="flex flex-row items-center gap-4">
-      <div className='flex flex-row items-center gap-3'>
-        <label className="block sm:block hidden text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Select Status:
-        </label>
-        <select
-          value={bulkStatus}
-          onChange={(e) => setBulkStatus(e.target.value as 'Pending' | 'Paid' | 'Failed')}
-          className="border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm rounded-md px-4 py-2 w-48"
-        >
-          <option value="Pending">Pending</option>
-          <option value="Paid">Paid</option>
-          <option value="Failed">Failed</option>
-        </select>
-      </div>
-
-      <div className=''>
-        <Button
-        size="xs"
-        variant="solid"
-        className="w-full sm:w-auto font-normal rounded-lg"
-        onClick={handleBulkStatusUpdate}
-        disabled={bulkUpdateLoading || selectedInvoices.length === 0}
-      >
-        {bulkUpdateLoading ? 'Updating...' : `Update (${selectedInvoices.length})`}
-      </Button>
-      </div>
-    </div>
+  <div className="flex flex-row items-center gap-3">
+    <label className="hidden sm:block text-sm font-medium text-gray-700 dark:text-gray-300">
+      Select Status:
+    </label>
+    <Select
+      options={statusOptions}
+      value={statusOptions.find((opt) => opt.value === bulkStatus)}
+      onChange={(option) => setBulkStatus(option?.value as 'Pending' | 'Paid' | 'Failed')}
+      isSearchable={false}
+      className="w-48"
+    />
+  </div>
+</div>
   </div>
 
   {/* Divider */}
@@ -522,7 +515,7 @@ const InvoiceTable = () => {
       </div>
     )}
   </div>
-</div>
+</Card>
 
   {bulkUpdateLoading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-gray-900/80">

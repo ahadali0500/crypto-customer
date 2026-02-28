@@ -7,6 +7,7 @@ import TabNav from '@/components/ui/Tabs/TabNav';
 import TabContent from '@/components/ui/Tabs/TabContent';
 import { Spinner } from '@/components/ui';
 import axios from 'axios';
+import Card from '@/components/ui/Card/Card';
 
 // Type definitions
 interface BalanceData {
@@ -603,7 +604,7 @@ const Page = () => {
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span className="font-medium">{row.original.sellAsset?.shortName || 'N/A'}</span>
-          <span className="text-sm text-gray-500">{parseFloat(row.original.sellAmount).toFixed(6)}</span>
+          <span className="text-xs ">{parseFloat(row.original.sellAmount).toFixed(6)}</span>
         </div>
       ),
     },
@@ -613,7 +614,7 @@ const Page = () => {
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span className="font-medium">{row.original.buyAsset?.shortName || 'N/A'}</span>
-          <span className="text-sm text-gray-500">{parseFloat(row.original.buyAmount).toFixed(6)}</span>
+          <span className="text-xs">{parseFloat(row.original.buyAmount).toFixed(6)}</span>
         </div>
       ),
     },
@@ -909,7 +910,7 @@ const Page = () => {
     <>
       <div className="">
         {/* Tabs Section */}
-        <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#18212F] border border-1 border-gray-600 rounded-lg">
+        <Card className="max-w-full mt-6">
           <Tabs
             value={activeTab}
             onChange={setActiveTab}
@@ -934,7 +935,7 @@ const Page = () => {
               ))}
             </div>
           </Tabs>
-        </div>
+        </Card>
       </div>
 
       {/* Details Modal */}

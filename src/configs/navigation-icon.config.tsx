@@ -1,28 +1,27 @@
-import { IoTicketOutline,IoTicket } from "react-icons/io5";
-import { FaFileInvoiceDollar, FaRocketchat,FaShekelSign } from "react-icons/fa6";
+import { IoTicketOutline } from "react-icons/io5";
+import { FaRocketchat } from "react-icons/fa6";
 import type { JSX } from 'react'
-import { RiExchangeBoxFill } from "react-icons/ri";
-import { PiHandDeposit } from "react-icons/pi";
-import { PiHandWithdrawLight } from "react-icons/pi";
-import { MdDashboardCustomize, MdWorkHistory } from "react-icons/md";
-import { TbShield } from "react-icons/tb";
-import { Settings } from "lucide-react";
+import { RiExchangeBoxLine } from "react-icons/ri";
+import { PiHandDeposit, PiHandWithdrawLight } from "react-icons/pi";
+import { MdOutlineDashboardCustomize, MdOutlineWorkHistory } from "react-icons/md";
+import { TbShield, TbFileInvoice } from "react-icons/tb";
+import { Settings, MessageCircle } from "lucide-react";
+import { LuTicket } from "react-icons/lu";
 
 export type NavigationIcons = Record<string, JSX.Element>
 
 const navigationIcon: NavigationIcons = {
-    dashboard: <MdDashboardCustomize />,
-    exchange: <RiExchangeBoxFill />,
-    inbox: <FaRocketchat />,
+    dashboard: <MdOutlineDashboardCustomize />,
+    exchange: <RiExchangeBoxLine />,
+    inbox: <MessageCircle strokeWidth={1.5} />,
     deposit: <PiHandDeposit />,
-    ticket:<IoTicketOutline />,
-    Viewticket:<IoTicket />,
-    invoice: <FaFileInvoiceDollar />,
+    ticket: <LuTicket />,
+    Viewticket: <LuTicket />,
+    invoice: <TbFileInvoice />,
     withdrawal: <PiHandWithdrawLight />,
-    transaction: <MdWorkHistory />,
+    transaction: <MdOutlineWorkHistory />,
     kyc: <TbShield />,
-    setting: <Settings />,
-
+    setting: <Settings strokeWidth={1.5} />,
 }
 
 export default navigationIcon

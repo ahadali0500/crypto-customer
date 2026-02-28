@@ -7,6 +7,7 @@ import { Mail } from "lucide-react";
 import { Input } from "@/components/ui";
 import { BodyText, SectionTitle } from "@/components/typography";
 import { useSessionContext } from "@/components/auth/AuthProvider/SessionContext";
+import Card from "@/components/ui/Card/Card";
 
 type EmailVerificationForm = {
   email: string;
@@ -125,7 +126,7 @@ export default function EmailVerification({
   };
 
   return (
-    <div className="w-full max-w-3xl bg-card border rounded-lg p-8">
+    <Card className="w-full max-w-3xl">
       <div className="mb-8">
         <SectionTitle>Step 2: Email Verification</SectionTitle>
         <BodyText>We'll send a verification code to your email address to confirm it's you.</BodyText>
@@ -216,6 +217,6 @@ export default function EmailVerification({
           )}
         </div>
       </form>
-    </div>
+    </Card>
   );
 }

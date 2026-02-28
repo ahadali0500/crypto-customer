@@ -14,6 +14,7 @@ import { countriesOption } from '@/constants/countries'
 import DropdownItem from '@/components/ui/Dropdown/DropdownItem'
 import { toast } from 'react-toastify'
 import DataTable, { ColumnDef, OnSortParam } from '@/components/shared/DataTable'
+import Card from '@/components/ui/Card/Card'
 
 interface FormData {
     currencyId: string
@@ -661,7 +662,8 @@ const BankTransferForm = () => {
 
     return (
         <>
-            <div className="min-h-screen p-6 shadow-sm bg-white dark:bg-[#18212F] rounded-lg border border-1 border-gray-600">
+            <div className='flex items-center justify-center'>
+                <Card className="min-h-screen">
                 <Tabs defaultValue="Available" onChange={handleBalanceTypeChange}>
                     <TabList>
                         <TabNav value="Available" className={balanceType === 'Available' ? 'active' : ''}>
@@ -1187,15 +1189,16 @@ const BankTransferForm = () => {
                         </TabContent>
                     ))}
                 </Tabs>
-            </div>
+            </Card>
 
+            </div>
             {isSubmitting && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 dark:bg-gray-900/80">
                     <Spinner size={40} />
                 </div>
             )}
 
-            <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#111827] rounded-lg">
+            <Card className="max-w-full mt-8 ">
                 <div className="text-xl font-semibold mb-4">Withdrawal History</div>
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
@@ -1217,7 +1220,7 @@ const BankTransferForm = () => {
                         noData={!loading && withdrawals.length === 0}
                     />
                 )}
-            </div>
+            </Card>
         </>
     )
 }

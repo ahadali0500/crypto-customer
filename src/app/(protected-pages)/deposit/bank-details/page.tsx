@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { CreditCard, Send } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/Card1"
+// import { Card, CardContent } from "@/components/ui/Card1"
 import { Button } from "@/components/ui"
 import { Input } from "@/components/ui"
 import Select from "@/components/ui/Select/Select"
@@ -10,8 +10,8 @@ import Tabs from "@/components/ui/Tabs"
 import TabList from "@/components/ui/Tabs/TabList"
 import TabNav from "@/components/ui/Tabs/TabNav"
 import TabContent from "@/components/ui/Tabs/TabContent"
-import Dialog from "@/components/ui/Dialog" // ✅ using your custom Dialog
-
+import Dialog from "@/components/ui/Dialog"
+import Card from "@/components/ui/Card/Card"
 export default function BankDepositForm() {
   const [activeTab, setActiveTab] = useState("swift")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -257,62 +257,56 @@ export default function BankDepositForm() {
     },
   ]
 
-  return (
+ return (
     <>
-      <div className="p-4 flex items-center justify-center">
-        <Card className="w-full max-w-2xl border-0">
-          <CardContent>
-            <div className="p-6 mt-6 shadow-sm bg-white dark:bg-[#18212F]  border-1 border-gray-600 rounded-lg">
-              <Tabs value={activeTab} onChange={setActiveTab}>
-                <TabList>
-                  {tabItems.map((item) => (
-                    <TabNav key={item.key} value={item.key}>
-                      {item.icon}
-                      <span className="ml-2">{item.label}</span>
-                    </TabNav>
-                  ))}
-                </TabList>
+        <div className="p-4 flex items-center justify-center">
+            <Card className="w-full max-w-2xl">
+                <Tabs value={activeTab} onChange={setActiveTab}>
+                    <TabList>
+                        {tabItems.map((item) => (
+                            <TabNav key={item.key} value={item.key}>
+                                {item.icon}
+                                <span className="ml-2">{item.label}</span>
+                            </TabNav>
+                        ))}
+                    </TabList>
 
-                <div className="mt-4">
-                  {tabItems.map((item) => (
-                    <TabContent key={item.key} value={item.key}>
-                      {item.content}
-                    </TabContent>
-                  ))}
-                </div>
-              </Tabs>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* ✅ Custom Dialog Popup */}
-      <Dialog
-        isOpen={isDialogOpen}
-        onClose={handleCloseDialog}
-        width={400}
-        height="auto"
-        closable
-        contentClassName="p-6 text-center"
-      >
-        <h2 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">
-          Support Required
-        </h2>
-        <p className="text-sm text-gray-600 dark:text-white">
-          Please contact <strong>Customer Support</strong> through a support ticket for further assistance.
-        </p>
-
-        <div className="mt-5">
-          <Button
-          variant="plain"
-          size="xs"
-            onClick={handleCloseDialog}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6  rounded-md"
-          >
-            OK
-          </Button>
+                    <div className="mt-4">
+                        {tabItems.map((item) => (
+                            <TabContent key={item.key} value={item.key}>
+                                {item.content}
+                            </TabContent>
+                        ))}
+                    </div>
+                </Tabs>
+            </Card>
         </div>
-      </Dialog>
+
+        <Dialog
+            isOpen={isDialogOpen}
+            onClose={handleCloseDialog}
+            width={400}
+            height="auto"
+            closable
+            contentClassName="p-6 text-center"
+        >
+            <h2 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">
+                Support Required
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-white">
+                Please contact <strong>Customer Support</strong> through a support ticket for further assistance.
+            </p>
+            <div className="mt-5">
+                <Button
+                    variant="plain"
+                    size="xs"
+                    onClick={handleCloseDialog}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-md"
+                >
+                    OK
+                </Button>
+            </div>
+        </Dialog>
     </>
-  )
+)
 }
