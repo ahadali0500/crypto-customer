@@ -52,19 +52,35 @@ const fmtDate = (d: string) =>
   new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
 const STATUS_STYLES: Record<string, string> = {
-  Pending:    'bg-zinc-700/50 text-zinc-300',
-  Processing: 'bg-amber-900/40 text-amber-400',
-  Execute:    'bg-emerald-900/40 text-emerald-400',
-  Decline:    'bg-red-900/40 text-red-400',
-  Completed:  'bg-emerald-900/40 text-emerald-400',
-  Success:    'bg-emerald-900/40 text-emerald-400',
-  Failed:     'bg-red-900/40 text-red-400',
+  Pending:
+    'bg-zinc-200 text-zinc-800 dark:bg-zinc-700/50 dark:text-zinc-300',
+
+  Processing:
+    'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-400',
+
+  Execute:
+    'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-400',
+
+  Completed:
+    'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-400',
+
+  Success:
+    'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-400',
+
+  Failed:
+    'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400',
+
+  Decline:
+    'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400',
 };
 
 const StatusBadge = ({ status }: { status?: string }) => {
   const label = status || 'Unknown';
   return (
-    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${STATUS_STYLES[label] ?? 'bg-zinc-700/50 text-zinc-400'}`}>
+    <span
+      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${STATUS_STYLES[label] ?? 'bg-zinc-200 text-zinc-800 dark:bg-zinc-700/50 dark:text-zinc-300'
+        }`}
+    >
       {label}
     </span>
   );
@@ -181,8 +197,8 @@ export default function TransactionHistory() {
   }, []);
 
   const tabs: { key: TabKey; label: string; count: number }[] = [
-    { key: 'exchanges',   label: 'Exchanges',   count: exchanges.length },
-    { key: 'deposits',    label: 'Deposits',    count: deposits.length },
+    { key: 'exchanges', label: 'Exchanges', count: exchanges.length },
+    { key: 'deposits', label: 'Deposits', count: deposits.length },
     { key: 'withdrawals', label: 'Withdrawals', count: withdrawals.length },
   ];
 
@@ -201,18 +217,18 @@ export default function TransactionHistory() {
         ),
         bordered: true,
       }}
-      // footer={{
-      //   content: (
-      //     <Link
-      //       href="/transactions"
-      //       className="flex items-center justify-center gap-1 w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
-      //     >
-      //       See full transaction history
-      //       <ChevronRight className="w-3.5 h-3.5" />
-      //     </Link>
-      //   ),
-      //   bordered: true,
-      // }}
+    // footer={{
+    //   content: (
+    //     <Link
+    //       href="/transactions"
+    //       className="flex items-center justify-center gap-1 w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
+    //     >
+    //       See full transaction history
+    //       <ChevronRight className="w-3.5 h-3.5" />
+    //     </Link>
+    //   ),
+    //   bordered: true,
+    // }}
     >
       <div className="flex flex-col gap-3">
 

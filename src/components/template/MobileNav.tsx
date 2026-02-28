@@ -10,7 +10,7 @@ import useCurrentSession from '@/utils/hooks/useCurrentSession'
 import queryRoute from '@/utils/queryRoute'
 import appConfig from '@/configs/app.config'
 import { usePathname } from 'next/navigation'
-
+import Image from 'next/image'
 const VerticalMenuContent = lazy(
     () => import('@/components/template/VerticalMenuContent'),
 )
@@ -61,14 +61,25 @@ const MobileNav = ({
                 <MobileNavToggle toggled={isOpen} />
             </div>
             <Drawer
-                title="Navigation"
+                title=""
                 isOpen={isOpen}
-                bodyClass={classNames('p-0')}
+                bodyClass="p-0"
                 width={250}
                 placement={direction === DIR_RTL ? 'right' : 'left'}
                 onClose={handleDrawerClose}
                 onRequestClose={handleDrawerClose}
             >
+                <div className="flex items-center gap-3 px-4 py-4 border-b">
+                    <div className="relative w-8 h-8">
+                        <Image
+                            src="/img/logo/logo.png"
+                            alt="logo"
+                            fill
+                        />
+                    </div>
+                    <p className="text-lg font-semibold">bexchange.io</p>
+                </div>
+
                 <Suspense fallback={<></>}>
                     {isOpen && (
                         <VerticalMenuContent

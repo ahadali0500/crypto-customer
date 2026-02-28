@@ -292,7 +292,7 @@ const Page = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUserDetails(res.data.data);
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const shouldShowBundleForExchange =
@@ -319,7 +319,7 @@ const Page = () => {
       setAllCurrency(res1.data.data || []);
       if (res.data.data?.length > 0) setSelectedSellCurrency(res.data.data[0]);
       if (res1.data.data?.length > 0) setSelectedBuyCurrency(res1.data.data[0]);
-    } catch (error) {}
+    } catch (error) { }
   };
 
   useEffect(() => {
@@ -582,22 +582,32 @@ const Page = () => {
   return (
     <div className="min-h-screen text-white">
       {/* ── Page Header ─────────────────────────────────────── */}
-      <div className="px-6 pt-8 pb-4 max-w-[1200px] mx-auto">
-        <div className="flex items-center gap-4 mb-1">
+      <div className="px-4 sm:px-6 pt-6 sm:pt-8 pb-4 max-w-[1200px] mx-auto">
+        <div className="flex items-start sm:items-center gap-3 sm:gap-4">
+
           <button
             type="button"
             className="text-[#8B95A3] hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
           </button>
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #7C3AED, #EC4899)' }}>
-            <ArrowUpDown size={20} className="text-white" />
+
+          <div
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg, #7C3AED, #EC4899)' }}
+          >
+            <ArrowUpDown size={18} className="text-white sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold leading-tight">Convert Crypto to Fiat</h1>
-            <p className="text-[#8B95A3] text-sm">Instantly exchange your cryptocurrency for traditional currencies</p>
+
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold leading-tight">
+              Convert Crypto to Fiat
+            </h1>
+            <p className="text-[#8B95A3] text-xs sm:text-sm mt-1">
+              Instantly exchange your cryptocurrency for traditional currencies
+            </p>
           </div>
+
         </div>
       </div>
 
@@ -620,11 +630,10 @@ const Page = () => {
               key={tab}
               type="button"
               onClick={() => handleTabChange(tab)}
-              className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${
-                activeTab === tab
+              className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${activeTab === tab
                   ? 'bg-[#6366f1] text-white shadow-lg shadow-[#6366f1]/20'
                   : 'text-[#8B95A3]'
-              }`}
+                }`}
             >
               {tab}
             </button>
@@ -632,10 +641,10 @@ const Page = () => {
         </div>
 
         {/* ── Main Two-Column Layout ──────────────────────────── */}
-        <div className="flex flex-col lg:flex-row gap-5 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
           {/* ── LEFT: Conversion Card ───────────────────────────── */}
-         <Card className="w-full lg:flex-1 border border-slate-200 dark:border-[#1F2D40] rounded-2xl bg-white dark:bg-transparent">
+          <Card className="w-full lg:flex-1 border border-slate-200 dark:border-[#1F2D40] rounded-2xl bg-white dark:bg-transparent">
             <div className="p-6">
 
               {/* You Send Block */}
@@ -710,9 +719,8 @@ const Page = () => {
                 </div>
                 <div className="flex items-center rounded-xl px-4 py-3 gap-3 border border-slate-200 bg-slate-50 dark:bg-[#0F172A] dark:border-[#2A3548]">
                   <span
-                    className={`flex-1 text-xl font-semibold ${
-                      buyAmount ? 'text-emerald-500 dark:text-[#4ADE80]' : 'text-slate-400 dark:text-[#374151]'
-                    }`}
+                    className={`flex-1 text-xl font-semibold ${buyAmount ? 'text-emerald-500 dark:text-[#4ADE80]' : 'text-slate-400 dark:text-[#374151]'
+                      }`}
                   >
                     {buyAmount ? parseFloat(buyAmount).toFixed(2) : '0.00'}
                   </span>
@@ -738,11 +746,10 @@ const Page = () => {
                           key={bundle.id}
                           type="button"
                           onClick={() => { setFeeBundleError(''); setSelectedFeeBundle(bundle); }}
-                          className={`p-3 rounded-xl text-left text-sm transition-all border-2 ${
-                            isSelected
+                          className={`p-3 rounded-xl text-left text-sm transition-all border-2 ${isSelected
                               ? 'bg-[#6366f1]/20 border-[#6366f1] text-white'
                               : 'bg-[#0F172A] border-[#2A3548] text-[#94A3B8] hover:border-[#6366f1]/40'
-                          }`}
+                            }`}
                         >
                           <div className="font-semibold">{bundle.name} ({bundle.value}%)</div>
                           <div className="text-xs mt-0.5 opacity-70">{bundle.description}</div>
@@ -759,11 +766,10 @@ const Page = () => {
                 type="button"
                 onClick={handleExchangeClick}
                 disabled={isSubmitDisabled}
-                className={`w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${
-                  isSubmitDisabled
+                className={`w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${isSubmitDisabled
                     ? 'bg-[#1F2937] text-[#4B5563] cursor-not-allowed'
                     : 'text-white shadow-lg shadow-[#7C3AED]/20 hover:opacity-90 active:scale-[0.99]'
-                }`}
+                  }`}
                 style={
                   !isSubmitDisabled
                     ? { background: 'linear-gradient(135deg, #7C3AED 0%, #EC4899 100%)' }

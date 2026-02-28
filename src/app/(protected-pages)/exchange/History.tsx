@@ -18,73 +18,99 @@ type Transaction = {
   buyAmount: string;
   fee: string;
   status: string;
-  exchangeBalanceType:string
+  exchangeBalanceType: string
 };
 
-const statusColorMap: Record<string, string> = {
-  'Completed': 'bg-green-500 text-white',
-  'Success': 'bg-green-500 text-white',
-  'Pending': 'bg-yellow-400 text-black',
-  'Failed': 'bg-red-500 text-white',
+const statusColorMap = {
+  Completed: 'bg-green-500 text-white dark:bg-green-600',
+  Success: 'bg-green-500 text-white dark:bg-green-600',
+  Pending: 'bg-yellow-400 text-black dark:bg-yellow-500 dark:text-black',
+  Failed: 'bg-red-500 text-white dark:bg-red-600',
 };
 
 const columns: ColumnDef<Transaction>[] = [
-  { header: 'ID', accessorKey: 'id', cell: ({ row }) => <span>#{row.original.id}</span> },
-  { 
-    header: 'Type', 
-    accessorKey: 'type', 
+  {
+    header: 'ID',
+    accessorKey: 'id',
     cell: ({ row }) => (
-      <span className={`px-2 py-1 rounded text-xs font-medium ${
-        row.original.type === 'Sell' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
-      }`}>
+      <span className="font-medium text-gray-900 dark:text-gray-100">
+        #{row.original.id}
+      </span>
+    ),
+  },
+  {
+    header: 'Type',
+    accessorKey: 'type',
+    cell: ({ row }) => (
+      <span className={`px-2 py-1 rounded text-xs font-medium ${row.original.type === 'Sell'
+        ? 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300'
+        : 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300'
+        }`}>
         {row.original.type}
       </span>
     )
   },
-  { header: 'Date', accessorKey: 'date', cell: ({ row }) => <span>{new Date(row.original.date).toLocaleDateString()}</span> },
-  { 
-    header: 'From Asset', 
-    accessorKey: 'sellAsset', 
+  {
+    header: 'Date',
+    accessorKey: 'date',
+    cell: ({ row }) => (
+      <span className="text-gray-700 dark:text-gray-300 font-medium">
+        {new Date(row.original.date).toLocaleDateString()}
+      </span>
+    ),
+  },
+  {
+    header: 'From Asset',
+    accessorKey: 'sellAsset',
     cell: ({ row }) => (
       <div className="flex flex-col">
         <span className="font-medium">{row.original.sellAsset}</span>
-        <span className="text-sm text-gray-500">{row.original.sellAmount}</span>
+        <span className="text-sm text-gray-600 dark:text-gray-300">
+          {row.original.sellAmount}
+        </span>
       </div>
     )
   },
-  { 
-    header: 'To Asset', 
-    accessorKey: 'buyAsset', 
+  {
+    header: 'To Asset',
+    accessorKey: 'buyAsset',
     cell: ({ row }) => (
       <div className="flex flex-col">
-        <span className="font-medium">{row.original.buyAsset}</span>
-        <span className="text-sm text-gray-500">{row.original.buyAmount}</span>
+        <span className="font-medium text-gray-900 dark:text-gray-100">
+          {row.original.buyAsset}
+        </span>
+        <span className="text-sm text-gray-600 dark:text-gray-300">
+          {row.original.buyAmount}
+        </span>
       </div>
     )
   },
-  { header: 'Fee', accessorKey: 'fee', cell: ({ row }) => <span>{row.original.fee}</span> },
   {
-  header: 'Balance Type',
-  accessorKey: 'exchangeBalanceType',
-  cell: ({ row }) => {
-    const value = row.getValue('exchangeBalanceType') as string
-
-    const color =
-      value === 'Available'
-        ? 'bg-green-100 text-green-800'
-        : value === 'Locked'
-        ? 'bg-yellow-100 text-yellow-800'
-        : 'bg-gray-100 text-gray-800'
-
-    return (
-      <span
-        className={`px-2 py-1 text-xs font-medium rounded-full ${color}`}
-      >
-        {value}
-      </span>
-    )
+    header: 'Fee', accessorKey: 'fee', cell: ({ row }) => <span className="font-medium text-gray-900 dark:text-gray-100">
+      {row.original.fee}
+    </span>
   },
-},
+  {
+    header: 'Balance Type',
+    accessorKey: 'exchangeBalanceType',
+    cell: ({ row }) => {
+      const value = row.getValue('exchangeBalanceType') as string
+
+      const color =
+        value === 'Available'
+          ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'
+          : value === 'Locked'
+            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300'
+            : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+      return (
+        <span
+          className={`px-2 py-1 text-xs font-medium rounded-full ${color}`}
+        >
+          {value}
+        </span>
+      )
+    },
+  },
 
   {
     header: 'Status',
@@ -99,21 +125,21 @@ const columns: ColumnDef<Transaction>[] = [
       );
     },
   },
-  
+
 ];
 
 const ExchangeHistory = () => {
   const [exchangeData, setExchangeData] = useState<any[]>([]);
   const [processedData, setProcessedData] = useState<Transaction[]>([]);
-  
-  
-  
+
+
+
 
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [totalCount, setTotalCount] = useState(0);
   const [search, setSearch] = useState('');
-  
+
   // Pagination and Sorting
   const [pageIndex, setPageIndex] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -121,7 +147,7 @@ const ExchangeHistory = () => {
     key: '',
     order: '',
   });
-  
+
   // Table ref for Print
   const tableRef = useRef<HTMLDivElement>(null);
 
@@ -139,8 +165,8 @@ const ExchangeHistory = () => {
       buyAmount: item.buyAmount,
       fee: item.fees,
       status: 'Completed',
-      exchangeBalanceType:item.exchangeBalanceType
-      
+      exchangeBalanceType: item.exchangeBalanceType
+
     }));
   };
 
@@ -171,7 +197,7 @@ const ExchangeHistory = () => {
   };
 
 
-  
+
 
   useEffect(() => {
     fetchHistory();
