@@ -5,19 +5,19 @@ import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { FormItem, Form } from '@/components/ui/Form'
 import PasswordInput from '@/components/shared/PasswordInput'
-
+import Card from '@/components/ui/Card/Card'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import type { CommonProps } from '@/@types/common'
 import type { ReactNode } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card1'
 import { useRouter, useSearchParams } from 'next/navigation'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { useSessionContext } from '../AuthProvider/SessionContext'
 import { Spinner } from '@/components/ui'
 import logo from '../../../../public/img/logo/logo.png'
+
 export type OnSignInPayload = {
     values: SignInFormSchema
     setSubmitting: (isSubmitting: boolean) => void
@@ -48,7 +48,7 @@ const validationSchema = z.object({
 
 const SignInForm = (props: SignInFormProps) => {
     const [isSubmitting, setSubmitting] = useState<boolean>(false)
-    const { setSession } = useSessionContext();
+    const { setSession } = useSessionContext()
     const { className, setMessage, onSignIn, passwordHint } = props
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -78,11 +78,7 @@ const SignInForm = (props: SignInFormProps) => {
             const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/auth/login`,
                 formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
+                { headers: { 'Content-Type': 'multipart/form-data' } }
             )
 
             const loginData = response.data?.data
@@ -93,7 +89,6 @@ const SignInForm = (props: SignInFormProps) => {
                 return
             }
 
-            // ✅ Store token separately
             localStorage.setItem('authToken', loginData.token)
 
             const lastLoginAt =
@@ -103,24 +98,16 @@ const SignInForm = (props: SignInFormProps) => {
                 loginData.last_login_at ||
                 new Date().toISOString()
 
-            // ✅ Store all other user info in an object
             const userInfo = {
-                name: loginData.name,   // from backend
-                email: loginData.email, 
-              
+                name: loginData.name,
+                email: loginData.email,
                 profileImageUrl: loginData.profileImageUrl,
                 lastLoginAt,
-                // from backend
-                // add more fields if needed
             }
             localStorage.setItem('userInfo', JSON.stringify(userInfo))
 
-            // Update session context
             setSession({
-                user: {
-                    ...loginData,
-                    lastLoginAt,
-                },
+                user: { ...loginData, lastLoginAt },
                 expires: '',
             })
 
@@ -136,33 +123,44 @@ const SignInForm = (props: SignInFormProps) => {
         }
     }
 
-
-
     return (
         <>
             <div className={className}>
-                <Card className="rounded-2xl border border-white/10 bg-[oklch(0.24_0.03_260.32)] shadow-2xl backdrop-blur">
-                    <CardHeader className="pb-6">
-                        <div className="flex flex-col items-center">
-                            <div className="w-12 h-12  flex items-center justify-center mb-4">
-                                <img src={logo.src} alt="Bexchange Logo" className="w-10 h-10" />
-                            </div>
-                            <CardTitle className="text-2xl font-bold text-slate-50">
-                                Sign In to Bexchange
-                            </CardTitle>
-                            <CardDescription className="mt-1 text-slate-300">
-                                Enter your credentials to continue
-                            </CardDescription>
-                        </div>
-                    </CardHeader>
+                
 
-                    <CardContent>
-                        <Form onSubmit={handleSubmit(handleSignIn)} className="space-y-6">
+                    {/* Logo + Title — used as card header content */}
+                    <Card
+                        bordered={false}
+                        header={{
+                            bordered: true,
+                            content: (
+                                <div className="flex flex-col items-center py-2">
+                                    <div className="w-12 h-12 flex items-center justify-center mb-3">
+                                        <img
+                                            src={logo.src}
+                                            alt="Bexchange Logo"
+                                            className="w-10 h-10"
+                                        />
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-50">
+                                        Sign In to Bexchange
+                                    </h2>
+                                    <p className="mt-1 text-sm text-gray-500 dark:text-slate-300">
+                                        Enter your credentials to continue
+                                    </p>
+                                </div>
+                            ),
+                        }}
+                    >
+                        {/* Form Body */}
+                        <Form
+                            onSubmit={handleSubmit(handleSignIn)}
+                            className="space-y-5 pt-2"
+                        >
                             <FormItem
                                 label="Email Address"
                                 invalid={Boolean(errors.email)}
                                 errorMessage={errors.email?.message}
-
                             >
                                 <Controller
                                     name="email"
@@ -172,8 +170,7 @@ const SignInForm = (props: SignInFormProps) => {
                                             type="email"
                                             placeholder="Enter your email address"
                                             autoComplete="off"
-                                            className='bg-[oklch(0.24_0.03_260.32)]'
-                                            // className="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                                            // className="bg-gray-50 dark:bg-[oklch(0.24_0.03_260.32)]"
                                             {...field}
                                         />
                                     )}
@@ -184,23 +181,19 @@ const SignInForm = (props: SignInFormProps) => {
                                 label="Password"
                                 invalid={Boolean(errors.password)}
                                 errorMessage={errors.password?.message}
-
                             >
                                 <Controller
                                     name="password"
                                     control={control}
                                     render={({ field }) => (
-                                        <div className="relative">
-                                            <PasswordInput
-                                                placeholder="Enter your password"
-                                                autoComplete="off"
-                                                className="rounded-lg"
-                                                {...field}
-                                            />
-                                        </div>
+                                        <PasswordInput
+                                            placeholder="Enter your password"
+                                            autoComplete="off"
+                                            className="rounded-lg bg-gray-50 dark:bg-[oklch(0.24_0.03_260.32)]"
+                                            {...field}
+                                        />
                                     )}
                                 />
-
                             </FormItem>
 
                             {passwordHint}
@@ -215,17 +208,9 @@ const SignInForm = (props: SignInFormProps) => {
                                 {isSubmitting ? 'Signing in...' : 'Sign In'}
                             </Button>
                         </Form>
+                    </Card>
 
-                        {/* <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-                                Need assistance?{' '}
-                                <a href="/support" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                                    Contact Support
-                                </a>
-                            </p>
-                        </div> */}
-                    </CardContent>
-                </Card>
+                
             </div>
 
             {isSubmitting && (
