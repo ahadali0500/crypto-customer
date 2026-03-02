@@ -551,6 +551,10 @@ const Page = () => {
             return
         }
 
+        if (parseFloat(cryptoAmount) <= 0) {
+            toast.error('Conversion rate unavailable. Please wait or try a different currency.')
+            return
+        }
         setLoading(true)
         try {
             const formData = new FormData()
@@ -738,7 +742,14 @@ const Page = () => {
                                 onClick={handleDeposit}
                                 variant="solid"
                                 className="w-full h-12 rounded-xl"
-                                disabled={loading || !selectedCurrency || !usdAmount || conversionLoading}
+                                disabled={
+                                    loading ||
+                                    !selectedCurrency ||
+                                    !usdAmount ||
+                                    conversionLoading ||
+                                    !cryptoAmount || 
+                                    parseFloat(cryptoAmount) <= 0
+                                }
                             >
                                 {loading ? "Processing..." : "Deposit"}
                             </Button>
@@ -825,7 +836,7 @@ const Page = () => {
                                                 border: '1px solid rgba(255,255,255,0.06)',
                                             }}
                                         >
-                                            <span className="text-[10px] font-semibold tracking-widest text-white/35 uppercase">
+                                            <span className="text-[10px] font-semibold tracking-widest  uppercase">
                                                 {label}
                                             </span>
                                             <span className="text-sm font-bold" style={{ color: accent }}>
@@ -904,7 +915,7 @@ const Page = () => {
             </Card>
 
             {showModal && (
-                <Dialog onClose={handleModalClose} isOpen width={400} className="dark:bg-[#111827]">
+                <Dialog onClose={handleModalClose} contentClassName="bg-white dark:bg-[#18212F]" isOpen width={400}>
                     <div className="space-y-4">
                         <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900 p-2 flex items-center justify-center mx-auto mb-3.5">
                             <svg
@@ -924,9 +935,9 @@ const Page = () => {
                         <div className="text-center font-semibold text-xl">
                             Your payment is being processed.
                         </div>
-                        <div className="text-center text-sm text-gray-600">
-                            We will notify you once the transaction is
-                            confirmed.
+                        <div className="mt-2">
+                            <p className="text-center text-sm "> We will notify you once the transaction is
+                                confirmed</p>
                         </div>
                         <div className="flex items-center justify-center">
                             <Button

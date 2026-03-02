@@ -1142,7 +1142,7 @@ useEffect(() => {
             </div>
 
             {/* Success Dialog */}
-            <Dialog isOpen={dialogOpen} onClose={() => setDialogOpen(false)}>
+            <Dialog isOpen={dialogOpen} contentClassName="bg-white dark:bg-[#18212F]"  onClose={() => setDialogOpen(false)}>
                 <div className="text-center">
                     <CheckCircle2 className="text-green-500 mx-auto mb-4" size={60} />
                     <h3 className="text-xl font-semibold">
