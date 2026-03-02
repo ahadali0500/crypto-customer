@@ -613,9 +613,7 @@ useEffect(() => {
                 </div>
                 <div>
                   <h2 className="font-semibold dark:text-white">{selectedUser.name}</h2>
-                  <p className="text-xs text-gray-500 capitalize">
-                    {selectedUser.status === "online" ? "🟢 Online" : "🔴 Offline"}
-                  </p>
+                 
                 </div>
               </div>
             </div>
