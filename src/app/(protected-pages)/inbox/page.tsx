@@ -155,7 +155,7 @@ const EmptyMessages = () => (
   <div className="flex flex-col items-center justify-center h-full p-8">
     <MessageCircle className="h-16 w-16 text-gray-400 mb-4" />
     <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">No messages</h3>
-    <p className="text-sm text-gray-500 text-center">Send a message to start the conversation</p>
+    <p className="text-sm text-gray-500 dark:text-gray-400 text-center">Send a message to start the conversation</p>
   </div>
 );
 
@@ -493,10 +493,10 @@ useEffect(() => {
       {toast && <Toast {...toast} />}
 
       {/* Sidebar */}
-      <div className={`${showChat ? "hidden" : "flex"} md:flex bg-white dark:bg-[#18212F] w-full md:w-80 border-r border-gray-200 dark:border-gray-800 flex-col h-full`}>
-        <div className="p-4 border-b border-gray-200 dark:border-gray-600 flex-shrink-0">
+      <div className={`${showChat ? "hidden" : "flex"} md:flex bg-white dark:bg-[#18212F] w-full md:w-80 border-r border-gray-200 dark:border-gray-200 flex-col h-full`}>
+        <div className="p-4 border-b border-gray-200 dark:border-gray-200 flex-shrink-0">
           <h1 className="text-xl font-bold mb-4 dark:text-white">Messages</h1>
-          <div className="relative">
+          <div className="relative  ">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               placeholder="Search conversations..."
@@ -507,7 +507,7 @@ useEffect(() => {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto ">
           {isLoadingUsers ? (
             <>{[...Array(5)].map((_, i) => <UserSkeleton key={i} />)}</>
           ) : showEmptySearch ? (
@@ -547,7 +547,7 @@ useEffect(() => {
                 className={`p-4 border-b border-gray-200 dark:border-gray-800 cursor-pointer hover:bg-gray-50 dark:bg-[#18212F] transition-colors ${selectedUser?.id === user.id ? "bg-blue-50 dark:bg-[#18212F]" : ""
                   }`}
               >
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 ">
                   <div className="relative">
                     <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                       {user.avatar}
@@ -557,14 +557,14 @@ useEffect(() => {
                         }`}
                     ></div>
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 ">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold dark:text-white truncate">{user.name}</h3>
                       {user.lastMessageTime && (
-                        <span className="text-xs text-gray-500 ml-2">{formatTime(user.lastMessageTime)}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-200 ml-2">{formatTime(user.lastMessageTime)}</span>
                       )}
                     </div>
-                    <div className="flex items-center justify-between mt-1">
+                    <div className="flex items-center justify-between mt-1 ">
                       {user.isTyping ? (
                         <TypingIndicator userName={user.name.split(" ")[0]} />
                       ) : (
@@ -654,7 +654,7 @@ useEffect(() => {
                             </a>
                           )}
                           <span
-                            className={`text-xs ${m.sender === "admin" ? "text-blue-100" : "text-gray-500"
+                            className={`text-xs ${m.sender === "admin" ? "text-blue-100" : "text-gray-400"
                               } mt-1 block`}
                           >
                             {formatTime(m.timestamp)}
@@ -678,7 +678,7 @@ useEffect(() => {
             </div>
 
             {/* Input */}
-            <div className="bg-white dark:bg-[#18212F] border-t border-gray-200 dark:border-gray-600 p-3 flex flex-col gap-2 flex-shrink-0">
+            <div className="bg-white dark:bg-[#18212F] border-t border-gray-200 dark:border-gray-300 p-3 flex flex-col gap-2 flex-shrink-0">
               {newFile && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2 text-sm flex items-center justify-between">
                   <span>📎 {newFile.name}</span>
@@ -690,9 +690,9 @@ useEffect(() => {
                   </button>
                 </div>
               )}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 ">
                 <label htmlFor="fileInput" className="cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
-                  <Paperclip className="h-5 w-5 text-gray-500" />
+                  <Paperclip className="h-5 w-5 text-gray-500 dark:text-gray-300" />
                 </label>
                 <input
                   ref={fileInputRef}
@@ -706,7 +706,7 @@ useEffect(() => {
                   onChange={(e) => handleTyping(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
                   placeholder="Type a message..."
-                  className="flex-1 dark:bg-[#18212F] text-white"
+                  className="flex-1 dark:bg-[#18212F] text-white border border-gray-400"
                   disabled={isSendingMessage}
                 />
                 <Button

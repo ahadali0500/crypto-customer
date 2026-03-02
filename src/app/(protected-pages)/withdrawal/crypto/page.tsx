@@ -907,7 +907,7 @@ useEffect(() => {
                                         <div className="flex items-center gap-2 mb-4 bg-gray-200 dark:bg-gray-700 pl-3 rounded-lg">
                                             <span className="whitespace-nowrap text-sm">Wallet Address</span>
                                             <Input
-                                                className="border border-gray-200 focus:ring-0 bg-gray-100 dark:bg-gray-800 rounded-lg"
+                                                className="border border-gray-200 focus:ring-0 bg-gray-100 dark:bg-[#18212F] rounded-lg"
                                                 placeholder="Enter wallet address"
                                                 value={walletAddress}
                                                 onChange={handleWalletAddressChange}
@@ -918,7 +918,7 @@ useEffect(() => {
                                         <div className="flex items-center gap-2 mb-4 bg-gray-200 dark:bg-gray-700 pl-3 rounded-lg">
                                             <span className="whitespace-nowrap text-sm">Amount</span>
                                             <Input
-                                                className="border border-gray-200 focus:ring-0 bg-gray-100 dark:bg-gray-800 rounded-lg"
+                                                className="border border-gray-200 focus:ring-0 bg-gray-100 dark:bg-[#18212F]  rounded-lg"
                                                 placeholder="0.000000"
                                                 type="number"
                                                 step="0.00000001"
