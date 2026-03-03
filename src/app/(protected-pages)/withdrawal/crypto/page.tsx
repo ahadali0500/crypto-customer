@@ -60,6 +60,39 @@ interface Withdrawal {
     }>;
 }
 
+// ==================== HELPERS ====================
+
+/** Renders a USD value or a subtle placeholder when the rate isn't loaded yet. */
+const UsdValue = ({
+    value,
+    loading,
+    prefix = '$',
+    suffix = ' USD',
+}: {
+    value: number | null;
+    loading?: boolean;
+    prefix?: string;
+    suffix?: string;
+}) => {
+    if (loading) {
+        return (
+            <span className="inline-flex items-center gap-1 text-gray-400 text-xs">
+                <Spinner size={10} /> loading…
+            </span>
+        );
+    }
+    if (value === null || value === undefined) {
+        return <span className="text-gray-400 text-xs">—{suffix}</span>;
+    }
+    return (
+        <span className="text-xs text-gray-500 dark:text-gray-400">
+            {prefix}
+            {value.toFixed(2)}
+            {suffix}
+        </span>
+    );
+};
+
 // ==================== COMPONENT ====================
 const WithdrawalPage = () => {
     // ========== State ==========
@@ -81,8 +114,6 @@ const WithdrawalPage = () => {
     const [tableLoading, setTableLoading] = useState(false);
     const [pageIndex, setPageIndex] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-
-    
 
     const [sortConfig, setSortConfig] = useState<{ key: string; order: 'asc' | 'desc' | '' }>({
         key: '',
@@ -114,23 +145,16 @@ const WithdrawalPage = () => {
         return 0;
     }, [shouldShowBundleForWithdraw, selectedFeeBundle, userDetails]);
 
-    // Adjusted locked balance based on withdrawal status:
-    // - Locked balance is only deducted on the client side
-    //   when a locked-withdrawal status is Execute / Completed / Approved.
     const adjustedLockedBalance = useMemo(() => {
         if (!selectedCurrency) return 0;
 
         const rawLocked = parseFloat(selectedCurrency.lockedBalance || '0') || 0;
-
-        // Only consider withdrawals for the currently selected currency
         const relatedLockedWithdrawals = withdrawals.filter((w) => {
             const sameCurrency = w.currency?.shortName === selectedCurrency.shortName;
             return sameCurrency && w.balancetype === 'Locked';
         });
 
         const executedStatuses = new Set(['Execute', 'Completed', 'Approved']);
-
-        // Sum only amounts that should actually reduce locked balance
         const executedLockedTotal = relatedLockedWithdrawals.reduce((sum, w) => {
             if (!executedStatuses.has(w.withdrawStatus)) return sum;
             const amt = parseFloat(w.amount || '0') || 0;
@@ -147,55 +171,41 @@ const WithdrawalPage = () => {
         return { available, locked };
     }, [selectedCurrency, adjustedLockedBalance]);
 
-const maxBalance = useMemo(() => {
-    if (!selectedCurrency) return 0;
-
-    return activeTab === 'locked'
-        ? balances.locked
-        : balances.available;
-}, [balances, selectedCurrency, activeTab]);
-
+    const maxBalance = useMemo(() => {
+        if (!selectedCurrency) return 0;
+        return activeTab === 'locked' ? balances.locked : balances.available;
+    }, [balances, selectedCurrency, activeTab]);
 
     const maxAllowed = useMemo(() => {
-    if (!selectedCurrency) return 0;
+        if (!selectedCurrency) return 0;
 
-    const { available, locked } = balances;
-   
-    
-    const feeRate = feePercent / 100;
+        const { available, locked } = balances;
+        const feeRate = feePercent / 100;
 
-    if (feePercent <= 0) {
-        return activeTab === 'locked' ? locked : available;
-    }
+        if (feePercent <= 0) {
+            return activeTab === 'locked' ? locked : available;
+        }
 
-    if (activeTab === 'locked') {
-        const maxByLocked = locked;
-      
-        const maxByFee = available / feeRate;
-        return Math.max(0, Math.min(maxByLocked, maxByFee));
-    }
+        if (activeTab === 'locked') {
+            const maxByLocked = locked;
+            const maxByFee = available / feeRate;
+            return Math.max(0, Math.min(maxByLocked, maxByFee));
+        }
 
-    return Math.max(0, available / (1 + feeRate));
-}, [balances, feePercent, selectedCurrency, activeTab]);
-
+        return Math.max(0, available / (1 + feeRate));
+    }, [balances, feePercent, selectedCurrency, activeTab]);
 
     const computed = useMemo(() => {
         const amount = parseFloat(withdrawAmount || '0') || 0;
         const fee = amount * (feePercent / 100);
         const net = amount - fee;
 
-        const amountUSD = exchangeRate ? amount * exchangeRate : 0;
-        const feeUSD = exchangeRate ? fee * exchangeRate : 0;
-        const netUSD = exchangeRate ? net * exchangeRate : 0;
+        // USD values: null when exchange rate not yet available
+        const amountUSD = exchangeRate !== null ? amount * exchangeRate : null;
+        const feeUSD = exchangeRate !== null ? fee * exchangeRate : null;
+        const netUSD = exchangeRate !== null ? net * exchangeRate : null;
 
-        return {
-            amount,
-            fee,
-            net,
-            amountUSD,
-            feeUSD,
-            netUSD,
-        };
+        return { amount, fee, net, amountUSD, feeUSD, netUSD };
     }, [withdrawAmount, feePercent, exchangeRate]);
 
     const sortedWithdrawals = useMemo(() => {
@@ -245,8 +255,6 @@ const maxBalance = useMemo(() => {
         }
     }, [token]);
 
-
-    
     const fetchFeeBundles = useCallback(async () => {
         if (!token) return;
         try {
@@ -277,7 +285,6 @@ const maxBalance = useMemo(() => {
             const userCurrencies = userCurrenciesRes.data.data || [];
             const allCurrencies = allCurrenciesRes.data.data || [];
 
-            // Filter only crypto currencies
             const cryptoOnly = userCurrencies.filter((currency: Currency) => {
                 const currencyInfo = allCurrencies.find(
                     (c: Currency) => c.shortName === currency.shortName || c.id === currency.id
@@ -287,7 +294,6 @@ const maxBalance = useMemo(() => {
 
             setCryptoCurrencies(cryptoOnly);
 
-            // Auto-select first crypto currency
             if (cryptoOnly.length > 0 && !selectedCurrency) {
                 setSelectedCurrency(cryptoOnly[0]);
             }
@@ -488,23 +494,24 @@ const maxBalance = useMemo(() => {
         },
         [cryptoCurrencies, debouncedCalculateConversion]
     );
-const clampToMaxAllowed = useCallback((value: string) => {
-  const n = parseFloat(value || "0")
-  if (!isFinite(n) || n <= 0) return value
 
-  const max = maxAllowed
-  if (n <= max) return value
+    const clampToMaxAllowed = useCallback(
+        (value: string) => {
+            const n = parseFloat(value || '0');
+            if (!isFinite(n) || n <= 0) return value;
 
+            const max = maxAllowed;
+            if (n <= max) return value;
 
-  const floored = Math.floor(max * 1e8) / 1e8
-  return floored.toFixed(8)
-}, [maxAllowed])
+            const floored = Math.floor(max * 1e8) / 1e8;
+            return floored.toFixed(8);
+        },
+        [maxAllowed]
+    );
 
     const handleFeeBundleSelect = useCallback(
         (bundle: FeeBundle) => {
             setFeeBundleError('');
-
-           
 
             const isEligible = getFeeEligibility(withdrawAmount, bundle);
             if (!isEligible) {
@@ -513,33 +520,27 @@ const clampToMaxAllowed = useCallback((value: string) => {
             }
 
             setSelectedFeeBundle(bundle);
-            setWithdrawAmount(prev => clampToMaxAllowed(prev))
-            
+            setWithdrawAmount((prev) => clampToMaxAllowed(prev));
         },
-        [withdrawAmount, getFeeEligibility, getDisabledReason,clampToMaxAllowed]
+        [withdrawAmount, getFeeEligibility, getDisabledReason, clampToMaxAllowed]
     );
-useEffect(() => {
-  if (!withdrawAmount) return;
-  setWithdrawAmount(prev => clampToMaxAllowed(prev));
-}, [maxAllowed]);
-useEffect(() => {
-  setErrorMessage('');
-  setFeeBundleError('');
-}, [feePercent, activeTab, selectedCurrency?.shortName]);
+
+    useEffect(() => {
+        if (!withdrawAmount) return;
+        setWithdrawAmount((prev) => clampToMaxAllowed(prev));
+    }, [maxAllowed]);
+
+    useEffect(() => {
+        setErrorMessage('');
+        setFeeBundleError('');
+    }, [feePercent, activeTab, selectedCurrency?.shortName]);
 
     const handleAmountChange = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const value = e.target.value;
             setWithdrawAmount(value);
             setFeeBundleError('');
-            setErrorMessage('');<Input
-  type="number"
-  step="0.00000001"
-  min="0"
-  value={withdrawAmount}
-  onChange={handleAmountChange}
-/>
-
+            setErrorMessage('');
 
             if (!value) {
                 setExchangeRate(null);
@@ -611,19 +612,15 @@ useEffect(() => {
         [debouncedCalculateConversion]
     );
 
-
     const handleMaxClick = useCallback(() => {
-  const floored = Math.floor(maxAllowed * 1e8) / 1e8
-  setWithdrawAmount(floored.toFixed(8))
-}, [maxAllowed])
-
-
+        const floored = Math.floor(maxAllowed * 1e8) / 1e8;
+        setWithdrawAmount(floored.toFixed(8));
+    }, [maxAllowed]);
 
     const handleWithdrawSubmit = useCallback(
         async (e: React.MouseEvent) => {
             e.preventDefault();
 
-            // Validation
             if (!selectedCurrency || !withdrawAmount || !walletAddress) {
                 const message = 'Please fill in all required fields';
                 setErrorMessage(message);
@@ -824,29 +821,27 @@ useEffect(() => {
                 </span>
             ),
         },
-
-         {
-    header: 'Balance Type',
-    accessorKey: 'balancetype',
-    cell: ({ row }) => {
-        const balanceType = row.original.balancetype;
-
-        const isAvailable = balanceType === 'Available';
-
-        const bgColor = isAvailable ? 'bg-green-100' : 'bg-yellow-100';
-        const textColor = isAvailable ? 'text-green-800' : 'text-yellow-800';
-        const statusText = isAvailable ? 'Available' : 'Locked';
-
-        return (
-            <span
-                className={`px-3 py-1 text-xs font-semibold rounded-full ${bgColor} ${textColor}`}
-            >
-                {statusText}
-            </span>
-        );
-    },
-},
+        {
+            header: 'Balance Type',
+            accessorKey: 'balancetype',
+            cell: ({ row }) => {
+                const balanceType = row.original.balancetype;
+                const isAvailable = balanceType === 'Available';
+                const bgColor = isAvailable ? 'bg-green-100' : 'bg-yellow-100';
+                const textColor = isAvailable ? 'text-green-800' : 'text-yellow-800';
+                const statusText = isAvailable ? 'Available' : 'Locked';
+                return (
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${bgColor} ${textColor}`}>
+                        {statusText}
+                    </span>
+                );
+            },
+        },
     ];
+
+    // ========== Derived display values ==========
+    const receiveAmount = activeTab === 'locked' ? computed.amount : computed.net;
+    const receiveUSD = activeTab === 'locked' ? computed.amountUSD : computed.netUSD;
 
     // ========== Render ==========
     return (
@@ -887,7 +882,7 @@ useEffect(() => {
                                                         eventKey={getCurrencyKey(currency)}
                                                         onSelect={handleCurrencySelect}
                                                     >
-                                                         {currency.fullName}
+                                                        {currency.fullName}
                                                     </DropdownItem>
                                                 ))}
                                             </Dropdown>
@@ -901,7 +896,6 @@ useEffect(() => {
                                                 {selectedCurrency.shortName}
                                             </div>
                                         )}
-                                     
 
                                         {/* Wallet Address */}
                                         <div className="flex items-center gap-2 mb-4 bg-gray-200 dark:bg-gray-700 pl-3 rounded-lg">
@@ -918,7 +912,7 @@ useEffect(() => {
                                         <div className="flex items-center gap-2 mb-4 bg-gray-200 dark:bg-gray-700 pl-3 rounded-lg">
                                             <span className="whitespace-nowrap text-sm">Amount</span>
                                             <Input
-                                                className="border border-gray-200 focus:ring-0 bg-gray-100 dark:bg-[#18212F]  rounded-lg"
+                                                className="border border-gray-200 focus:ring-0 bg-gray-100 dark:bg-[#18212F] rounded-lg"
                                                 placeholder="0.000000"
                                                 type="number"
                                                 step="0.00000001"
@@ -969,16 +963,21 @@ useEffect(() => {
                                                                             (parseFloat(bundle.value) / 100)
                                                                         ).toFixed(6)}
                                                                     </div>
-                                                                    {exchangeRate && withdrawAmount && (
-                                                                        <div>
-                                                                            USD: $
-                                                                            {(
+                                                                    {/* Always show USD row in fee bundles */}
+                                                                    {/* <div className="flex items-center gap-1">
+                                                                        USD:{' '}
+                                                                        {conversionLoading ? (
+                                                                            <Spinner size={10} />
+                                                                        ) : exchangeRate && withdrawAmount ? (
+                                                                            `$${(
                                                                                 parseFloat(withdrawAmount || '0') *
                                                                                 exchangeRate *
                                                                                 (parseFloat(bundle.value) / 100)
-                                                                            ).toFixed(2)}
-                                                                        </div>
-                                                                    )}
+                                                                            ).toFixed(2)}`
+                                                                        ) : (
+                                                                            <span className="text-gray-400">—</span>
+                                                                        )}
+                                                                    </div> */}
                                                                 </div>
                                                                 {disabledReason && (
                                                                     <div className="text-xs mt-2 font-medium">
@@ -1013,51 +1012,53 @@ useEffect(() => {
 
                                         <hr className="text-primary bg-primary my-6" />
 
-                                        {/* Summary Section */}
+                                        {/* ========== Summary Section ========== */}
                                         <div className="space-y-2 mb-6">
+
                                             {/* Withdrawal Amount */}
                                             <div className="flex flex-row items-center justify-between gap-4">
-                                                <div>Withdrawal Amount:</div>
-                                                <div className="space-y-1 text-right">
-                                                    <div>
-                                                        {computed.amount.toFixed(8)} {selectedCurrency?.shortName}
+                                                <div className="text-sm font-medium">Withdrawal Amount:</div>
+                                                <div className="space-y-0.5 text-right">
+                                                    <div className="text-sm">
+                                                        {computed.amount.toFixed(8)}{' '}
+                                                        <span className="font-semibold">{selectedCurrency?.shortName}</span>
                                                     </div>
-                                                    {exchangeRate && withdrawAmount && (
-                                                        <div className="text-sm">
-                                                            ${computed.amountUSD.toFixed(2)} USD
-                                                        </div>
-                                                    )}
+                                                    <UsdValue
+                                                        value={computed.amountUSD}
+                                                        loading={conversionLoading && !!withdrawAmount}
+                                                    />
                                                 </div>
                                             </div>
 
-                                            {/* Fee Information */}
+                                            {/* Fee */}
                                             <div className="flex flex-row items-center justify-between gap-4">
-                                                <div>
+                                                <div className="text-sm font-medium">
                                                     <span>Fee ({feePercent}%):</span>
                                                     {activeTab === 'locked' && (
-                                                        <span className="text-xs text-gray-500 ml-2">
-                                                            (from Available)
-                                                        </span>
+                                                        <span className="text-xs text-gray-500 ml-2">(from Available)</span>
                                                     )}
                                                 </div>
-                                                <div className="space-y-1 text-right">
-                                                    <div>
-                                                        -{computed.fee.toFixed(6)} {selectedCurrency?.shortName}
+                                                <div className="space-y-0.5 text-right">
+                                                    <div className="text-sm text-red-500">
+                                                        -{computed.fee.toFixed(6)}{' '}
+                                                        <span className="font-semibold">{selectedCurrency?.shortName}</span>
                                                     </div>
-                                                    {exchangeRate && withdrawAmount && (
-                                                        <div className="text-sm">
-                                                            -${computed.feeUSD.toFixed(2)} USD
-                                                        </div>
-                                                    )}
+                                                    <UsdValue
+                                                        value={computed.feeUSD !== null ? -computed.feeUSD! : null}
+                                                        loading={conversionLoading && !!withdrawAmount}
+                                                        prefix="-$"
+                                                    />
                                                 </div>
                                             </div>
 
+                                            {/* Insufficient fee warning */}
                                             {insufficientFeeBalance && (
                                                 <div className="p-2 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700 rounded-lg mt-2">
                                                     <div className="text-sm text-red-700 dark:text-red-300 flex items-start">
                                                         <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0 mt-0.5" />
                                                         <span>
-                                                            Insufficient available balance to deduct the fee ({computed.fee.toFixed(6)} {selectedCurrency?.shortName}). 
+                                                            Insufficient available balance to deduct the fee (
+                                                            {computed.fee.toFixed(6)} {selectedCurrency?.shortName}).
                                                             Please add funds to Available balance.
                                                         </span>
                                                     </div>
@@ -1065,7 +1066,7 @@ useEffect(() => {
                                             )}
 
                                             {/* Divider */}
-                                            <div className="border-t border-gray-300 dark:border-gray-600 my-3"></div>
+                                            <div className="border-t border-gray-300 dark:border-gray-600 my-3" />
 
                                             {/* You Will Receive */}
                                             <div className="flex flex-row items-center justify-between gap-4 font-semibold bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
@@ -1077,33 +1078,25 @@ useEffect(() => {
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="space-y-1 text-right">
+                                                <div className="space-y-0.5 text-right">
                                                     <div className="text-green-700 dark:text-green-300">
-                                                        {activeTab === 'locked' 
-                                                            ? computed.amount.toFixed(6) 
-                                                            : computed.net.toFixed(6)} {selectedCurrency?.shortName}
+                                                        {receiveAmount.toFixed(6)}{' '}
+                                                        <span>{selectedCurrency?.shortName}</span>
                                                     </div>
-                                                    {exchangeRate && withdrawAmount && (
-                                                        <div className="text-sm">
-                                                            ${activeTab === 'locked' 
-                                                                ? computed.amountUSD.toFixed(2)
-                                                                : computed.netUSD.toFixed(2)} USD
-                                                        </div>
-                                                    )}
+                                                    <UsdValue
+                                                        value={receiveUSD}
+                                                        loading={conversionLoading && !!withdrawAmount}
+                                                    />
                                                 </div>
                                             </div>
-
-                                        
-
-                                           
 
                                             {/* Max Amount */}
                                             <div
                                                 className="text-primary my-2 cursor-pointer hover:underline text-sm"
                                                 onClick={handleMaxClick}
                                             >
-                                           Max withdraw: {maxAllowed.toFixed(8)} {selectedCurrency?.shortName}
-
+                                                Max withdraw: {maxAllowed.toFixed(8)}{' '}
+                                                {selectedCurrency?.shortName}
                                             </div>
 
                                             {exceedsMaxAllowed && (
@@ -1142,7 +1135,11 @@ useEffect(() => {
             </div>
 
             {/* Success Dialog */}
-            <Dialog isOpen={dialogOpen} contentClassName="bg-white dark:bg-[#18212F]"  onClose={() => setDialogOpen(false)}>
+            <Dialog
+                isOpen={dialogOpen}
+                contentClassName="bg-white dark:bg-[#18212F]"
+                onClose={() => setDialogOpen(false)}
+            >
                 <div className="text-center">
                     <CheckCircle2 className="text-green-500 mx-auto mb-4" size={60} />
                     <h3 className="text-xl font-semibold">
