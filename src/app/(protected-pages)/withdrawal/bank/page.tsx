@@ -15,7 +15,6 @@ import DropdownItem from '@/components/ui/Dropdown/DropdownItem'
 import { toast } from 'react-toastify'
 import DataTable, { ColumnDef, OnSortParam } from '@/components/shared/DataTable'
 import Card from '@/components/ui/Card/Card'
-
 interface FormData {
     currencyId: string
     amount: string
@@ -432,6 +431,7 @@ const BankTransferForm = () => {
                 fetchUserDetails()
                 fetchBundleDetails()
             }, 500)
+            toast.success('Bank withdrawal submitted successfully!')
         } catch (error) {
             console.error('Error submitting form:', error)
             toast.error('Error submitting form. Please try again.')
@@ -823,7 +823,7 @@ const BankTransferForm = () => {
 
                                                         setErrors((prev) => ({ ...prev, amount: undefined }))
                                                     }}
-                                                    className="border border-gray-300 focus:ring-0 dark:bg-[#18212F] text-white rounded-lg flex-1"
+                                                    // className="border border-gray-300 focus:ring-0 dark:bg-[#18212F] text-white rounded-lg flex-1"
                                                 />
                                                 <button
                                                     type="button"
@@ -962,7 +962,6 @@ const BankTransferForm = () => {
                                                 placeholder="Canton"
                                                 value={formData.canton}
                                                 onChange={(e: any) => updateFormData('canton', e.target.value)}
-                                                className="w-full text-gray-300"
                                             />
                                             {errors.canton && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.canton}</p>
@@ -977,7 +976,6 @@ const BankTransferForm = () => {
                                                 placeholder="Address"
                                                 value={formData.address}
                                                 onChange={(e: any) => updateFormData('address', e.target.value)}
-                                                className="w-full text-gray-300"
                                             />
                                             {errors.address && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.address}</p>
@@ -993,7 +991,6 @@ const BankTransferForm = () => {
                                                     placeholder="Postal/ZIP code"
                                                     value={formData.postalCode}
                                                     onChange={(e: any) => updateFormData('postalCode', e.target.value)}
-                                                    className="w-full text-gray-300"
                                                 />
                                                 {errors.postalCode && (
                                                     <p className="text-red-500 text-sm mt-1">{errors.postalCode}</p>
@@ -1007,7 +1004,6 @@ const BankTransferForm = () => {
                                                     placeholder="City"
                                                     value={formData.city}
                                                     onChange={(e: any) => updateFormData('city', e.target.value)}
-                                                    className="w-full text-gray-300"
                                                 />
                                                 {errors.city && (
                                                     <p className="text-red-500 text-sm mt-1">{errors.city}</p>
@@ -1025,7 +1021,6 @@ const BankTransferForm = () => {
                                                     placeholder="Enter phone with country code"
                                                     value={formData.phone}
                                                     onChange={(e: any) => updateFormData('phone', e.target.value)}
-                                                    className="w-full text-gray-300"
                                                 />
                                                 {errors.phone && (
                                                     <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
@@ -1067,7 +1062,6 @@ const BankTransferForm = () => {
                                                 placeholder="Account holder"
                                                 value={formData.accountHolder}
                                                 onChange={(e: any) => updateFormData('accountHolder', e.target.value)}
-                                                className="w-full text-gray-300"
                                             />
                                             {errors.accountHolder && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.accountHolder}</p>
@@ -1082,7 +1076,6 @@ const BankTransferForm = () => {
                                                 placeholder="Bank"
                                                 value={formData.bank}
                                                 onChange={(e: any) => updateFormData('bank', e.target.value)}
-                                                className="w-full text-gray-300"
                                             />
                                             {errors.bank && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.bank}</p>
@@ -1097,7 +1090,6 @@ const BankTransferForm = () => {
                                                 placeholder="City"
                                                 value={formData.billingCity}
                                                 onChange={(e: any) => updateFormData('billingCity', e.target.value)}
-                                                className="w-full text-gray-300"
                                             />
                                             {errors.billingCity && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.billingCity}</p>
@@ -1112,7 +1104,6 @@ const BankTransferForm = () => {
                                                 placeholder="Account number"
                                                 value={formData.accountNumber}
                                                 onChange={(e: any) => updateFormData('accountNumber', e.target.value)}
-                                                className="w-full text-gray-300"
                                             />
                                             {errors.accountNumber && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.accountNumber}</p>
@@ -1127,7 +1118,6 @@ const BankTransferForm = () => {
                                                 placeholder="IBAN"
                                                 value={formData.iban}
                                                 onChange={(e: any) => updateFormData('iban', e.target.value)}
-                                                className="w-full text-gray-300"
                                             />
                                             {errors.iban && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.iban}</p>
@@ -1142,7 +1132,6 @@ const BankTransferForm = () => {
                                                 placeholder="Swift code"
                                                 value={formData.swiftCode}
                                                 onChange={(e: any) => updateFormData('swiftCode', e.target.value)}
-                                                className="w-full text-gray-300"
                                             />
                                             {errors.swiftCode && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.swiftCode}</p>
@@ -1157,7 +1146,6 @@ const BankTransferForm = () => {
                                                 placeholder="Payment reference number"
                                                 value={formData.paymentReferenceNumber}
                                                 onChange={(e: any) => updateFormData('paymentReferenceNumber', e.target.value)}
-                                                className="w-full text-gray-300"
                                             />
                                             {errors.paymentReferenceNumber && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.paymentReferenceNumber}</p>

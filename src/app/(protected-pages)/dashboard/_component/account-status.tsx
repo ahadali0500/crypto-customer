@@ -14,6 +14,7 @@ import { SystemButton } from "@/components/shared/system-button";
 import Link from "next/link";
 import Card from "@/components/ui/Card/Card";
 import { useSessionContext } from "@/components/auth/AuthProvider/SessionContext";
+import { Button } from "@/components/ui";
 
 type KycStatus =
   | "EmailPending"
@@ -303,9 +304,9 @@ export default function AccountStatus() {
           <p className="text-sm text-muted-foreground">
             Enable Two-Factor Authentication (2FA) to add an extra layer of security to your account.
           </p>
-          <SystemButton size="sm" className="bg-orange-500 hover:bg-orange-600">
+          <button className="bg-orange-500 hover:bg-orange-600 py-2 px-4 text-white rounded-md hover:text-white hover:border-orange-600 text-orange-400 border-orange-500" onClick={() => alert("2FA setup flow coming soon!")}>
             Enable 2FA Now
-          </SystemButton>
+          </button>
         </div>
       </div>
     </Card>

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react"
 import classNames from "classnames"
 import { Input } from "@/components/ui"
 import Card from "@/components/ui/Card/Card"
-
+import { toast } from 'react-toastify';
 
 // Main Card Payment Component
 export default function CardPaymentPage() {
@@ -92,7 +92,7 @@ export default function CardPaymentPage() {
     await new Promise((resolve) => setTimeout(resolve, 3000))
     setIsProcessing(false)
     // Here you would integrate with actual payment processor
-    alert("Payment processed successfully!")
+    toast.success("Payment processed successfully!")
   }
 
   const formatCardNumber = (value: string) => {
@@ -182,7 +182,7 @@ export default function CardPaymentPage() {
                   value={formData.cardholderName}
                   onChange={(e) => handleInputChange("cardholderName", e.target.value)}
                   invalid={!!errors.cardholderName}
-                  className="text-white"
+                
                 />
                 {errors.cardholderName && (
                   <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.cardholderName}</p>
@@ -197,7 +197,7 @@ export default function CardPaymentPage() {
                   value={formData.cardNumber}
                   onChange={(e) => handleInputChange("cardNumber", formatCardNumber(e.target.value))}
                   invalid={!!errors.cardNumber}
-                  maxLength={19}  className="text-white"
+                  maxLength={19} 
                 />
                 {errors.cardNumber && (
                   <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.cardNumber}</p>
@@ -216,7 +216,6 @@ export default function CardPaymentPage() {
                     onChange={(e) => handleInputChange("expiryDate", formatExpiryDate(e.target.value))}
                     invalid={!!errors.expiryDate}
                     maxLength={5}
-                     className="text-white"
                   />
                   {errors.expiryDate && (
                     <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.expiryDate}</p>
@@ -231,7 +230,6 @@ export default function CardPaymentPage() {
                     onChange={(e) => handleInputChange("cvc", e.target.value.replace(/\D/g, ""))}
                     invalid={!!errors.cvc}
                     maxLength={4}
-                     className="text-white"
                   />
                   {errors.cvc && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.cvc}</p>}
                 </div>

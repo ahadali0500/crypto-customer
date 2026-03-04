@@ -50,13 +50,13 @@ export default function BankDepositForm() {
               <label htmlFor="swift-recipient-name" className="text-sm font-medium ">
                 Recipient Name *
               </label>
-              <Input size="sm" id="swift-recipient-name" placeholder="Enter recipient full name" className="text-white" required />
+              <Input size="sm" id="swift-recipient-name" placeholder="Enter recipient full name" required />
             </div>
             <div className="space-y-2">
               <label htmlFor="swift-bank-name" className="text-sm font-medium ">
                 Bank Name *
               </label>
-              <Input size="sm" id="swift-bank-name" placeholder="Enter bank name" required  className="text-white"/>
+              <Input size="sm" id="swift-bank-name" placeholder="Enter bank name" required />
             </div>
           </div>
 
@@ -70,7 +70,7 @@ export default function BankDepositForm() {
                 size="sm"
                 id="swift-code"
                 placeholder="e.g., DEUTDEFF"
-                className="uppercase text-white"
+                className="uppercase"
                 style={{ textTransform: "uppercase" }}
                 required 
               />
@@ -79,7 +79,7 @@ export default function BankDepositForm() {
               <label htmlFor="iban-swift" className="text-sm font-medium ">
                 IBAN/Account Number *
               </label>
-              <Input size="sm" id="iban-swift" placeholder="Enter IBAN or account number" required  className="text-white"/>
+              <Input size="sm" id="iban-swift" placeholder="Enter IBAN or account number" required />
             </div>
           </div>
 
@@ -102,7 +102,7 @@ export default function BankDepositForm() {
               <label htmlFor="amount-swift" className="text-sm font-medium ">
                 Amount *
               </label>
-              <Input size="sm" id="amount-swift" type="number" step="0.01" placeholder="0.00" required  className="text-white"/>
+              <Input size="sm" id="amount-swift" type="number" step="0.01" placeholder="0.00" required />
             </div>
             <div className="space-y-2  dark:bg-[#18212F] ">
               <label htmlFor="currency-swift" className="text-sm font-medium ">
@@ -123,7 +123,7 @@ export default function BankDepositForm() {
             <label htmlFor="reference-swift" className="text-sm font-medium ">
               Reference/Purpose
             </label>
-            <Input size="sm" id="reference-swift" placeholder="Payment reference or purpose" className="text-white" />
+            <Input size="sm" id="reference-swift" placeholder="Payment reference or purpose"  />
           </div>
 
           {/* Submit Button */}
@@ -157,7 +157,7 @@ export default function BankDepositForm() {
               <label htmlFor="sepa-recipient-name" className="text-sm font-medium ">
                 Recipient Name *
               </label>
-              <Input size="sm" id="sepa-recipient-name" placeholder="Enter recipient full name" required className="text-white" />
+              <Input size="sm" id="sepa-recipient-name" placeholder="Enter recipient full name" required  />
             </div>
             <div className="space-y-2">
               <label htmlFor="sepa-iban" className="text-sm font-medium ">
@@ -167,7 +167,7 @@ export default function BankDepositForm() {
                 size="sm"
                 id="sepa-iban"
                 placeholder="e.g., DE89370400440532013000"
-                className="uppercase text-white"
+                className="uppercase"
                 style={{ textTransform: "uppercase" }}
                 required 
               />
@@ -184,7 +184,7 @@ export default function BankDepositForm() {
                 size="sm"
                 id="sepa-bic"
                 placeholder="Optional for SEPA zone"
-                className="uppercase text-white"
+                className="uppercase"
                 style={{ textTransform: "uppercase" }}
               />
             </div>
@@ -192,7 +192,7 @@ export default function BankDepositForm() {
               <label htmlFor="amount-sepa" className="text-sm font-medium ">
                 Amount (EUR) *
               </label>
-              <Input size="sm" id="amount-sepa" type="number" step="0.01" placeholder="0.00" required className="text-white" />
+              <Input size="sm" id="amount-sepa" type="number" step="0.01" placeholder="0.00" required />
             </div>
           </div>
 
@@ -213,7 +213,7 @@ export default function BankDepositForm() {
             <label htmlFor="reference-sepa" className="text-sm font-medium ">
               Reference/Purpose
             </label>
-            <Input size="sm" id="reference-sepa" placeholder="Payment reference or purpose" maxLength={140}  className="text-white"/>
+            <Input size="sm" id="reference-sepa" placeholder="Payment reference or purpose" maxLength={140}/>
             <p className="text-xs text-gray-500">Maximum 140 characters</p>
           </div>
 
@@ -225,7 +225,7 @@ export default function BankDepositForm() {
               <Input
                 size="sm"
                 id="execution-date"
-                type="date" className="text-white"
+                type="date"
                 min={new Date().toISOString().split("T")[0]}
               />
             </div>
@@ -288,7 +288,7 @@ export default function BankDepositForm() {
             width={400}
             height="auto"
             closable
-            contentClassName="p-6 text-center"
+            contentClassName="p-6 text-center bg-white dark:bg-[#18212F]"
         >
             <h2 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">
                 Support Required
