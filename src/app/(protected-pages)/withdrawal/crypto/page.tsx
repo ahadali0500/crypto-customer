@@ -814,7 +814,7 @@ const WithdrawalPage = () => {
             cell: ({ row }) => (
                 <span
                     className={`px-2 py-1 rounded text-xs ${
-                        statusColorMap[row.original.withdrawStatus] || 'bg-gray-500'
+                        statusColorMap[row.original.withdrawStatus] || 'bg-gray-500 text-white'
                     }`}
                 >
                     {row.original.withdrawStatus}
