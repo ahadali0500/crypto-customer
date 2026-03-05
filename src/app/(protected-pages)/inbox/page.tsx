@@ -105,13 +105,13 @@ const TypingIndicator = ({ userName }: { userName: string }) => (
 const MessageStatus = ({ status }: { status?: string }) => {
   switch (status) {
     case "sending":
-      return <Loader className="h-4 w-4 text-gray-400 animate-spin" />;
+      return <Loader className="h-4 w-4 text-blue-200 animate-spin" />;
     case "sent":
-      return <Check className="h-4 w-4 text-gray-400" />;
+      return <Check className="h-4 w-4 text-blue-200" />;
     case "delivered":
-      return <CheckCheck className="h-4 w-4 text-gray-400" />;
+      return <CheckCheck className="h-4 w-4 text-blue-200" />;
     case "read":
-      return <CheckCheck className="h-4 w-4 text-blue-500" />;
+      return <CheckCheck className="h-4 w-4 text-white" />;
     default:
       return null;
   }
@@ -134,7 +134,7 @@ const UserSkeleton = () => (
 
 const MessageSkeleton = ({ isOwn }: { isOwn: boolean }) => (
   <div className={`flex ${isOwn ? "justify-end" : "justify-start"} animate-pulse`}>
-    <div className={`${isOwn ? "bg-blue-200 dark:bg-blue-900" : "bg-gray-200 dark:bg-gray-800"} rounded-lg px-4 py-2 max-w-xs`}>
+    <div className={`${isOwn ? "bg-blue-200 dark:bg-blue-900" : "bg-gray-200 dark:bg-gray-800"} rounded-2xl px-4 py-2 max-w-xs`}>
       <div className="h-4 bg-gray-400 dark:bg-gray-600 rounded w-32"></div>
     </div>
   </div>
@@ -147,7 +147,7 @@ const EmptyUsersList = () => (
   <div className="flex flex-col items-center justify-center h-64 p-8">
     <Users className="h-16 w-16 text-gray-400 mb-4" />
     <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">No conversations</h3>
-    <p className="text-sm  text-center">Start a conversation to begin messaging</p>
+    <p className="text-sm text-center">Start a conversation to begin messaging</p>
   </div>
 );
 
@@ -175,7 +175,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null
+  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
   if (token) {
     config.headers["Authorization"] = `Bearer ${token}`;
   }
@@ -200,12 +200,13 @@ export default function ChatApp() {
   const [typingUsers, setTypingUsers] = useState<Set<number>>(new Set());
   const [messageOffset, setMessageOffset] = useState(0);
 
-  const { session } = useSessionContext()
+  const { session } = useSessionContext();
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const fileInputRef = useRef<HTMLInputElement>(null);
-const { socket, onlineAdminIds } = useChatSocket();
+  const { socket, onlineAdminIds } = useChatSocket();
+
   // Show toast notification
   const showToast = useCallback((message: string, type: "success" | "error" | "info" = "info") => {
     setToast({ message, type });
@@ -226,26 +227,19 @@ const { socket, onlineAdminIds } = useChatSocket();
       setIsLoadingUsers(true);
       try {
         const { data } = await api.get("/user/chat/list");
-        
-        
-       const mapped: User[] = data.admins.map((u: any) => ({
-  id: u.id,
-  name: u.name,
-  email: u.email,
-  avatar: u.profileImageUrl ?? u.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2),
 
-
-  status: onlineAdminIds.has(u.id) ? "online" : "offline",
-
-  unreadCount: u._count?.sentChats || 0,
-  lastMessage: u.lastChat?.message ?? (u.lastChat?.file ? "📎 File attachment" : "No messages yet"),
-  lastMessageTime: new Date(u.lastChat?.createdAt || Date.now()),
-  messages: [],
-  isTyping: false,
-}));
-
-setUsers(mapped);
-
+        const mapped: User[] = data.admins.map((u: any) => ({
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          avatar: u.profileImageUrl ?? u.name.split(" ").map((n: string) => n[0]).join("").slice(0, 2),
+          status: onlineAdminIds.has(u.id) ? "online" : "offline",
+          unreadCount: u._count?.sentChats || 0,
+          lastMessage: u.lastChat?.message ?? (u.lastChat?.file ? "📎 File attachment" : "No messages yet"),
+          lastMessageTime: new Date(u.lastChat?.createdAt || Date.now()),
+          messages: [],
+          isTyping: false,
+        }));
 
         setUsers(mapped);
         showToast("Conversations loaded", "success");
@@ -258,7 +252,7 @@ setUsers(mapped);
     };
 
     fetchUsers();
-  }, [showToast,onlineAdminIds]);
+  }, [showToast, onlineAdminIds]);
 
   // Fetch messages when user selected
   useEffect(() => {
@@ -276,6 +270,7 @@ setUsers(mapped);
           headers: { "Content-Type": "multipart/form-data" },
         });
 
+        // FIX: fromAdminId set → sender "admin" (left), fromCustomerId set → sender "user" (right)
         const mapped: Message[] = data.data.map((m: ApiMessage) => ({
           id: m.id,
           text: m.message ?? "",
@@ -328,11 +323,11 @@ setUsers(mapped);
 
     setIsSendingMessage(true);
 
-    // Add optimistic message
+    // FIX: sender is "user" (customer's own message → right side)
     const optimisticMsg: Message = {
       id: Date.now(),
       text: newMessage,
-      sender: "admin",
+      sender: "user",
       file: newFile ? URL.createObjectURL(newFile) : null,
       timestamp: new Date(),
       status: "sending",
@@ -348,23 +343,24 @@ setUsers(mapped);
       });
 
       const payload: ApiMessage = data.chat;
+
+      // FIX: sender stays "user" after API confirms
       const msg: Message = {
         id: payload.id,
         text: payload.message ?? "",
         file: payload.file,
-        sender: "admin",
+        sender: "user",
         timestamp: new Date(payload.createdAt),
         status: "delivered",
       };
 
-      // Update with real message
       setUsers((prev) =>
         prev.map((u) =>
           u.id === selectedUser.id
             ? {
               ...u,
               lastMessage: payload?.message ?? (payload?.file ? "📎 File" : "No messages"),
-              messages: u.messages.map(m => m.id === optimisticMsg.id ? msg : m)
+              messages: u.messages.map(m => m.id === optimisticMsg.id ? msg : m),
             }
             : u
         ),
@@ -372,18 +368,13 @@ setUsers(mapped);
 
       setSelectedUser((prev) =>
         prev
-          ? {
-            ...prev,
-            messages: prev.messages.map(m => m.id === optimisticMsg.id ? msg : m)
-          }
+          ? { ...prev, messages: prev.messages.map(m => m.id === optimisticMsg.id ? msg : m) }
           : null
       );
 
       setNewMessage("");
       setNewFile(null);
       showToast("Message sent", "success");
-
-
 
       // Stop typing indicator
       if (socket.connected) {
@@ -412,7 +403,7 @@ setUsers(mapped);
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (file.size > 10 * 1024 * 1024) {
         showToast("File too large (max 10MB)", "error");
         return;
       }
@@ -427,18 +418,15 @@ setUsers(mapped);
 
     if (!selectedUser || !socket?.connected) return;
 
-    // Clear previous timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    // Emit typing indicator
     socket.emit("user_typing", {
       room: `chat-room-customer-${session!.user!.id}-to-${selectedUser.id}`,
       typingStatus: value.length > 0,
     });
 
-    // Stop typing after 2 seconds of inactivity
     typingTimeoutRef.current = setTimeout(() => {
       if (socket?.connected) {
         socket.emit("user_typing", {
@@ -457,33 +445,63 @@ setUsers(mapped);
 
   const showEmptySearch = searchQuery.trim() && filteredUsers.length === 0;
 
-  // Socket setup
-  
-useEffect(() => {
-  if (!socket || !session?.user?.id) return;
+  // Socket setup — status changes + real-time incoming messages
+  useEffect(() => {
+    if (!socket || !session?.user?.id) return;
 
-  
-  socket.emit("user_online", { userId: session.user.id, userType: "customer" });
+    socket.emit("user_online", { userId: session.user.id, userType: "customer" });
 
-  const handleStatus = (data: any) => {
-    if (data.userType !== "admin") return;
+    const handleStatus = (data: any) => {
+      if (data.userType !== "admin") return;
 
-    setUsers((prev) =>
-      prev.map((u) => (u.id === data.userId ? { ...u, status: data.status } : u))
-    );
+      setUsers((prev) =>
+        prev.map((u) => (u.id === data.userId ? { ...u, status: data.status } : u))
+      );
 
-    setSelectedUser((prev) => {
-      if (!prev || prev.id !== data.userId) return prev;
-      return { ...prev, status: data.status };
-    });
-  };
+      setSelectedUser((prev) => {
+        if (!prev || prev.id !== data.userId) return prev;
+        return { ...prev, status: data.status };
+      });
+    };
 
-  socket.on("user_status_change", handleStatus);
+    // FIX: real-time incoming message listener — no page refresh needed
+    const handleNewMessage = (data: any) => {
+      const incomingMsg: Message = {
+        id: data.id ?? Date.now(),
+        text: data.message ?? "",
+        file: data.file ?? null,
+        sender: "admin",   // from admin → left side
+        timestamp: new Date(data.createdAt ?? Date.now()),
+        status: "delivered",
+      };
 
-  return () => {
-    socket.off("user_status_change", handleStatus);
-  };
-}, [socket, session?.user?.id]);
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === data.fromAdminId
+            ? {
+              ...u,
+              lastMessage: data.message ?? "📎 File",
+              lastMessageTime: new Date(data.createdAt ?? Date.now()),
+              messages: [...u.messages, incomingMsg],
+            }
+            : u
+        )
+      );
+
+      setSelectedUser((prev) => {
+        if (!prev || prev.id !== data.fromAdminId) return prev;
+        return { ...prev, messages: [...prev.messages, incomingMsg] };
+      });
+    };
+
+    socket.on("user_status_change", handleStatus);
+    socket.on("receive_message", handleNewMessage); // adjust event name to match your backend
+
+    return () => {
+      socket.off("user_status_change", handleStatus);
+      socket.off("receive_message", handleNewMessage);
+    };
+  }, [socket, session?.user?.id]);
 
   // --------------------------------------------------
   // Render
@@ -493,10 +511,10 @@ useEffect(() => {
       {toast && <Toast {...toast} />}
 
       {/* Sidebar */}
-      <div className={`${showChat ? "hidden" : "flex"} md:flex bg-white dark:bg-[#18212F] w-full md:w-80 border-r border-gray-200 dark:border-gray-200 flex-col h-full`}>
-        <div className="p-4 border-b border-gray-200 dark:border-gray-200 flex-shrink-0">
+      <div className={`${showChat ? "hidden" : "flex"} md:flex bg-white dark:bg-[#18212F] w-full md:w-80 border-r border-gray-200 dark:border-gray-700 flex-col h-full`}>
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
           <h1 className="text-xl font-bold mb-4 dark:text-white">Messages</h1>
-          <div className="relative  ">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               placeholder="Search conversations..."
@@ -507,7 +525,7 @@ useEffect(() => {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto ">
+        <div className="flex-1 overflow-y-auto">
           {isLoadingUsers ? (
             <>{[...Array(5)].map((_, i) => <UserSkeleton key={i} />)}</>
           ) : showEmptySearch ? (
@@ -544,27 +562,25 @@ useEffect(() => {
                     setShowChat(true);
                   }
                 }}
-                className={`p-4 border-b border-gray-200 dark:border-gray-800 cursor-pointer hover:bg-gray-50 dark:bg-[#18212F] transition-colors ${selectedUser?.id === user.id ? "bg-blue-50 dark:bg-[#18212F]" : ""
-                  }`}
+                className={`p-4 border-b border-gray-200 dark:border-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e293b] dark:bg-[#18212F] transition-colors ${selectedUser?.id === user.id ? "bg-blue-50 dark:bg-[#1e293b]" : ""}`}
               >
-                <div className="flex items-center space-x-3 ">
+                <div className="flex items-center space-x-3">
                   <div className="relative">
                     <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                       {user.avatar}
                     </div>
                     <div
-                      className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${user.status === "online" ? "bg-green-500" : "bg-gray-400"
-                        }`}
+                      className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${user.status === "online" ? "bg-green-500" : "bg-gray-400"}`}
                     ></div>
                   </div>
-                  <div className="flex-1 min-w-0 ">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <h3 className="font-semibold dark:text-white truncate">{user.name}</h3>
                       {user.lastMessageTime && (
-                        <span className="text-xs text-gray-500 dark:text-gray-200 ml-2">{formatTime(user.lastMessageTime)}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">{formatTime(user.lastMessageTime)}</span>
                       )}
                     </div>
-                    <div className="flex items-center justify-between mt-1 ">
+                    <div className="flex items-center justify-between mt-1">
                       {user.isTyping ? (
                         <TypingIndicator userName={user.name.split(" ")[0]} />
                       ) : (
@@ -587,8 +603,7 @@ useEffect(() => {
       </div>
 
       {/* Chat Pane */}
-      <div className={`${showChat ? "flex" : "hidden"} md:flex flex-1 flex-col h-full
-  dark:border-l dark:border-gray-600`}>
+      <div className={`${showChat ? "flex" : "hidden"} md:flex flex-1 flex-col h-full dark:border-l dark:border-gray-600`}>
         {selectedUser ? (
           <>
             {/* Header */}
@@ -607,19 +622,20 @@ useEffect(() => {
                     {selectedUser.avatar}
                   </div>
                   <div
-                    className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${selectedUser.status === "online" ? "bg-green-500" : "bg-gray-400"
-                      }`}
+                    className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${selectedUser.status === "online" ? "bg-green-500" : "bg-gray-400"}`}
                   ></div>
                 </div>
                 <div>
                   <h2 className="font-semibold dark:text-white">{selectedUser.name}</h2>
-                 
+                  <p className={`text-xs ${selectedUser.status === "online" ? "text-green-500" : "text-gray-400"}`}>
+                    {selectedUser.status === "online" ? "Online" : "Offline"}
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-[#18212F]">
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-50 dark:bg-[#18212F]">
               {isLoadingMessages ? (
                 <div className="space-y-3">
                   {[...Array(3)].map((_, i) => (
@@ -631,34 +647,54 @@ useEffect(() => {
               ) : (
                 <>
                   {selectedUser.messages.map((m) => (
-                    <div key={m.id} className={`flex ${m.sender === "admin" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      key={m.id}
+                      // FIX: "user" = customer's own message → right; "admin" = received → left
+                      className={`flex ${m.sender === "user" ? "justify-end" : "justify-start"}`}
+                    >
                       <div
-                        className={`max-w-xs sm:max-w-md rounded-lg px-4 py-2 flex items-end space-x-2 ${m.sender === "admin"
-                            ? "bg-blue-500 text-white rounded-br-none"
-                            : "bg-white dark:bg-[#18212F] text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-bl-none"
-                          }`}
+                        className={`
+                          max-w-xs sm:max-w-md rounded-2xl px-4 py-2.5 flex items-end gap-2 shadow-sm
+                          ${m.sender === "user"
+                            // Sent bubble: blue, tail bottom-right
+                            ? "bg-blue-500 text-white rounded-br-sm"
+                            // Received bubble: light gray (light) / dark navy (dark), tail bottom-left
+                            : "bg-slate-100 dark:bg-[#1E2A3B] text-slate-800 dark:text-gray-100 rounded-bl-sm"
+                          }
+                        `}
                       >
-                        <div className="flex-1">
-                          {m.text && <p className="text-sm leading-relaxed break-words">{m.text}</p>}
+                        <div className="flex-1 min-w-0">
+                          {m.text && (
+                            <p className="text-sm leading-relaxed break-words">{m.text}</p>
+                          )}
                           {m.file && (
                             <a
                               href={m.file}
                               target="_blank"
                               rel="noreferrer"
-                              className={`text-sm underline hover:opacity-80 transition-opacity ${m.sender === "admin" ? "text-blue-100" : "text-blue-600"
-                                }`}
+                              className={`text-sm underline hover:opacity-80 transition-opacity ${
+                                m.sender === "user" ? "text-blue-100" : "text-blue-500 dark:text-blue-400"
+                              }`}
                             >
                               📎 Download file
                             </a>
                           )}
                           <span
-                            className={`text-xs ${m.sender === "admin" ? "text-blue-100" : "text-gray-400"
-                              } mt-1 block`}
+                            className={`text-xs mt-1 block ${
+                              m.sender === "user"
+                                ? "text-blue-100"
+                                : ""
+                            }`}
                           >
                             {formatTime(m.timestamp)}
                           </span>
                         </div>
-                        {m.sender === "admin" && <MessageStatus status={m.status} />}
+                        {/* FIX: only show tick for own messages */}
+                        {m.sender === "user" && (
+                          <div className="flex-shrink-0 mb-0.5">
+                            <MessageStatus status={m.status} />
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -676,7 +712,7 @@ useEffect(() => {
             </div>
 
             {/* Input */}
-            <div className="bg-white dark:bg-[#18212F] border-t border-gray-200 dark:border-gray-300 p-3 flex flex-col gap-2 flex-shrink-0">
+            <div className="bg-white dark:bg-[#18212F] border-t border-gray-200 dark:border-gray-700 p-3 flex flex-col gap-2 flex-shrink-0">
               {newFile && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2 text-sm flex items-center justify-between">
                   <span>📎 {newFile.name}</span>
@@ -688,7 +724,7 @@ useEffect(() => {
                   </button>
                 </div>
               )}
-              <div className="flex items-center space-x-2 ">
+              <div className="flex items-center space-x-2">
                 <label htmlFor="fileInput" className="cursor-pointer p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
                   <Paperclip className="h-5 w-5 text-gray-500 dark:text-gray-300" />
                 </label>
@@ -704,7 +740,7 @@ useEffect(() => {
                   onChange={(e) => handleTyping(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
                   placeholder="Type a message..."
-                  className="flex-1 dark:bg-[#18212F] text-white border border-gray-400"
+                  className="flex-1 dark:bg-[#18212F] dark:text-white border border-gray-300 dark:border-gray-600"
                   disabled={isSendingMessage}
                 />
                 <Button

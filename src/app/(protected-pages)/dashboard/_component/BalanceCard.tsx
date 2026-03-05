@@ -197,7 +197,7 @@ const BalanceCard = ({ cardData }: { cardData: CardData }) => {
             />
 
             <div className="mt-4 space-y-2">
-              <div className="max-h-32 overflow-y-auto scrollbar-thumb-gray-500 scrollbar-track-gray-700 scrollbar-thin">
+             <div className="max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-[#4B5563] scrollbar-track-gray-100 dark:scrollbar-track-[#1B2539] hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-[#6B7280]">
                 {cardData.data.map((item, index) => {
                   const balance =
                     activeBalanceTab === 'available'
@@ -231,7 +231,7 @@ const BalanceCard = ({ cardData }: { cardData: CardData }) => {
                         <div className={classNames('text-sm', { 'text-red-500': balance < 0 })}>
                           {balance.toFixed(6)}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs">
                           ${balanceUSDStr || '0.00'}
                         </div>
                       </div>

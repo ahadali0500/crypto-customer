@@ -198,6 +198,7 @@ const Page = () => {
   const [feeBundles, setFeeBundles] = useState<FeeBundle[]>([]);
   const [selectedFeeBundle, setSelectedFeeBundle] = useState<FeeBundle | null>(null);
   const [feeBundleError, setFeeBundleError] = useState('');
+  const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
   // ─── API calls (unchanged) ──────────────────────────────────────────────
   const fetchAdminSetting = async () => {
@@ -547,6 +548,7 @@ const Page = () => {
         setBuyAmount('');
         setErrorMessage('');
         await fetchCrypto();
+        setHistoryRefreshKey(prev => prev + 1);
       }
     } catch (error: any) {
       const errorMsg = error.response?.data?.message || 'Exchange failed. Please try again.';
@@ -750,8 +752,8 @@ const Page = () => {
                 onClick={handleExchangeClick}
                 disabled={isSubmitDisabled}
                 className={`w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${isSubmitDisabled
-                    ? 'bg-neutral-100 dark:bg-[#1F2937] text-neutral-400 dark:text-[#4B5563] cursor-not-allowed border border-neutral-200 dark:border-[#374151]'
-                    : 'text-white shadow-lg shadow-[#7C3AED]/20 hover:opacity-90 active:scale-[0.99]'
+                  ? 'bg-neutral-100 dark:bg-[#1F2937] text-neutral-400 dark:text-[#4B5563] cursor-not-allowed border border-neutral-200 dark:border-[#374151]'
+                  : 'text-white shadow-lg shadow-[#7C3AED]/20 hover:opacity-90 active:scale-[0.99]'
                   }`}
                 style={
                   !isSubmitDisabled
@@ -879,7 +881,7 @@ const Page = () => {
 
         {/* ── Exchange History ──────────────────────────────── */}
         <div className="mt-8 mb-10">
-          <ExchangeHistory />
+          <ExchangeHistory  key={historyRefreshKey}/>
         </div>
       </div>
 

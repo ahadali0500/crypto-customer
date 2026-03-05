@@ -187,11 +187,11 @@ const Hero = () => {
                                                 </div>
 
                                                 <div>
-                                                    <div className="font-semibold text-gray-900 dark:text-white">
-                                                        {crypto.name}
+                                                    <div className="font-semibold">
+                                                        <p className='text-white'>{crypto.name}</p>
                                                     </div>
-                                                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                                                        {crypto.symbol}
+                                                    <div className="text-xs">
+                                                       <p className='dark:text-gray-400 text-slate-400'> {crypto.symbol}</p>
                                                     </div>
                                                 </div>
                                             </div>
