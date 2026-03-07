@@ -6,42 +6,57 @@ import { initchatSocket } from "@/configs/chat.socket";
 import { useSessionContext } from "@/components/auth/AuthProvider/SessionContext";
 import { getUserIdFromToken } from "@/utils/getUserIdFromToken";
 
-type StatusPayload = { userId: number; userType: "admin" | "customer"; status: "online" | "offline" | "away" };
+type StatusPayload = {
+  userId: number;
+  userType: "admin" | "customer";
+  status: "online" | "offline" | "away";
+};
+
+// Raw Prisma Chat object the backend emits
+export interface IncomingChatMessage {
+  id: number;
+  fromAdminId: number | null;
+  fromCustomerId: number | null;
+  toAdminId: number | null;
+  toCustomerId: number | null;
+  message: string | null;
+  file: string | null;
+  createdAt: string;
+  seen: string;
+}
 
 type ChatSocketContextValue = {
   socket: Socket | null;
   connected: boolean;
   onlineAdminIds: Set<number>;
+  // ✅ NEW: last message received via socket — reactive, no timing issues
+  lastMessage: IncomingChatMessage | null;
 };
 
 const ChatSocketContext = createContext<ChatSocketContextValue | null>(null);
 
 export const ChatSocketProvider = ({ children }: { children: React.ReactNode }) => {
   const { session } = useSessionContext();
-  const socketRef = useRef<Socket | null>(null);
 
+  // ✅ useState (not useRef) so consumers re-render when socket is ready
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
   const [onlineAdminIds, setOnlineAdminIds] = useState<Set<number>>(new Set());
 
+  // ✅ KEY FIX: lastMessage lives HERE in the context where socket lifecycle
+  // is fully controlled. ChatApp just reads this — no timing issues at all.
+  const [lastMessage, setLastMessage] = useState<IncomingChatMessage | null>(null);
+
   useEffect(() => {
-    
     const customerId = Number(session?.user?.id) || getUserIdFromToken();
-
-    if (!customerId) {
-      console.log("⚠️ No customerId yet, waiting...");
-      return;
-    }
-
- 
+    if (!customerId) return;
 
     const s = initchatSocket(String(customerId), "customer");
-    socketRef.current = s;
+    setSocket(s);
 
     const onConnect = () => {
       console.log("✅ SOCKET CONNECTED:", s.id);
       setConnected(true);
-
-      // mark online + sync online admins
       s.emit("user_online", { userId: customerId, userType: "customer" });
       s.emit("get_online_users", { userType: "admin" });
     };
@@ -52,21 +67,13 @@ export const ChatSocketProvider = ({ children }: { children: React.ReactNode }) 
     };
 
     const onOnlineUsers = (payload: any) => {
-      console.log("📡 online_users payload:", payload);
-
       if (payload?.userType !== "admin") return;
-
-      // ✅ backend sends: { userType: "admin", users: [31, 1] }
       const ids = (payload?.users || []).map(Number);
       setOnlineAdminIds(new Set(ids));
-
-      console.log("✅ onlineAdminIds updated:", ids);
     };
 
     const onStatus = (data: StatusPayload) => {
-      // realtime admin online/offline updates
       if (data.userType !== "admin") return;
-
       setOnlineAdminIds((prev) => {
         const next = new Set(prev);
         if (data.status === "online") next.add(Number(data.userId));
@@ -75,10 +82,27 @@ export const ChatSocketProvider = ({ children }: { children: React.ReactNode }) 
       });
     };
 
+    // ✅ CONFIRMED from backend: active room → "message", inactive → "inactiveMessage"
+    // Both carry the raw Prisma Chat object
+    const onMessage = (data: IncomingChatMessage) => {
+      console.log("[SOCKET] 'message' received:", data);
+      // Only handle messages FROM admin TO customer
+      if (!data.fromAdminId) return;
+      setLastMessage({ ...data }); // spread ensures new reference → triggers useEffect in ChatApp
+    };
+
+    const onInactiveMessage = (data: IncomingChatMessage) => {
+      console.log("[SOCKET] 'inactiveMessage' received:", data);
+      if (!data.fromAdminId) return;
+      setLastMessage({ ...data });
+    };
+
     s.on("connect", onConnect);
     s.on("disconnect", onDisconnect);
     s.on("online_users", onOnlineUsers);
     s.on("user_status_change", onStatus);
+    s.on("message", onMessage);
+    s.on("inactiveMessage", onInactiveMessage);
 
     if (s.connected) onConnect();
 
@@ -87,16 +111,21 @@ export const ChatSocketProvider = ({ children }: { children: React.ReactNode }) 
       s.off("disconnect", onDisconnect);
       s.off("online_users", onOnlineUsers);
       s.off("user_status_change", onStatus);
-      // ❌ do not disconnect here (global provider)
+      s.off("message", onMessage);
+      s.off("inactiveMessage", onInactiveMessage);
     };
-  }, [session?.user?.id]); // ok; token fallback handles null
+  }, [session?.user?.id]);
 
   const value = useMemo(
-    () => ({ socket: socketRef.current, connected, onlineAdminIds }),
-    [connected, onlineAdminIds]
+    () => ({ socket, connected, onlineAdminIds, lastMessage }),
+    [socket, connected, onlineAdminIds, lastMessage]
   );
 
-  return <ChatSocketContext.Provider value={value}>{children}</ChatSocketContext.Provider>;
+  return (
+    <ChatSocketContext.Provider value={value}>
+      {children}
+    </ChatSocketContext.Provider>
+  );
 };
 
 export const useChatSocket = () => {
