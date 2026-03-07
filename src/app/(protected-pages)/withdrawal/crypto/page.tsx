@@ -318,29 +318,35 @@ const WithdrawalPage = () => {
         }
     }, [token]);
 
-    const fetchConversionRate = useCallback(async (cryptoSymbol: string): Promise<number | null> => {
-        try {
-            const cleanSymbol = cryptoSymbol.trim().split(/[\s/-]/)[0].toLowerCase();
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const fetchConversionRate = useCallback(
+  async (cryptoSymbol: string): Promise<number | null> => {
+    try {
+      const normalizedSymbol = cryptoSymbol.trim().split(/[\s/-]/)[0].toUpperCase()
 
-            const res = await axios.get(
-                `https://api.coingecko.com/api/v3/simple/price?ids=${cleanSymbol}&vs_currencies=usd`,
-                { signal: controller.signal }
-            );
-
-            clearTimeout(timeoutId);
-            const rate = res.data[cleanSymbol]?.usd;
-            return typeof rate === 'number' && rate >= 0 ? rate : null;
-        } catch (error) {
-            if (axios.isCancel(error)) {
-                console.error('Request timeout for conversion rate');
-            } else {
-                console.error('Error fetching conversion rate:', error);
-            }
-            return null;
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/conversion/convert`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            from: normalizedSymbol,
+            to: 'USD',
+            amount: 1,
+          },
+          timeout: 10000,
         }
-    }, []);
+      )
+
+      const rate = Number(res.data?.data?.result || 0)
+      return rate > 0 ? rate : null
+    } catch (error) {
+      console.error('Error fetching conversion rate from backend:', error)
+      return null
+    }
+  },
+  [token]
+)
 
     // ========== Effects ==========
     useEffect(() => {

@@ -179,7 +179,13 @@ const Page = () => {
     const [search, setSearch] = useState('')
     const [dataLoading, setDataLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    const { session } = useSessionContext()
+const [conversionCache, setConversionCache] = useState<{
+  [key: string]: {
+    rate: number
+    result: number
+    timestamp: number
+  }
+}>({})
 
     // Pagination and Sorting
     const [pageIndex, setPageIndex] = useState(1)
@@ -201,10 +207,8 @@ const Page = () => {
     const router = useRouter()
     const tableRef = useRef<HTMLDivElement>(null)
 
-    // Rate caching
-    const [rateCache, setRateCache] = useState<{
-        [key: string]: { rate: number; timestamp: number }
-    }>({})
+    
+  
     const [isLoadingRates, setIsLoadingRates] = useState(false)
 
     // Get token safely
@@ -288,72 +292,66 @@ const Page = () => {
             toast.error(err?.response?.data?.message || 'No wallet available for this currency')
         }
     }, [token])
-    // ✅ ONLY dynamic symbol mapping (no static object)
-    const [symbolToIdMap, setSymbolToIdMap] = useState({})
+ 
 
-    const fetchAllCurrencies = async () => {
-        const [vsCurrenciesRes, cryptoListRes] = await Promise.all([
-            axios.get(
-                'https://api.coingecko.com/api/v3/simple/supported_vs_currencies',
-            ),
-            axios.get('https://api.coingecko.com/api/v3/coins/list'),
-        ])
-
-        // Create mapping from SYMBOL to ID
-        const map = {}
-        cryptoListRes.data.forEach((coin) => {
-            map[coin.symbol.toUpperCase()] = coin.id
-        })
-
-        setSymbolToIdMap(map)
-    }
-
-    useEffect(() => {
-        fetchAllCurrencies()
-    }, [])
+  
 
     // fetch conversion rate
-    const fetchConversionRate = useCallback(
-        async (coinGeckoId: string, useCache = true): Promise<number | null> => {
-            const cleanId = coinGeckoId.toLowerCase()
-            const cacheKey = `${cleanId}_USD`
 
-            if (useCache && rateCache[cacheKey]) {
-                const cached = rateCache[cacheKey]
-                if (Date.now() - cached.timestamp < 300000) {
-                    return cached.rate
-                }
-            }
+const fetchConversionRate = useCallback(
+  async (from: string, to: string, amount: number) => {
+    const normalizedFrom = from.toUpperCase()
+    const normalizedTo = to.toUpperCase()
+    const normalizedAmount = Number(amount)
 
-            try {
-                const res = await axios.get(
-                    'https://api.coingecko.com/api/v3/simple/price',
-                    {
-                        params: {
-                            ids: cleanId,
-                            vs_currencies: 'usd',
-                        },
-                    }
-                )
+    const cacheKey = `${normalizedFrom}_${normalizedTo}_${normalizedAmount}`
+    const cached = conversionCache[cacheKey]
 
-                const rate = res.data?.[cleanId]?.usd ?? null
+    // frontend cache valid for 30 seconds
+    if (cached && Date.now() - cached.timestamp < 30000) {
+      return {
+        rate: cached.rate,
+        result: cached.result,
+      }
+    }
 
-                if (rate) {
-                    setRateCache((prev) => ({
-                        ...prev,
-                        [cacheKey]: { rate, timestamp: Date.now() },
-                    }))
-                }
-
-                return rate
-            } catch (e) {
-                console.error('Rate fetch failed:', e)
-                return null
-            }
+    try {
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/conversion/convert`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            from: normalizedFrom,
+            to: normalizedTo,
+            amount: normalizedAmount,
+          },
+          timeout: 10000,
         },
-        [rateCache]
-    )
+      )
 
+      const payload = {
+        rate: Number(res.data?.data?.rate || 0),
+        result: Number(res.data?.data?.result || 0),
+      }
+
+      setConversionCache((prev) => ({
+        ...prev,
+        [cacheKey]: {
+          ...payload,
+          timestamp: Date.now(),
+        },
+      }))
+
+      return payload
+    } catch (error) {
+      console.error('Backend conversion API error:', error)
+      return null
+    }
+  },
+  [conversionCache, token],
+)
 
     // Fetch deposit history
     const fetchDepositHistory = useCallback(async () => {
@@ -381,110 +379,76 @@ const Page = () => {
 
     // Fetch cryptocurrencies with rates
 
-    const fetchCryptocurrencies = useCallback(async () => {
-        if (!token) return
 
-        setIsLoadingRates(true)
-        try {
-            const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/currency/fetch?type=Crypto`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                },
-            )
+const fetchCryptocurrencies = useCallback(async () => {
+  if (!token) return
 
-            const currencyData = response.data.data || []
+  setIsLoadingRates(true)
+  try {
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/currency/fetch?type=Crypto`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    )
 
-            const currenciesWithRates: Currency[] = []
+    const currencyData = response.data.data || []
 
-            for (let i = 0; i < currencyData.length; i++) {
-                const currency = currencyData[i]
+    setCurrencies(currencyData)
 
-                try {
-                    const rate = await fetchConversionRate(currency.shortName)
-
-                    currenciesWithRates.push({
-                        ...currency,
-                        rate: rate || 0,
-                    })
-
-                    if (i < currencyData.length - 1) {
-                        await new Promise((resolve) => setTimeout(resolve, 200))
-                    }
-                } catch {
-                    currenciesWithRates.push({
-                        ...currency,
-                        rate: 0,
-                    })
-                }
-            }
-
-
-            setCurrencies(currenciesWithRates)
-
-            if (currenciesWithRates.length > 0) {
-                const first = currenciesWithRates[0]
-                setSelectedCurrency(first)
-                fetchWalletForCurrency(first.id)
-            }
-
-        } catch (error) {
-            console.error('Error fetching currencies:', error)
-            setError('Failed to fetch currencies')
-        } finally {
-            setIsLoadingRates(false)
-        }
-    }, [token, fetchConversionRate, fetchWalletForCurrency])
+    if (currencyData.length > 0) {
+      const first = currencyData[0]
+      setSelectedCurrency(first)
+      fetchWalletForCurrency(first.id)
+    }
+  } catch (error) {
+    console.error('Error fetching currencies:', error)
+    setError('Failed to fetch currencies')
+  } finally {
+    setIsLoadingRates(false)
+  }
+}, [token, fetchWalletForCurrency])
 
     // Currency conversion effect
-    useEffect(() => {
-        const convertCurrency = async () => {
-            if (
-                !selectedCurrency ||
-                !usdAmount ||
-                isNaN(parseFloat(usdAmount)) ||
-                parseFloat(usdAmount) <= 0
-            ) {
-                setCryptoAmount('')
-                return
-            }
+useEffect(() => {
+  const convertCurrency = async () => {
+    if (
+      !selectedCurrency ||
+      !usdAmount ||
+      isNaN(parseFloat(usdAmount)) ||
+      parseFloat(usdAmount) <= 0
+    ) {
+      setCryptoAmount('')
+      return
+    }
 
-            setConversionLoading(true)
+    setConversionLoading(true)
 
-            try {
-                let rate = selectedCurrency.rate
+    try {
+      const conversion = await fetchConversionRate(
+        'USD',
+        selectedCurrency.shortName.toUpperCase(),
+        parseFloat(usdAmount),
+      )
 
-                // Only fetch fresh rate if cached rate is 0 or very old
-                if (!rate || rate === 0) {
-                    console.log('Fetching fresh rate for conversion...')
-                    rate = await fetchConversionRate(
-                        selectedCurrency.shortName,
-                        true,
-                    )
-                }
+      if (conversion?.result) {
+        setCryptoAmount(Number(conversion.result).toFixed(8))
+      } else {
+        setCryptoAmount('0')
+      }
+    } catch (error) {
+      console.error('Error in conversion:', error)
+      setCryptoAmount('0')
+    } finally {
+      setConversionLoading(false)
+    }
+  }
 
-                if (rate && rate > 0) {
-                    const usdValue = parseFloat(usdAmount)
-                    const cryptoValue = usdValue / rate
-                    setCryptoAmount(cryptoValue.toFixed(8))
-                } else {
-                    console.error('Unable to get conversion rate')
-                    setCryptoAmount('0')
-                }
-            } catch (error) {
-                console.error('Error in conversion:', error)
-                setCryptoAmount('0')
-            } finally {
-                setConversionLoading(false)
-            }
-        }
-
-        // Debounce to reduce API calls
-        const timeoutId = setTimeout(convertCurrency, 1000)
-        return () => clearTimeout(timeoutId)
-    }, [selectedCurrency, usdAmount, fetchConversionRate])
+  const timeoutId = setTimeout(convertCurrency, 800)
+  return () => clearTimeout(timeoutId)
+}, [selectedCurrency, usdAmount, fetchConversionRate])
 
     // Initial data fetch
     useEffect(() => {

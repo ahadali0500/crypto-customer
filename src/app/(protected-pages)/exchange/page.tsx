@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { Button, Dialog } from '@/components/ui';
+import {  Dialog } from '@/components/ui';
 import {
   CheckCircle2,
   AlertCircle,
@@ -219,60 +219,43 @@ const Page = () => {
     return data[0]?.type;
   }
 
-  const fetchConversionRates = useCallback(
-    async (fromSymbol: string, toSymbol: string): Promise<number | null> => {
-      try {
-        const fromType = getCurrencyType(fromSymbol);
-        const toType = getCurrencyType(toSymbol);
-        toSymbol = toSymbol.trim().split(/[\s/-]/)[0].toLowerCase();
-        fromSymbol = fromSymbol.trim().split(/[\s/-]/)[0].toLowerCase();
-        if (fromSymbol == toSymbol) return 1;
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-        let conversionRate: number | null = null;
-        if (fromType == 'Crypto' && toType == 'Crypto') {
-          const res = await axios.get(
-            `https://api.coingecko.com/api/v3/simple/price?ids=${fromSymbol},${toSymbol}&vs_currencies=usd`,
-            { signal: controller.signal }
-          );
-          const fromPriceUSD = res.data[fromSymbol]?.usd;
-          const toPriceUSD = res.data[toSymbol]?.usd;
-          if (typeof fromPriceUSD === 'number' && typeof toPriceUSD === 'number' && toPriceUSD > 0) {
-            conversionRate = fromPriceUSD / toPriceUSD;
-          }
-        } else if (fromType == 'Crypto' && toType == 'Fiat') {
-          const targetCurrency = toSymbol.trim().split(/[\s/-]/)[0].toLowerCase();
-          const res = await axios.get(
-            `https://api.coingecko.com/api/v3/simple/price?ids=${fromSymbol}&vs_currencies=${toSymbol}`,
-            { signal: controller.signal }
-          );
-          const rate = res.data[fromSymbol]?.[targetCurrency];
-          if (typeof rate === 'number' && rate >= 0) conversionRate = rate;
-        } else if (fromType == 'Fiat' && toType == 'Crypto') {
-          const res = await axios.get(
-            `https://api.coingecko.com/api/v3/simple/price?ids=${toSymbol}&vs_currencies=${fromSymbol}`,
-            { signal: controller.signal }
-          );
-          const cryptoPriceInFiat = res.data[toSymbol]?.[fromSymbol];
-          if (typeof cryptoPriceInFiat === 'number' && cryptoPriceInFiat > 0)
-            conversionRate = 1 / cryptoPriceInFiat;
-        } else if (fromType == 'Fiat' && toType == 'Fiat') {
-          const res = await axios.get(
-            `https://api.coingecko.com/api/v3/simple/price?ids=${toSymbol}&vs_currencies=${fromSymbol}`,
-            { signal: controller.signal }
-          );
-          const cryptoPriceInFiat = res.data[toSymbol]?.[fromSymbol];
-          if (typeof cryptoPriceInFiat === 'number' && cryptoPriceInFiat > 0)
-            conversionRate = 1 / cryptoPriceInFiat;
+ const fetchConversionRates = useCallback(
+  async (fromSymbol: string, toSymbol: string): Promise<number | null> => {
+    try {
+      const normalizedFrom = fromSymbol.toUpperCase();
+      const normalizedTo = toSymbol.toUpperCase();
+
+      if (normalizedFrom === normalizedTo) return 1;
+
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/conversion/convert`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          params: {
+            from: normalizedFrom,
+            to: normalizedTo,
+            amount: 1,
+          },
+          timeout: 10000,
         }
-        clearTimeout(timeoutId);
-        return conversionRate;
-      } catch (error) {
-        return null;
+      );
+
+      const rate = Number(res.data?.data?.result || 0);
+
+      if (rate && rate > 0) {
+        return rate;
       }
-    },
-    [allCurrency]
-  );
+
+      return null;
+    } catch (error) {
+      console.error("Conversion fetch failed:", error);
+      return null;
+    }
+  },
+  [token]
+);
 
   const fetchExchangeFeeBundles = async () => {
     try {
@@ -460,12 +443,7 @@ const Page = () => {
     return parseFloat(Math.max(0, available / (1 + r)).toFixed(8));
   };
 
-  const getMaxDisplayAmount = (): number => {
-    if (!selectedSellCurrency) return 0;
-    const available = parseFloat(selectedSellCurrency.availableBalance || '0') || 0;
-    const locked = parseFloat(selectedSellCurrency.lockedBalance || '0') || 0;
-    return activeTab === 'locked' ? locked : available;
-  };
+
 
   const handleSellAmountChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

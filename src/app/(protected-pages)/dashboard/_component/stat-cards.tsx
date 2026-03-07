@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { DollarSign, CreditCard, Activity, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { log } from "console";
+
 
 interface CardData {
   totalBalanceUSD: number;
@@ -21,6 +21,9 @@ type Deposit = { status?: string };
 type Withdrawal = { withdrawStatus?: string };
 
 export default function StatCards({ cardData }: StatCardsProps) {
+
+  console.log("card daata",cardData);
+  
   const router = useRouter();
   const [balanceVisible, setBalanceVisible] = useState(true);
 

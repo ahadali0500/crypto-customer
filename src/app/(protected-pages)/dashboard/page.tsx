@@ -31,11 +31,7 @@ interface CardData {
     data: BalanceItem[]
 }
 
-interface CardData {
-    totalBalanceUSD: number
-    lockedBalanceUSD: number
-    availableBalanceUSD: number
-}
+
 
 interface TicketData {
     id: number
@@ -203,7 +199,6 @@ const Page = () => {
                     },
                 },
             )
-
             // const result = await response.json();
             setCardData(response.data)
         } catch (error) {
@@ -219,6 +214,8 @@ const Page = () => {
         fetchHistory()
         fetchDasboard()
     }, [])
+
+  
 
     // Helper function to sort data
     const sortData = (
@@ -694,31 +691,7 @@ const Page = () => {
         data?.withdraw?.length || 0,
     ]
 
-    const [coins, setCoins] = useState<Coin[]>([])
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await axios.get(
-                    'https://api.coingecko.com/api/v3/coins/markets',
-                    {
-                        params: {
-                            vs_currency: 'usd',
-                            ids: coinIds.join(','),
-                            sparkline: true,
-                        },
-                    },
-                )
-                setCoins(res.data)
-            } catch (error) {
-                console.error('Error fetching crypto data:', error)
-            }
-        }
-
-        fetchData()
-        const interval = setInterval(fetchData, 60000) // auto-refresh every 1 minute
-        return () => clearInterval(interval)
-    }, [])
+    
 
     return (
         <>

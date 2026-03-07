@@ -10,42 +10,51 @@ type Crypto = {
   icon: string
 }
 
-/* ✅ DEFINE cryptoMeta */
-const cryptoMeta: Crypto[] = [
-  { id: 'bitcoin', code: 'BTC', price: '', change: 0, icon: '₿' },
-  { id: 'ethereum', code: 'ETH', price: '', change: 0, icon: 'Ξ' },
-  { id: 'binancecoin', code: 'BNB', price: '', change: 0, icon: '◎' },
-  { id: 'solana', code: 'SOL', price: '', change: 0, icon: 'S' },
-  { id: 'dogecoin', code: 'DOGE', price: '', change: 0, icon: 'Ð' },
-  { id: 'cardano', code: 'ADA', price: '', change: 0, icon: 'A' },
-]
-
 const scrollSpeed = 0.35
 
 const CurrencySlider = () => {
-  const [cryptos, setCryptos] = useState<Crypto[]>(cryptoMeta)
+  const [cryptos, setCryptos] = useState<Crypto[]>([])
   const [paused, setPaused] = useState(false)
 
   const contentRef = useRef<HTMLDivElement>(null)
-  const animationRef = useRef<number>()
+  const animationRef = useRef<number | undefined>(undefined)
 
-  /* -------- FETCH LIVE PRICES -------- */
   useEffect(() => {
     const fetchPrices = async () => {
       try {
-        const ids = cryptoMeta.map(c => c.id).join(',')
-        const res = await fetch(
-          `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`
-        )
-        const data = await res.json()
+        const token =
+          typeof window !== 'undefined'
+            ? localStorage.getItem('authToken')
+            : null
 
-        setCryptos(
-          cryptoMeta.map(c => ({
-            ...c,
-            price: data[c.id]?.usd?.toLocaleString() ?? '—',
-            change: data[c.id]?.usd_24h_change ?? 0,
-          }))
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/markets/ticker`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         )
+
+        const json = await res.json()
+        const markets = json?.data || []
+
+        const mapped: Crypto[] = markets.map((coin: any) => ({
+          id: String(coin.id || coin.symbol || ''),
+          code: String(coin.shortName || coin.symbol || '').toUpperCase(),
+          price: Number(coin.current_price || 0).toLocaleString(undefined, {
+            minimumFractionDigits: Number(coin.current_price || 0) >= 1 ? 2 : 3,
+            maximumFractionDigits: Number(coin.current_price || 0) >= 1 ? 2 : 6,
+          }),
+          change: Number(
+            coin.price_change_percentage_24h ??
+              coin.price_change ??
+              0
+          ),
+          icon: coin.image || '',
+        }))
+
+        setCryptos(mapped)
       } catch (e) {
         console.error('Failed to fetch crypto prices', e)
       }
@@ -56,15 +65,16 @@ const CurrencySlider = () => {
     return () => clearInterval(i)
   }, [])
 
-  /* -------- SCROLL ANIMATION -------- */
   useEffect(() => {
-    if (!contentRef.current || paused) return
+    if (!contentRef.current || paused || cryptos.length === 0) return
 
     const el = contentRef.current
 
     const animate = () => {
       const x =
-        parseFloat(el.style.transform.replace('translateX(', '').replace('px)', '')) || 0
+        parseFloat(
+          el.style.transform.replace('translateX(', '').replace('px)', '')
+        ) || 0
 
       let next = x - scrollSpeed
       if (Math.abs(next) >= el.scrollWidth / 2) next = 0
@@ -74,11 +84,14 @@ const CurrencySlider = () => {
     }
 
     animationRef.current = requestAnimationFrame(animate)
-    return () => cancelAnimationFrame(animationRef.current!)
-  }, [paused])
+
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current)
+    }
+  }, [paused, cryptos])
 
   return (
-    <div className="w-full bg-[oklch(0.24_0.03_260.32)]  border-y border-slate-top border-slate-700">
+    <div className="w-full bg-[oklch(0.24_0.03_260.32)] border-y border-slate-top border-slate-700">
       <div
         className="relative overflow-hidden h-10 flex items-center"
         onMouseEnter={() => setPaused(true)}
@@ -90,8 +103,16 @@ const CurrencySlider = () => {
           style={{ willChange: 'transform' }}
         >
           {[...cryptos, ...cryptos].map((coin, i) => (
-            <div key={i} className="flex items-center gap-2 text-sm">
-              <span className="text-yellow-400">{coin.icon}</span>
+            <div key={`${coin.id}-${i}`} className="flex items-center gap-2 text-sm">
+              {coin.icon ? (
+                <img
+                  src={coin.icon}
+                  alt={coin.code}
+                  className="w-4 h-4 rounded-full object-cover"
+                />
+              ) : (
+                <span className="text-yellow-400">•</span>
+              )}
 
               <span className="text-white font-semibold">
                 {coin.code}

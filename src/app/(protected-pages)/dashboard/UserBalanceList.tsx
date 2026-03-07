@@ -20,28 +20,60 @@ const UserBalanceList = ({ data }: { data: BalanceItem[] }) => {
     const [loading, setLoading] = useState(true)
 
     const fetchMarketData = useCallback(async () => {
-        if (!data || data.length === 0) return
+        if (!data || data.length === 0) {
+            setEnrichedData([])
+            setLoading(false)
+            return
+        }
+
         try {
-            const coinIds = data.map(item => item.currency.shortName.toLowerCase()).join(',')
+            setLoading(true)
 
-            const marketRes = await axios.get(
-                `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinIds}&order=market_cap_desc&sparkline=true&price_change_percentage=24h`
+            const token =
+                typeof window !== 'undefined'
+                    ? localStorage.getItem('authToken')
+                    : null
+
+            const res = await axios.get(
+                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/markets`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    timeout: 10000,
+                }
             )
-            const marketData = marketRes.data
 
-            const merged = data.map(item => {
-                const market = marketData.find((m: any) => m.id === item.currency.shortName.toLowerCase())
+            const markets = res.data?.data || []
+
+            const merged = data.map((item) => {
+                const market = markets.find(
+                    (m: any) =>
+                        String(m.shortName || m.symbol || '').toUpperCase() ===
+                        String(item.currency.shortName || '').toUpperCase()
+                )
+
                 return {
                     ...item,
-                    currentPrice: market?.current_price || 0,
-                    priceChange24h: market?.price_change_percentage_24h || 0,
+                    currentPrice: Number(market?.current_price || 0),
+                    priceChange24h: Number(
+                        market?.price_change_percentage_24h ??
+                        market?.price_change ??
+                        0
+                    ),
                 }
             })
 
             setEnrichedData(merged)
         } catch (error) {
-            console.error("Error fetching balance market data:", error)
-            setEnrichedData(data)
+            console.error('Error fetching balance market data:', error)
+            setEnrichedData(
+                data.map((item) => ({
+                    ...item,
+                    currentPrice: 0,
+                    priceChange24h: 0,
+                }))
+            )
         } finally {
             setLoading(false)
         }
@@ -53,12 +85,11 @@ const UserBalanceList = ({ data }: { data: BalanceItem[] }) => {
         return () => clearInterval(interval)
     }, [fetchMarketData])
 
-    // Check if user has no balances or all balances are zero
     const hasNoBalance =
         !data ||
         data.length === 0 ||
         data.every(
-            item =>
+            (item) =>
                 parseFloat(item.availableBalance || '0') === 0 &&
                 parseFloat(item.lockedBalance || '0') === 0
         )
@@ -87,11 +118,10 @@ const UserBalanceList = ({ data }: { data: BalanceItem[] }) => {
                         const isPositive = item.priceChange24h >= 0
 
                         return (
-                            <div 
+                            <div
                                 key={item.id}
                                 className="bg-white dark:bg-[#1F2937] border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-[#1B2539] transition-all"
                             >
-                                {/* Column 1: Coin Info */}
                                 <div className="flex items-center gap-3 w-[25%]">
                                     <img src={item.currency.icon} alt="" className="w-9 h-9 rounded-full shadow-sm" />
                                     <div className="truncate">
@@ -104,7 +134,6 @@ const UserBalanceList = ({ data }: { data: BalanceItem[] }) => {
                                     </div>
                                 </div>
 
-                                {/* Column 2: Available Balance */}
                                 <div className="flex flex-col items-center w-[15%] text-center">
                                     <span className="text-[9px] text-gray-400 uppercase font-bold mb-1 flex items-center gap-1">
                                         <Unlock size={10} /> Available
@@ -114,7 +143,6 @@ const UserBalanceList = ({ data }: { data: BalanceItem[] }) => {
                                     </span>
                                 </div>
 
-                                {/* Column 3: Locked Balance */}
                                 <div className="flex flex-col items-center w-[15%] text-center border-l border-gray-100 dark:border-gray-700">
                                     <span className="text-[9px] text-gray-400 uppercase font-bold mb-1 flex items-center gap-1">
                                         <Lock size={10} /> Locked
@@ -124,7 +152,6 @@ const UserBalanceList = ({ data }: { data: BalanceItem[] }) => {
                                     </span>
                                 </div>
 
-                                {/* Column 4: Price */}
                                 <div className="flex flex-col items-center w-[15%] text-center">
                                     <span className="text-[9px] text-gray-400 uppercase font-bold mb-1">Price</span>
                                     <span className="text-xs font-bold text-gray-800 dark:text-gray-200">
@@ -132,14 +159,15 @@ const UserBalanceList = ({ data }: { data: BalanceItem[] }) => {
                                     </span>
                                 </div>
 
-                                {/* Column 5: 24h & Sparkline */}
                                 <div className="flex items-center justify-end gap-5 w-[30%]">
                                     <div className="text-right hidden sm:block">
                                         <p className="text-[9px] text-gray-400 uppercase font-bold mb-1 text-center">24h Change</p>
-                                        <div className={classNames(
-                                            "flex items-center justify-center gap-1 text-xs font-bold",
-                                            isPositive ? "text-green-500" : "text-red-500"
-                                        )}>
+                                        <div
+                                            className={classNames(
+                                                'flex items-center justify-center gap-1 text-xs font-bold',
+                                                isPositive ? 'text-green-500' : 'text-red-500'
+                                            )}
+                                        >
                                             {isPositive ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                                             {Math.abs(item.priceChange24h || 0).toFixed(2)}%
                                         </div>
@@ -147,11 +175,11 @@ const UserBalanceList = ({ data }: { data: BalanceItem[] }) => {
 
                                     <div className="w-14 h-7">
                                         <svg viewBox="0 0 100 40" className="w-full h-full">
-                                            <path 
-                                                d="M0 25 Q 25 35, 50 20 T 100 25" 
-                                                fill="none" 
-                                                stroke={isPositive ? "#10B981" : "#EF4444"} 
-                                                strokeWidth="4" 
+                                            <path
+                                                d="M0 25 Q 25 35, 50 20 T 100 25"
+                                                fill="none"
+                                                stroke={isPositive ? '#10B981' : '#EF4444'}
+                                                strokeWidth="4"
                                                 strokeLinecap="round"
                                             />
                                         </svg>
